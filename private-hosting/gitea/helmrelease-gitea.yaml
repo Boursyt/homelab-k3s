@@ -1,15 +1,21 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
 metadata:
   name: gitea
-  namespace: kube-system
+  namespace: gitea
 spec:
-  repo: https://dl.gitea.com/charts/
-  chart: gitea
-  version: 12.5.0
-  targetNamespace: gitea
-  failurePolicy: abort
-  valuesContent: |-
+  interval: 1h
+  chart:
+    spec:
+      chart: gitea
+      version: 12.5.0
+      sourceRef: { kind: HelmRepository, name: gitea, namespace: flux-system }
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    remediation: { retries: 3 }
+  values:
     gitea:
       admin:
         existingSecret: gitea-admin-secret

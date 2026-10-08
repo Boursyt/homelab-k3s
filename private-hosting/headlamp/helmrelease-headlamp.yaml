@@ -1,15 +1,21 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
 metadata:
   name: headlamp
-  namespace: kube-system
+  namespace: headlamp
 spec:
-  repo: https://kubernetes-sigs.github.io/headlamp/
-  chart: headlamp
-  version: 0.45.0
-  targetNamespace: headlamp
-  failurePolicy: abort
-  valuesContent: |-
+  interval: 1h
+  chart:
+    spec:
+      chart: headlamp
+      version: 0.45.0
+      sourceRef: { kind: HelmRepository, name: headlamp, namespace: flux-system }
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    remediation: { retries: 3 }
+  values:
     clusterRoleBinding:
       create: false
 

@@ -1,12 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - namespace.yaml
   - configmap-vmauth-public.yaml
   - cronjob-speedtest.yaml
   - deployment-vmauth-public.yaml
   - endpointslice-victoriametrics-nas.yaml
-  - helm-kps.yaml
-  - helm-vm-operator.yaml
+  - helmrelease-kps.yaml
+  - helmrelease-vm-operator.yaml
   - networkpolicy-vmauth-public.yaml
   - secret-vmagent-scrape-token.yaml
   - service-victoriametrics.yaml

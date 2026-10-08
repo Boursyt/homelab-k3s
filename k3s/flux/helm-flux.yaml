@@ -10,9 +10,11 @@ spec:
   targetNamespace: flux-system
   failurePolicy: abort
   valuesContent: |-
-    # Helm charts stay k3s HelmChart objects: no Flux helm-controller; no image automation
+    # charts are Flux HelmReleases; no image automation
     helmController:
-      create: false
+      resources:
+        requests: { cpu: 20m, memory: 64Mi }
+        limits:   { memory: 512Mi }
     imageAutomationController:
       create: false
     imageReflectionController:

@@ -23,12 +23,11 @@ The NAS stores data, the Pis run compute.
 | `public-hosting/` | services exposed on the internet, on `*.lab.pub.theoboursy.fr` |
 | `off-cluster/` | machines outside Kubernetes: NAS stacks, VPS |
 
-Every service directory is a kustomization, applied the same way:
+Flux applies everything from this repository (`k3s/flux/`): push to `main`, the cluster follows within a minute.
 
-    kubectl apply --server-side -k <dir>
-
-Helm charts are `HelmChart` objects (`helm-*.yaml`, version pinned, values inline) installed by the k3s Helm controller.
-One object per file, named `<kind>-<name>.yaml`; each directory has a README describing its files.
+- own apps: plain Kustomize directories, one object per file named `<kind>-<name>.yaml`
+- third-party software: a Flux `HelmRelease` (`helmrelease-*.yaml`, chart version pinned, values inline) in its directory
+- every directory has a README describing its files
 
 ## Notes
 

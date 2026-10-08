@@ -4,8 +4,9 @@ Collection of every metric into VictoriaMetrics on the NAS (no Prometheus).
 
 | File | Content |
 |---|---|
-| `helm-vm-operator.yaml` | VictoriaMetrics operator: runs vmagent / vmalert, reads ServiceMonitors |
-| `helm-kps.yaml` | kube-prometheus-stack without Prometheus: CRDs, kube-state-metrics, rules |
+| `namespace.yaml` | `monitoring` namespace |
+| `helmrelease-vm-operator.yaml` | VictoriaMetrics operator: runs vmagent / vmalert, reads ServiceMonitors |
+| `helmrelease-kps.yaml` | kube-prometheus-stack without Prometheus: CRDs, kube-state-metrics, rules |
 | `service-victoriametrics.yaml` | in-cluster name of VictoriaMetrics |
 | `endpointslice-victoriametrics-nas.yaml` | points that Service to the NAS |
 | `vmagent-vmagent.yaml` | scraper, writes to VictoriaMetrics |

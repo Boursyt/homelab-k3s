@@ -4,7 +4,8 @@ TLS: two wildcard Let's Encrypt certificates (DNS-01 on Google Cloud DNS) used b
 
 | File | Content |
 |---|---|
-| `helm-cert-manager.yaml` | cert-manager chart |
+| `namespace.yaml` | `cert-manager` namespace |
+| `helmrelease-cert-manager.yaml` | cert-manager chart |
 | `clusterissuer-letsencrypt-prod.yaml` | Let's Encrypt production issuer |
 | `clusterissuer-letsencrypt-staging.yaml` | Let's Encrypt staging issuer (tests) |
 | `certificate-lab-wildcard.yaml` | `lab.theoboursy.fr` + `*.lab.theoboursy.fr` |
