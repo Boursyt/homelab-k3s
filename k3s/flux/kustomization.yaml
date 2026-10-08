@@ -4,5 +4,26 @@ resources:
   - namespace.yaml
   - helm-flux.yaml
   - gitrepository-homelab.yaml
-  # directories handed over to Flux, one by one (the other kustomization-*.yaml are ready)
+  - kustomization-flux.yaml
+  # directories handed over to Flux
   - kustomization-databases.yaml
+  - kustomization-nfs.yaml
+  - kustomization-devices.yaml
+  - kustomization-cert-manager.yaml
+  - kustomization-traefik.yaml
+  - kustomization-kube-vip.yaml
+  - kustomization-metrics.yaml
+  - kustomization-system-upgrade.yaml
+  - kustomization-grafana.yaml
+  - kustomization-backup.yaml
+  - kustomization-gatus.yaml
+  - kustomization-gitea.yaml
+  - kustomization-glance.yaml
+  - kustomization-headlamp.yaml
+  - kustomization-homeassistant.yaml
+  - kustomization-manyfold.yaml
+  - kustomization-openwebui.yaml
+  - kustomization-spoolman.yaml
+  - kustomization-zigbee.yaml
+  - kustomization-gatus-public.yaml
+  - kustomization-glance-public.yaml
