@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: gatus-public
+resources:
+  - namespace.yaml
+  - deployment-gatus.yaml
+  - ingress-gatus.yaml
+  - networkpolicy-gatus.yaml
+  - service-gatus.yaml
+configMapGenerator:
+  - name: gatus-config
+    files:
+      - config/base.yaml
+      - config/homelab.yaml
+      - config/projects.yaml
+generatorOptions:
+  disableNameSuffixHash: true

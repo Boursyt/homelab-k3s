@@ -1,0 +1,8 @@
+server: https://192.168.1.200:6443
+token-file: /etc/rancher/k3s/cluster-token
+node-ip: 192.168.1.78
+flannel-iface: eth0
+kubelet-arg:
+  - kube-reserved=cpu=200m,memory=384Mi
+  - system-reserved=cpu=200m,memory=256Mi
+  - eviction-hard=memory.available<200Mi

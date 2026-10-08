@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmauth-public
+  namespace: monitoring
+  labels: { app.kubernetes.io/name: vmauth-public }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: vmauth-public }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: vmauth-public }
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: vmauth
+          image: victoriametrics/vmauth:v1.153.0
+          args: [-auth.config=/config/auth.yml, -httpListenAddr=:8427, -envflag.enable]
+          ports:
+            - { name: http, containerPort: 8427 }
+          envFrom:
+            - secretRef: { name: vmauth-public }
+          volumeMounts:
+            - { name: config, mountPath: /config, readOnly: true }
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          resources:
+            requests: { cpu: 5m, memory: 16Mi }
+            limits:   { memory: 64Mi }
+      volumes:
+        - name: config
+          configMap: { name: vmauth-public }

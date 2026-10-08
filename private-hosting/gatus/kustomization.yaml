@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - deployment-gatus.yaml
+  - ingress-gatus.yaml
+  - secret-gatus-k8s-token.yaml
+  - service-gatus.yaml
+  - serviceaccount-gatus.yaml
+configMapGenerator:
+  - name: gatus-config
+    files:
+      - config/base.yaml
+      - config/announcements.yaml
+      - config/apps.yaml
+      - config/services.yaml
+      - config/cluster.yaml
+      - config/hosts.yaml
+      - config/network.yaml
+generatorOptions:
+  disableNameSuffixHash: true

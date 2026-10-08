@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitea-shared-storage
+  namespace: gitea
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: nfs-ssd
+  volumeName: nfs-gitea-gitea-shared-storage
+  resources: { requests: { storage: 10Gi } }

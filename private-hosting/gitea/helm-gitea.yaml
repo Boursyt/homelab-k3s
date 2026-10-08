@@ -1,0 +1,113 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: gitea
+  namespace: kube-system
+spec:
+  repo: https://dl.gitea.com/charts/
+  chart: gitea
+  version: 12.5.0
+  targetNamespace: gitea
+  failurePolicy: abort
+  valuesContent: |-
+    gitea:
+      admin:
+        existingSecret: gitea-admin-secret
+      config:
+        actions:
+          ENABLED: true
+        database:
+          DB_TYPE: postgres
+          HOST: postgres.databases.svc.cluster.local:5432
+          NAME: gitea
+          USER: gitea
+          SSL_MODE: require
+          MAX_OPEN_CONNS: 10
+          MAX_IDLE_CONNS: 2
+        server:
+          DOMAIN: git.lab.theoboursy.fr
+          ROOT_URL: https://git.lab.theoboursy.fr/
+          SSH_DOMAIN: git.lab.theoboursy.fr
+          SSH_PORT: 2222
+        session:
+          PROVIDER: redis
+          PROVIDER_CONFIG: "network=tcp,addr=gitea-valkey-cluster.gitea.svc.cluster.local:6379,db=0,pool_size=100,idle_timeout=180"
+        cache:
+          ADAPTER: redis
+          HOST: "gitea-valkey-cluster.gitea.svc.cluster.local:6379"
+        cache.last_commit:
+          COMMITS_COUNT: 1
+        cron.git_gc_repos:
+          ENABLED: true
+          SCHEDULE: "@every 72h"
+      replicaCount: 1
+      additionalConfigFromEnvs:
+        - name: GITEA__DATABASE__PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: gitea-db
+              key: password
+
+    postgresql-ha:
+      enabled: false
+
+    valkey-cluster:
+      cluster:
+        nodes: 1
+      valkey:
+        resources:
+          requests: { cpu: 20m, memory: 48Mi }
+          limits:   { memory: 128Mi }
+
+    # rootless image: everything already runs as git (1000); made explicit, without capabilities
+    podSecurityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile: { type: RuntimeDefault }
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities: { drop: [ALL] }
+
+    persistence:
+      enabled: true
+      create: false
+      claimName: gitea-shared-storage
+
+    service:
+      http:
+        type: ClusterIP
+        clusterIP: ""
+        port: 6969
+      ssh:
+        type: LoadBalancer
+        clusterIP: ""
+        port: 2222
+
+    ingress:
+      enabled: true
+      className: traefik
+      hosts:
+        - host: git.lab.theoboursy.fr
+          paths:
+            - path: /
+
+    livenessProbe:
+      httpGet:
+        path: /api/healthz
+        port: http
+      initialDelaySeconds: 120
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 10
+
+    # never two pods on the nocto NFS volume
+    strategy:
+      type: Recreate
+      rollingUpdate: null
+
+    resources:
+      requests: { cpu: 25m, memory: 128Mi }
+      limits:   { memory: 512Mi }

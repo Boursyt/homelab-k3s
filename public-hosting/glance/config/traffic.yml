@@ -1,0 +1,40 @@
+- type: custom-api
+  title: Traffic
+  cache: 30s
+  url: http://vmauth-public.monitoring.svc.cluster.local:8427/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      WITH (
+        rx(i, d) = sum(rate(node_network_receive_bytes_total{job="node-exporter",instance=~i,device=d}[5m])) * 8 / 1e6,
+        tx(i, d) = sum(rate(node_network_transmit_bytes_total{job="node-exporter",instance=~i,device=d}[5m])) * 8 / 1e6
+      )
+      union(
+        label_set(rx("aegis|keraunos|bident|harpe", "eth0"), "k", "crx"),
+        label_set(tx("aegis|keraunos|bident|harpe", "eth0"), "k", "ctx"),
+        label_set(rx("kibisis", "eth0"), "k", "nrx"),
+        label_set(tx("kibisis", "eth0"), "k", "ntx"),
+        label_set(rx("trident", "ens3"), "k", "vrx"),
+        label_set(tx("trident", "ens3"), "k", "vtx"),
+        label_set(rx("trident", "wg0"), "k", "wrx"),
+        label_set(tx("trident", "wg0"), "k", "wtx"),
+        label_set(sum(rate(traefik_entrypoint_requests_total[5m])), "k", "rps"),
+        label_set(1000 * histogram_quantile(0.5, sum by (le) (rate(traefik_entrypoint_request_duration_seconds_bucket[5m]))), "k", "p50"),
+        label_set(100 * sum(rate(traefik_entrypoint_requests_total{code=~"5.."}[5m]) or vector(0)) / sum(rate(traefik_entrypoint_requests_total[5m])), "k", "err")
+      )
+  template: |
+    {{ $crx := 0.0 }}{{ $ctx := 0.0 }}{{ $nrx := 0.0 }}{{ $ntx := 0.0 }}{{ $vrx := 0.0 }}{{ $vtx := 0.0 }}{{ $wrx := 0.0 }}{{ $wtx := 0.0 }}{{ $rps := 0.0 }}{{ $p50 := 0.0 }}{{ $err := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "crx" }}{{ $crx = $x }}{{ end }}{{ if eq $k "ctx" }}{{ $ctx = $x }}{{ end }}{{ if eq $k "nrx" }}{{ $nrx = $x }}{{ end }}{{ if eq $k "ntx" }}{{ $ntx = $x }}{{ end }}{{ if eq $k "vrx" }}{{ $vrx = $x }}{{ end }}{{ if eq $k "vtx" }}{{ $vtx = $x }}{{ end }}{{ if eq $k "wrx" }}{{ $wrx = $x }}{{ end }}{{ if eq $k "wtx" }}{{ $wtx = $x }}{{ end }}{{ if eq $k "rps" }}{{ $rps = $x }}{{ end }}{{ if eq $k "p50" }}{{ $p50 = $x }}{{ end }}{{ if eq $k "err" }}{{ $err = $x }}{{ end }}{{ end }}
+    <div class="kv size-h6 color-subdue"><span></span><span>↓ in · ↑ out, Mbit/s</span></div>
+    <ul class="list list-gap-10 margin-top-10">
+      <li class="kv"><span class="color-highlight">Cluster <span class="color-subdue">(4 Pi)</span></span><span class="shrink-0">{{ printf "%.1f" $crx }} · {{ printf "%.1f" $ctx }}</span></li>
+      <li class="kv"><span class="color-highlight">NAS</span><span class="shrink-0">{{ printf "%.1f" $nrx }} · {{ printf "%.1f" $ntx }}</span></li>
+      <li class="kv"><span class="color-highlight">VPS</span><span class="shrink-0">{{ printf "%.2f" $vrx }} · {{ printf "%.2f" $vtx }}</span></li>
+      <li class="kv"><span class="color-highlight">VPN tunnel</span><span class="shrink-0">{{ printf "%.2f" $wrx }} · {{ printf "%.2f" $wtx }}</span></li>
+    </ul>
+    <div class="stat-row">
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $rps }}</div><div class="size-h6">req/s</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $p50 }}</div><div class="size-h6">ms median</div></div>
+      <div><div class="{{ if gt $err 1.0 }}color-negative{{ else }}color-highlight{{ end }} size-h4">{{ printf "%.1f" $err }}%</div><div class="size-h6">5xx</div></div>
+    </div>
+    <div class="size-h6 color-subdue text-center margin-top-10">requests through Traefik</div>

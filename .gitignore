@@ -1,0 +1,14 @@
+*.bak
+*.bak-*
+*.bak.*
+
+AGENTS.md
+CLAUDE.md
+
+off-cluster/kibisis/**/.env
+off-cluster/kibisis/**/userlist.txt
+off-cluster/kibisis/**/data/
+off-cluster/kibisis/**/tls/
+
+.helpers/
+k3s/cert-manager/acme.env

@@ -1,0 +1,29 @@
+- type: custom-api
+  title: Ingress · Traefik
+  title-url: https://traefik.lab.theoboursy.fr/dashboard/
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(sum(rate(traefik_entrypoint_requests_total[5m])), "k", "rps"),
+        label_set(sum(rate(traefik_service_requests_total{code=~"2.."}[5m])) or vector(0), "k", "e2"),
+      label_set(sum(rate(traefik_service_requests_total{code=~"3.."}[5m])) or vector(0), "k", "e3"),
+      label_set(sum(rate(traefik_service_requests_total{code=~"4.."}[5m])) or vector(0), "k", "e4"),
+        label_set(sum(rate(traefik_service_requests_total{code=~"5.."}[5m])) or vector(0), "k", "e5"),
+        label_set(topk(4, label_replace(sum by (service) (rate(traefik_service_requests_total[5m])), "service", "$1", "service", "(.*)@kubernetes")), "k", "svc")
+      )
+  template: |
+    {{ $rps := 0.0 }}{{ $e2 := 0.0 }}{{ $e3 := 0.0 }}{{ $e4 := 0.0 }}{{ $e5 := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "rps" }}{{ $rps = $x }}{{ end }} {{ if eq $k "e2" }}{{ $e2 = $x }}{{ end }} {{ if eq $k "e3" }}{{ $e3 = $x }}{{ end }} {{ if eq $k "e4" }}{{ $e4 = $x }}{{ end }} {{ if eq $k "e5" }}{{ $e5 = $x }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">REQUESTS</span><span class="color-highlight">{{ printf "%.2f" $rps }} req/s</span></div>
+    <div class="stat-row">
+      <div><div class="color-positive size-h3">{{ printf "%.2f" $e2 }}</div><div class="size-h6">2xx/s</div></div>
+      <div><div class="color-highlight size-h3">{{ printf "%.2f" $e3 }}</div><div class="size-h6">3xx/s</div></div>
+      <div><div class="color-highlight size-h3">{{ printf "%.2f" $e4 }}</div><div class="size-h6">4xx/s</div></div>
+      <div><div class="{{ if gt $e5 0.0 }}color-negative{{ else }}color-highlight{{ end }} size-h3">{{ printf "%.2f" $e5 }}</div><div class="size-h6">5xx/s</div></div>
+    </div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "svc" }}
+    <div class="kv size-h6 margin-top-5"><span class="color-subdue text-truncate">{{ .String "metric.service" }}</span><span>{{ printf "%.2f" (.Float "value.1") }}/s</span></div>
+    {{ end }}{{ end }}

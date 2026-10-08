@@ -1,0 +1,12 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: postgres-nas
+  namespace: monitoring
+spec:
+  jobName: postgres
+  targetEndpoints:
+    - { targets: ["192.168.1.51:9187"], labels: { instance: kibisis, role: primary, stack: private } }
+    - { targets: ["192.168.1.51:9188"], labels: { instance: kibisis, role: replica, stack: private } }
+    - { targets: ["192.168.1.51:9189"], labels: { instance: kibisis, role: primary, stack: public } }
+    - { targets: ["192.168.1.51:9190"], labels: { instance: kibisis, role: replica, stack: public } }

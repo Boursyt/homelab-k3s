@@ -1,0 +1,9 @@
+[Unit]
+Description=Clean up k3s pods in the Unknown phase (3 min after boot, then every 5 min)
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

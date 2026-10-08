@@ -1,0 +1,31 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: gitea-runner
+  namespace: kube-system
+spec:
+  repo: https://dl.gitea.com/charts/
+  chart: actions
+  version: 0.0.3
+  targetNamespace: gitea
+  failurePolicy: abort
+  valuesContent: |-
+    enabled: true
+    existingSecret: gitea-runner-secret
+    existingSecretKey: token
+    giteaRootURL: http://gitea-http.gitea.svc.cluster.local:6969
+    statefulset:
+      resources:
+        requests: { cpu: 25m, memory: 64Mi }
+        limits:   { memory: 2Gi }
+      actRunner:
+        config: |
+          log:
+            level: info
+          runner:
+            labels:
+              - "ubuntu-latest:docker://gitea/runner-images:ubuntu-latest"
+              - "ubuntu-22.04:docker://gitea/runner-images:ubuntu-22.04"
+          container:
+            privileged: true
+            require_docker: true

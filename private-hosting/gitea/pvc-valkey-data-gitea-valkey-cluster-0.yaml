@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: valkey-data-gitea-valkey-cluster-0
+  namespace: gitea
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: nfs-ssd
+  volumeName: nfs-gitea-valkey-data-gitea-valkey-cluster-0
+  resources: { requests: { storage: 8Gi } }

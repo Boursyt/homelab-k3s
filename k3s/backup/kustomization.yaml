@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - cronjob-pg-dump.yaml
+  - cronjob-restic.yaml
+  - pv-nfs-backup-backups-hdd.yaml
+  - pv-nfs-backup-k3s-data-ro.yaml
+  - pvc-backups-hdd.yaml
+  - pvc-k3s-data-ro.yaml

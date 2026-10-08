@@ -1,0 +1,21 @@
+- type: custom-api
+  title: Projects · Google Cloud Run
+  cache: 5m
+  url: http://vmauth-public.monitoring.svc.cluster.local:8427/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: sort_by_label(max by (name, desc, icon, order, url) (last_over_time(gatus_results_endpoint_success{job="gatus-public",group=~"Projects.*"}[30d])), "order")
+  template: |
+    <ul class="dynamic-columns list-gap-20 list-with-separator">
+    {{ range .JSON.Array "data.result" }}
+      <div class="monitor-site flex items-center gap-15">
+        <img class="monitor-site-icon flat-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/{{ .String "metric.icon" }}.svg" alt="" loading="lazy">
+        <div class="grow min-width-0">
+          <a class="size-h3 color-highlight text-truncate block" href="{{ .String "metric.url" }}" target="_blank" rel="noreferrer">{{ .String "metric.name" }}</a>
+          <div class="size-h6 color-subdue">{{ .String "metric.desc" }}</div>
+        </div>
+        {{ if eq (.Float "value.1") 1.0 }}<span class="color-positive" title="up">●</span>{{ else }}<span class="color-negative" title="down">●</span>{{ end }}
+      </div>
+    {{ end }}
+    </ul>
+    <div class="size-h6 color-subdue text-center margin-top-10">they scale to zero: status of the last check, every 3 h</div>

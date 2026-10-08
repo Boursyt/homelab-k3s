@@ -1,0 +1,33 @@
+default_config:
+
+homeassistant:
+  packages: !include_dir_named packages
+  external_url: https://ha.lab.theoboursy.fr
+  internal_url: https://ha.lab.theoboursy.fr
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 10.42.0.0/16
+    - 192.168.1.0/24
+
+recorder:
+  db_url: !env_var HA_DB_URL
+  purge_keep_days: 30
+
+# plug electrical sensors only; no auth because an HA token is always admin
+prometheus:
+  requires_auth: false
+  filter:
+    include_entity_globs:
+      - sensor.*_power
+      - sensor.*_energy
+      - sensor.*_energy_today
+      - sensor.*_energy_yesterday
+      - sensor.*_energy_month
+      - sensor.*_voltage
+      - sensor.*_current
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml

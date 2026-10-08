@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: { name: models, namespace: manyfold }
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: nfs-ssd
+  volumeName: nfs-manyfold-models
+  resources: { requests: { storage: 1Ti } }

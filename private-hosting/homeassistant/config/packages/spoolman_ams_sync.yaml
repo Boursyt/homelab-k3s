@@ -1,0 +1,115 @@
+automation:
+  - id: spoolman_ams_sync
+    alias: "Spoolman: sync AMS spools"
+    mode: queued
+    max: 20
+    max_exceeded: silent
+    triggers:
+      - trigger: homeassistant
+        event: start
+      - trigger: time_pattern
+        minutes: "/15"
+      - trigger: state
+        entity_id:
+          - sensor.p2s_ams_1_emplacement_1
+          - sensor.p2s_ams_1_emplacement_2
+          - sensor.p2s_ams_1_emplacement_3
+          - sensor.p2s_ams_1_emplacement_4
+          - sensor.p2s_externalspool_bobine_externe
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.p2s_en_ligne
+        state: "on"
+      - condition: template
+        value_template: "{{ states.sensor | selectattr('entity_id', 'match', 'sensor\\.spoolman_spool_\\d+_location$') | list | count > 0 }}"
+    variables:
+      plan: >-
+        {%- set P = 'sensor.p2s_' -%}
+        {%- set slots = [['AMS 1', P ~ 'ams_1_emplacement_1'], ['AMS 2', P ~ 'ams_1_emplacement_2'], ['AMS 3', P ~ 'ams_1_emplacement_3'],
+                         ['AMS 4', P ~ 'ams_1_emplacement_4'], ['Externe', P ~ 'externalspool_bobine_externe']] -%}
+        {%- set slot_names = slots | map('first') | list -%}
+        {%- set ids = states.sensor | selectattr('entity_id', 'match', 'sensor\.spoolman_spool_\d+_location$')
+                      | map(attribute='entity_id') | map('regex_replace', '^sensor\.spoolman_spool_(\d+)_location$', '\\1')
+                      | map('int') | sort | list -%}
+        {%- set g = namespace(homes=[]) -%}
+        {%- for i in ids -%}{%- set l = states('sensor.spoolman_spool_' ~ i ~ '_location') -%}
+          {%- if l not in slot_names and l not in ['', 'unknown', 'unavailable'] and l not in g.homes -%}{%- set g.homes = g.homes + [l] -%}{%- endif -%}
+        {%- endfor -%}
+        {%- set ns = namespace(assign=[], taken=[], moves=[], warns=[]) -%}
+        {%- for slot, e in slots -%}
+          {%- set unknown = states(e) in ['unknown', 'unavailable', ''] -%}
+          {%- set empty = not unknown and (state_attr(e, 'empty') == true or states(e) == 'Empty') -%}
+          {%- if unknown -%}
+            {#- unknown tray: keep its spool -#}
+            {%- for i in ids if states('sensor.spoolman_spool_' ~ i ~ '_location') == slot -%}
+              {%- set ns.taken = ns.taken + [i] -%}
+            {%- endfor -%}
+          {%- elif not empty -%}
+            {%- set ttype = (state_attr(e, 'type') or '') | upper | replace('+', '') -%}
+            {%- set tcol = ((state_attr(e, 'color') or '#000000') | replace('#', ''))[0:6] | upper -%}
+            {%- set rfid = (state_attr(e, 'tag_uid') or '0') | replace('0', '') != '' -%}
+            {%- set tremain = state_attr(e, 'remain') | int(-1) -%}
+            {%- set best = namespace(id=0, score=999999999) -%}
+            {%- for i in ids if i not in ns.taken -%}
+              {%- set p = 'sensor.spoolman_spool_' ~ i ~ '_' -%}
+              {%- set mat = states(p ~ 'material') | upper | replace('+', '') -%}
+              {%- if mat == ttype and (not rfid or 'bambu' in states(p ~ 'vendor') | lower) -%}
+                {%- set c = (states(p ~ 'color_hex') | replace('#', '') | upper ~ '000000')[0:6] -%}
+                {%- set d = ((c[0:2] | int(0, 16)) - (tcol[0:2] | int(0, 16))) ** 2 + ((c[2:4] | int(0, 16)) - (tcol[2:4] | int(0, 16))) ** 2
+                          + ((c[4:6] | int(0, 16)) - (tcol[4:6] | int(0, 16))) ** 2 -%}
+                {%- if d <= 120 ** 2 -%}
+                  {%- set left = 100 - states(p ~ 'used_percentage') | float(0) -%}
+                  {#- chip % is coarse: the spool already there stays within 10 points -#}
+                  {%- set gap = (left - tremain) | abs if rfid and tremain >= 0 else 0 -%}
+                  {%- set stays = states(p ~ 'location') == slot and gap <= 10 -%}
+                  {%- set score = d + (0 if stays else gap * 100 + 50) + i / 1000
+                                  + (100000 if not rfid and 'bambu' in states(p ~ 'vendor') | lower else 0) -%}
+                  {%- if score < best.score -%}{%- set best.id = i -%}{%- set best.score = score -%}{%- endif -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if best.id -%}
+              {%- set ns.taken = ns.taken + [best.id] -%}{%- set ns.assign = ns.assign + [[best.id, slot]] -%}
+              {%- if states('sensor.spoolman_spool_' ~ best.id ~ '_location') != slot -%}
+                {%- set ns.moves = ns.moves + [{'id': best.id, 'location': slot, 'why': 'loaded in ' ~ slot}] -%}
+              {%- endif -%}
+            {%- else -%}
+              {%- set ns.warns = ns.warns + [slot ~ ': ' ~ ttype ~ ' #' ~ tcol ~ (' (RFID)' if rfid else '') ~ ' matches no Spoolman spool'] -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- for i in ids if i not in ns.taken and states('sensor.spoolman_spool_' ~ i ~ '_location') in slot_names -%}
+          {%- set want = (states('sensor.spoolman_spool_' ~ i ~ '_vendor') ~ ' - ' ~ states('sensor.spoolman_spool_' ~ i ~ '_material')) | lower -%}
+          {%- set match = g.homes | map('lower') | list -%}
+          {%- set h = g.homes[match.index(want)] if want in match else 'Étagère' -%}
+          {%- set ns.moves = ns.moves + [{'id': i, 'location': h, 'why': 'left ' ~ states('sensor.spoolman_spool_' ~ i ~ '_location')}] -%}
+        {%- endfor -%}
+        {{ {'moves': ns.moves, 'warns': ns.warns, 'assign': ns.assign} | tojson }}
+    actions:
+      - repeat:
+          for_each: "{{ plan.moves }}"
+          sequence:
+            - action: spoolman.patch_spool
+              data:
+                id: "{{ repeat.item.id }}"
+                location: "{{ repeat.item.location }}"
+            - action: logbook.log
+              data:
+                name: Spoolman
+                message: "spool #{{ repeat.item.id }} → {{ repeat.item.location }} ({{ repeat.item.why }})"
+      - if: "{{ plan.moves | count > 0 }}"
+        then:
+          - action: homeassistant.update_entity
+            target:
+              entity_id: "sensor.spoolman_spool_{{ plan.moves[0].id }}_location"
+      - if: "{{ plan.warns | count > 0 }}"
+        then:
+          - action: persistent_notification.create
+            data:
+              notification_id: spoolman_ams_sync
+              title: "Spoolman: AMS spool not recognised"
+              message: "{{ plan.warns | join('\n') }}. Add the spool in Spoolman (same material and colour)."
+        else:
+          - action: persistent_notification.dismiss
+            data:
+              notification_id: spoolman_ams_sync

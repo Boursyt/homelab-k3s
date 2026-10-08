@@ -1,0 +1,52 @@
+- type: custom-api
+  title: K3s
+  title-url: https://headlamp.lab.theoboursy.fr
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      WITH (
+        nodes = max by (instance) (label_replace(kube_node_info, "instance", "$1", "node", "(.*)")),
+        k(m) = m * on (instance) group_left () nodes
+      )
+      union(
+        label_set(100 * (1 - avg(k(rate(node_cpu_seconds_total{mode="idle"}[5m])))), "k", "cpu"),
+        label_set(count(k(node_cpu_seconds_total{mode="idle"})), "k", "cores"),
+        label_set(sum(k(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)) / 1e9, "k", "ramu"),
+        label_set(sum(k(node_memory_MemTotal_bytes)) / 1e9, "k", "ramt"),
+        label_set(sum(k(node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_avail_bytes{mountpoint="/"})) / 1e9, "k", "disku"),
+        label_set(sum(k(node_filesystem_size_bytes{mountpoint="/"})) / 1e9, "k", "diskt"),
+        label_set(100 * (1 - avg by (instance) (k(rate(node_cpu_seconds_total{mode="idle"}[5m])))), "k", "ncpu"),
+        label_set(100 * (1 - k(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)), "k", "nram"),
+        label_set(max by (instance) (k(node_thermal_zone_temp{type="cpu-thermal"})), "k", "ntemp"),   # CPU sensor (hwmon max = Pi 5 RP1 chip)
+        label_set(sum(kube_node_status_condition{condition="Ready",status="true"}), "k", "nodesr"),
+        label_set(count(kube_node_info), "k", "nodes"),
+        label_set(sum(kube_pod_status_phase{phase="Running"}), "k", "podsr"),
+        label_set(sum(kube_pod_status_phase{phase!="Succeeded"}), "k", "pods"),
+        label_set(sum(kube_deployment_status_replicas_available) + sum(kube_statefulset_status_replicas_ready), "k", "wlr"),
+        label_set(sum(kube_deployment_spec_replicas) + sum(kube_statefulset_replicas), "k", "wl"),
+        label_set(sum(kube_persistentvolumeclaim_status_phase{phase="Bound"}), "k", "pvcb"),
+        label_set(count(kube_persistentvolumeclaim_info), "k", "pvc")
+      )
+  template: |
+    {{ $cpu := 0.0 }}{{ $cores := 0.0 }}{{ $ramu := 0.0 }}{{ $ramt := 0.0 }}{{ $disku := 0.0 }}{{ $diskt := 0.0 }}{{ $nodesr := 0.0 }}{{ $nodes := 0.0 }}{{ $podsr := 0.0 }}{{ $pods := 0.0 }}{{ $wlr := 0.0 }}{{ $wl := 0.0 }}{{ $pvcb := 0.0 }}{{ $pvc := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "cpu" }}{{ $cpu = $x }}{{ end }} {{ if eq $k "cores" }}{{ $cores = $x }}{{ end }} {{ if eq $k "ramu" }}{{ $ramu = $x }}{{ end }} {{ if eq $k "ramt" }}{{ $ramt = $x }}{{ end }} {{ if eq $k "disku" }}{{ $disku = $x }}{{ end }} {{ if eq $k "diskt" }}{{ $diskt = $x }}{{ end }} {{ if eq $k "nodesr" }}{{ $nodesr = $x }}{{ end }} {{ if eq $k "nodes" }}{{ $nodes = $x }}{{ end }} {{ if eq $k "podsr" }}{{ $podsr = $x }}{{ end }} {{ if eq $k "pods" }}{{ $pods = $x }}{{ end }} {{ if eq $k "wlr" }}{{ $wlr = $x }}{{ end }} {{ if eq $k "wl" }}{{ $wl = $x }}{{ end }} {{ if eq $k "pvcb" }}{{ $pvcb = $x }}{{ end }} {{ if eq $k "pvc" }}{{ $pvc = $x }}{{ end }}{{ end }}
+
+    <div class="kv"><span class="size-h5 color-highlight">CPU <span class="color-subdue">({{ printf "%.0f" $cores }} cores)</span></span><span class="color-highlight">{{ printf "%.1f" $cpu }}%</span></div>
+    <div class="bar"><div class="{{ if ge $cpu 85.0 }} hot{{ end }}" style="width: {{ $cpu }}%"></div></div>
+    {{ $ramp := mul (div $ramu $ramt) 100 }}
+    <div class="kv"><span class="size-h5 color-highlight">RAM <span class="color-subdue">({{ printf "%.1f" $ramu }}/{{ printf "%.0f" $ramt }} GB)</span></span><span class="color-highlight">{{ printf "%.1f" $ramp }}%</span></div>
+    <div class="bar"><div class="{{ if ge $ramp 85.0 }} hot{{ end }}" style="width: {{ $ramp }}%"></div></div>
+    {{ $diskp := mul (div $disku $diskt) 100 }}
+    <div class="kv"><span class="size-h5 color-highlight">SYSTEM DISKS <span class="color-subdue">({{ printf "%.0f" $disku }}/{{ printf "%.0f" $diskt }} GB)</span></span><span class="color-highlight">{{ printf "%.1f" $diskp }}%</span></div>
+    <div class="bar"><div class="data{{ if ge $diskp 85.0 }} hot{{ end }}" style="width: {{ $diskp }}%"></div></div>
+    <div class="kv margin-top-15"><span class="size-h5 color-highlight">NODES</span><span class="color-highlight">{{ printf "%.0f" $nodesr }}/{{ printf "%.0f" $nodes }}</span></div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ncpu" }}{{ $i := .String "metric.instance" }}
+    <div class="kv size-h6 margin-top-5"><span class="color-subdue">{{ $i }}</span><span>{{ printf "%.1f" (.Float "value.1") }}% CPU · {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "nram") (eq (.String "metric.instance") $i) }}{{ printf "%.0f" (.Float "value.1") }}% RAM{{ end }}{{ if and (eq (.String "metric.k") "ntemp") (eq (.String "metric.instance") $i) }} · {{ printf "%.0f" (.Float "value.1") }}°C{{ end }}{{ end }}</span></div>
+    {{ end }}{{ end }}
+    <div class="stat-row">
+      <div><div class="color-highlight size-h3">{{ printf "%.0f" $podsr }}/{{ printf "%.0f" $pods }}</div><div class="size-h6">pods</div></div>
+      <div><div class="color-highlight size-h3">{{ printf "%.0f" $wlr }}/{{ printf "%.0f" $wl }}</div><div class="size-h6">replicas</div></div>
+      <div><div class="color-highlight size-h3">{{ printf "%.0f" $pvcb }}/{{ printf "%.0f" $pvc }}</div><div class="size-h6">volumes</div></div>
+    </div>

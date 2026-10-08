@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmauth-public
+  namespace: monitoring
+data:
+  auth.yml: |
+    users:
+      - username: "%{RO_USER}"
+        password: "%{RO_PASSWORD}"
+        url_map:
+          - src_paths: ["/api/v1/query", "/api/v1/query_range"]
+            url_prefix: http://victoriametrics.monitoring.svc.cluster.local:8428
+            headers: ["Authorization: Basic %{VM_BASIC}"]

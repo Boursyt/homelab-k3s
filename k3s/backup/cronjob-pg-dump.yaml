@@ -1,0 +1,83 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pg-dump
+  namespace: backup
+spec:
+  schedule: "30 2 * * *"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999          # postgres in the image; owns /backups/postgres on the NAS
+            runAsGroup: 999
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: pg-dump
+              image: postgres:17.11-bookworm
+              env:
+                - { name: TZ, value: Europe/Paris }
+                - { name: PGHOST, value: postgres.databases.svc.cluster.local }
+                - { name: PGSSLMODE, value: require }
+                - { name: PGDATABASE, value: postgres }
+                - { name: PGUSER, valueFrom: { secretKeyRef: { name: postgres-admin, key: username } } }
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: postgres-admin, key: password } } }
+                - { name: PUBLIC_HOST, value: postgres-public.databases.svc.cluster.local }
+                - { name: PUBLIC_USER, valueFrom: { secretKeyRef: { name: postgres-public-admin, key: username } } }
+                - { name: PUBLIC_PASSWORD, valueFrom: { secretKeyRef: { name: postgres-public-admin, key: password } } }
+                - { name: VM_USER, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: username } } }
+                - { name: VM_PASSWORD, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: password } } }
+              command:
+                - bash
+                - -euo
+                - pipefail
+                - -c
+                - |
+                  umask 077
+                  d=/backups/postgres/$(date +%F)
+                  dump() {
+                    mkdir -p "$1"
+                    for db in $(psql -Atc "select datname from pg_database where not datistemplate and datname <> 'postgres' order by 1"); do
+                      pg_dump -Fc -d "$db" -f "$1/$db.dump"
+                      pg_restore -l "$1/$db.dump" > /dev/null
+                      echo "$1/$db: $(du -h "$1/$db.dump" | cut -f1)"
+                    done
+                    pg_dumpall --globals-only -l postgres > "$1/globals.sql"
+                  }
+                  dump "$d"
+                  PGHOST=$PUBLIC_HOST PGUSER=$PUBLIC_USER PGPASSWORD=$PUBLIC_PASSWORD dump "$d/public"
+                  find /backups/postgres -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
+                  echo "backup_last_success_timestamp_seconds{job=\"pg-dump\"} $(date +%s)" > /tmp/m.txt
+                  echo "backup_size_bytes{job=\"pg-dump\"} $(du -sb --exclude=public "$d" | cut -f1)" >> /tmp/m.txt
+                  echo "backup_last_success_timestamp_seconds{job=\"pg-dump-public\"} $(date +%s)" >> /tmp/m.txt
+                  echo "backup_size_bytes{job=\"pg-dump-public\"} $(du -sb "$d/public" | cut -f1)" >> /tmp/m.txt
+                  # no curl in the postgres image: push with bash /dev/tcp
+                  body=$(cat /tmp/m.txt); auth=$(printf '%s:%s' "$VM_USER" "$VM_PASSWORD" | base64 -w0)
+                  exec 3<>/dev/tcp/victoriametrics.monitoring.svc.cluster.local/8428
+                  printf 'POST /api/v1/import/prometheus HTTP/1.1\r\nHost: victoriametrics\r\nAuthorization: Basic %s\r\nContent-Length: %s\r\nConnection: close\r\n\r\n%s\n' "$auth" "$(( ${#body} + 1 ))" "$body" >&3
+                  status=$(head -1 <&3); exec 3>&-
+                  echo "metrics push: $status"; case "$status" in *" 204"*|*" 200"*) ;; *) exit 1;; esac
+                  echo "done: $d"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: [ALL] }
+              volumeMounts:
+                - { name: backups, mountPath: /backups }
+                - { name: tmp, mountPath: /tmp }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits:   { memory: 256Mi }
+          volumes:
+            - name: tmp
+              emptyDir: { sizeLimit: 16Mi }
+            - name: backups
+              persistentVolumeClaim: { claimName: backups-hdd }

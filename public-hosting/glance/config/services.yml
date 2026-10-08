@@ -1,0 +1,48 @@
+- type: custom-api
+  title: Homelab services
+  cache: 1m
+  url: http://vmauth-public.monitoring.svc.cluster.local:8427/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      WITH (
+        pub = max by (namespace, host) (kube_ingress_path{host=~".*lab.pub.theoboursy.fr"})
+      )
+      union(
+        label_set(sum by (namespace) (kube_deployment_status_replicas_available) * on (namespace) group_left (host) pub, "k", "ready"),
+        label_set(sum by (namespace) (kube_deployment_spec_replicas) * on (namespace) group_left (host) pub, "k", "want"),
+        label_set(sort_by_label(max by (name) (gatus_results_endpoint_success{job="gatus",group="Apps"}), "name"), "k", "app"),
+        label_set(count(max by (group, name) (gatus_results_endpoint_success{job="gatus"})), "k", "checks"),
+        label_set(sum(max by (group, name) (gatus_results_endpoint_success{job="gatus"})), "k", "green"),
+        label_set(count(max by (group, name) (gatus_results_endpoint_success{job="gatus-public"})), "k", "pchecks"),
+        label_set(sum(max by (group, name) (gatus_results_endpoint_success{job="gatus-public"})), "k", "pgreen")
+      )
+  template: |
+    {{ $checks := 0.0 }}{{ $green := 0.0 }}{{ $pchecks := 0.0 }}{{ $pgreen := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "checks" }}{{ $checks = $x }}{{ end }}{{ if eq $k "green" }}{{ $green = $x }}{{ end }}{{ if eq $k "pchecks" }}{{ $pchecks = $x }}{{ end }}{{ if eq $k "pgreen" }}{{ $pgreen = $x }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">PUBLIC <span class="color-subdue">· *.lab.pub.theoboursy.fr</span></span>{{ if gt $pchecks 0.0 }}<a class="size-h6 shrink-0" href="https://status.lab.pub.theoboursy.fr" target="_blank" rel="noreferrer">{{ printf "%.0f" $pgreen }}/{{ printf "%.0f" $pchecks }} checks green → status</a>{{ end }}</div>
+    <ul class="dynamic-columns list-gap-20 list-with-separator margin-top-10">
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ready" }}{{ $h := .String "metric.host" }}{{ $r := .Float "value.1" }}{{ $pn := $h }}{{ $pi := "" }}{{ $pd := "" }}{{ if eq $h "lab.pub.theoboursy.fr" }}{{ $pn = "Glance" }}{{ $pi = "glance" }}{{ $pd = "this page" }}{{ else if eq $h "status.lab.pub.theoboursy.fr" }}{{ $pn = "Gatus" }}{{ $pi = "gatus" }}{{ $pd = "status page" }}{{ end }}
+      <div class="monitor-site flex items-center gap-15">
+        <img class="monitor-site-icon" src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{{ $pi }}.svg" alt="" loading="lazy">
+        <div class="grow min-width-0">
+          <a class="size-h3 color-highlight text-truncate block" href="https://{{ $h }}" target="_blank" rel="noreferrer">{{ $pn }}</a>
+          <div class="size-h6 color-subdue">{{ $pd }} · {{ $h }}</div>
+        </div>
+        {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "want") (eq (.String "metric.host") $h) }}<span class="{{ if eq $r (.Float "value.1") }}color-positive{{ else }}color-negative{{ end }}" title="{{ printf "%.0f" $r }}/{{ printf "%.0f" (.Float "value.1") }} replicas">●</span>{{ end }}{{ end }}
+      </div>
+    {{ end }}{{ end }}
+    </ul>
+    <div class="kv margin-top-20"><span class="size-h5 color-highlight">PRIVATE <span class="color-subdue">· home network + VPN only</span></span>{{ if gt $checks 0.0 }}<span class="size-h6 color-subdue shrink-0">{{ printf "%.0f" $green }}/{{ printf "%.0f" $checks }} checks green</span>{{ end }}</div>
+    <ul class="dynamic-columns list-gap-20 list-with-separator margin-top-10">
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "app" }}{{ $icon := "" }}{{ $desc := "" }}{{ $n := .String "metric.name" }}{{ if eq $n "Gitea" }}{{ $icon = "gitea" }}{{ $desc = "git hosting, mirrored to GitHub" }}{{ else if eq $n "Glance" }}{{ $icon = "glance" }}{{ $desc = "the private version of this page" }}{{ else if eq $n "Grafana" }}{{ $icon = "grafana" }}{{ $desc = "metrics dashboards" }}{{ else if eq $n "Headlamp" }}{{ $icon = "headlamp" }}{{ $desc = "Kubernetes web UI" }}{{ else if eq $n "Home Assistant" }}{{ $icon = "home-assistant" }}{{ $desc = "home automation, Zigbee, 3D printer" }}{{ else if eq $n "Manyfold" }}{{ $icon = "manyfold" }}{{ $desc = "3D model library" }}{{ else if eq $n "Open WebUI" }}{{ $icon = "open-webui" }}{{ $desc = "chat with LLMs" }}{{ else if eq $n "Spoolman" }}{{ $icon = "spoolman" }}{{ $desc = "3D printing filament inventory" }}{{ else if eq $n "Zigbee2MQTT" }}{{ $icon = "zigbee2mqtt" }}{{ $desc = "Zigbee bridge" }}{{ end }}
+      <div class="monitor-site flex items-center gap-15">
+        <img class="monitor-site-icon" src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{{ $icon }}.svg" alt="" loading="lazy">
+        <div class="grow min-width-0">
+          <div class="size-h3 color-highlight text-truncate">{{ $n }}</div>
+          <div class="size-h6 color-subdue">{{ $desc }}</div>
+        </div>
+        {{ if eq (.Float "value.1") 1.0 }}<span class="color-positive" title="up">●</span>{{ else }}<span class="color-negative" title="down">●</span>{{ end }}
+      </div>
+    {{ end }}{{ end }}
+    </ul>

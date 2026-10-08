@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: zigbee
+  labels: { app.kubernetes.io/name: mosquitto }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: mosquitto }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: mosquitto }
+    spec:
+      automountServiceAccountToken: false
+      securityContext: { runAsUser: 1883, runAsGroup: 1883, runAsNonRoot: true, fsGroup: 1883 }
+      initContainers:
+        - name: passwd
+          image: eclipse-mosquitto:2.0.22
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              touch /mosquitto/auth/passwd
+              for u in homeassistant zigbee2mqtt; do
+                mosquitto_passwd -b /mosquitto/auth/passwd "$u" "$(cat /users/$u)"
+              done
+              chmod 600 /mosquitto/auth/passwd
+          volumeMounts:
+            - { name: auth, mountPath: /mosquitto/auth }
+            - { name: users, mountPath: /users, readOnly: true }
+          resources: { requests: { cpu: 5m, memory: 8Mi }, limits: { memory: 32Mi } }
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.0.22
+          ports:
+            - { name: mqtt, containerPort: 1883 }
+          volumeMounts:
+            - { name: config, mountPath: /mosquitto/config/mosquitto.conf, subPath: mosquitto.conf, readOnly: true }
+            - { name: auth, mountPath: /mosquitto/auth }
+          readinessProbe:
+            tcpSocket: { port: mqtt }
+            periodSeconds: 15
+          livenessProbe:
+            tcpSocket: { port: mqtt }
+            periodSeconds: 30
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 5m, memory: 8Mi }
+            limits:   { memory: 64Mi }
+      volumes:
+        - name: config
+          configMap: { name: mosquitto }
+        - name: auth
+          emptyDir: {}
+        - name: users
+          secret: { secretName: mqtt-users }

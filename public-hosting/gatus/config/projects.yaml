@@ -1,0 +1,65 @@
+# Cloud Run scales to zero: check every 3 h only
+endpoints:
+  - name: theoboursy.fr
+    group: Projects (every 3 h)
+    extra-labels: { desc: "personal site, links to everything below", icon: "go", order: "1", url: "https://www.theoboursy.fr" }
+    url: "https://www.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: img2ascii
+    group: Projects (every 3 h)
+    extra-labels: { desc: "image to ASCII art, CLI in Go", icon: "go", order: "2", url: "https://ascii.theoboursy.fr" }
+    url: "https://ascii.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: portfolio
+    group: Projects (every 3 h)
+    extra-labels: { desc: "the IaC behind *.theoboursy.fr, tuned for the free tier", icon: "terraform", order: "3", url: "https://portfolio.theoboursy.fr" }
+    url: "https://portfolio.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: infra-loadtest
+    group: Projects (every 3 h)
+    extra-labels: { desc: "distributed load tester on serverless containers", icon: "scaleway", order: "4", url: "https://loadtest.theoboursy.fr" }
+    url: "https://loadtest.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: infra-monitoring
+    group: Projects (every 3 h)
+    extra-labels: { desc: "serverless Grafana on AWS Lambda", icon: "grafana", order: "5", url: "https://monitoring.theoboursy.fr" }
+    url: "https://monitoring.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: docker-online
+    group: Projects (every 3 h)
+    extra-labels: { desc: "mini-PaaS built on the Docker SDK", icon: "docker", order: "6", url: "https://dockeronline.theoboursy.fr" }
+    url: "https://dockeronline.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: hall-of-gopher
+    group: Projects (every 3 h)
+    extra-labels: { desc: "Go image gallery on Cloud Run", icon: "go", order: "7", url: "https://gopher.theoboursy.fr" }
+    url: "https://gopher.theoboursy.fr"
+    interval: 3h
+    alerts: [{ type: ntfy, failure-threshold: 1 }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"

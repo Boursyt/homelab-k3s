@@ -1,0 +1,56 @@
+storage:
+  type: postgres
+  path: "postgres://gatus:${GATUS_DB_PASSWORD}@postgres-public.databases.svc.cluster.local:5432/gatus?sslmode=require"
+
+metrics: true
+
+ui:
+  title: "status · boursyt lab"
+  description: "Live status of the public homelab and Cloud Run projects of Théo Boursy"
+  header: "boursyt@lab:~$ status"
+  dashboard-heading: "Public services"
+  dashboard-subheading: "Live checks of the public homelab and of the Cloud Run projects. Private services are not listed."
+  logo: "https://www.theoboursy.fr/assets/favicon.ico"
+  link: "https://lab.pub.theoboursy.fr"
+  favicon:
+    default: "https://www.theoboursy.fr/assets/favicon.ico"
+    size16x16: "https://www.theoboursy.fr/assets/favicon.ico"
+    size32x32: "https://www.theoboursy.fr/assets/favicon.ico"
+  buttons:
+    - { name: "Dashboard", link: "https://lab.pub.theoboursy.fr" }
+    - { name: "Source", link: "https://github.com/Boursyt/homelab-k3s" }
+    - { name: "theoboursy.fr", link: "https://www.theoboursy.fr" }
+  dark-mode: true
+  login-subtitle: "homelab of Théo Boursy"
+  default-sort-by: group
+  # colours and fonts of theoboursy.fr (fonts served by the public Glance); html: beats app.css, loaded after
+  custom-css: |
+    @font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap; src: url('https://lab.pub.theoboursy.fr/assets/inter.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-weight: 100 800; font-display: swap; src: url('https://lab.pub.theoboursy.fr/assets/jetbrains-mono.woff2') format('woff2'); }
+    html:root {
+      --background: 0 0% 100%; --foreground: 203 46% 11%; --card: 0 0% 100%; --card-foreground: 203 46% 11%;
+      --popover: 0 0% 100%; --popover-foreground: 203 46% 11%; --primary: 192 100% 31%; --primary-foreground: 0 0% 100%;
+      --secondary: 196 81% 95%; --secondary-foreground: 203 46% 11%; --muted: 196 81% 95%; --muted-foreground: 205 14% 41%;
+      --accent: 196 81% 95%; --accent-foreground: 203 46% 11%; --border: 200 30% 89%; --input: 200 30% 89%; --ring: 192 100% 31%;
+    }
+    html:root.dark {
+      --background: 213 33% 6%; --foreground: 204 33% 90%; --card: 210 33% 11%; --card-foreground: 204 33% 90%;
+      --popover: 210 33% 11%; --popover-foreground: 204 33% 90%; --primary: 192 87% 50%; --primary-foreground: 213 33% 6%;
+      --secondary: 200 46% 12%; --secondary-foreground: 204 33% 90%; --muted: 200 46% 12%; --muted-foreground: 205 15% 63%;
+      --accent: 200 46% 12%; --accent-foreground: 204 33% 90%; --border: 206 33% 20%; --input: 206 33% 20%; --ring: 192 87% 50%;
+    }
+    body { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background: linear-gradient(180deg, rgb(0 173 216 / .20), rgb(0 173 216 / .06) 430px, transparent 760px); }
+    h1, h2, h3, code, .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+# notifications on the phone (ntfy.sh, topic from Secret gatus-ntfy)
+alerting:
+  ntfy:
+    url: "https://ntfy.sh"
+    topic: "${GATUS_NTFY_TOPIC}"
+    priority: 4
+    default-alert:
+      failure-threshold: 3
+      success-threshold: 2
+      send-on-resolved: true

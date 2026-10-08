@@ -1,0 +1,5 @@
+announcements:
+  - timestamp: 2026-10-01T20:30:00Z
+    type: information
+    archived: true
+    message: "Status page online: apps, services, cluster and hosts are now monitored."

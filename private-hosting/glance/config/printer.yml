@@ -1,0 +1,98 @@
+- type: custom-api
+  title: 3D printer
+  title-url: https://ha.lab.theoboursy.fr/dashboard-p2s
+  cache: 30s
+  url: http://homeassistant.homeassistant.svc.cluster.local:8123/api/template
+  method: POST
+  headers:
+    Authorization: "Bearer ${HA_TOKEN}"
+  subrequests:
+    spoolman:
+      url: http://spoolman.spoolman.svc.cluster.local:8000/api/v1/spool
+      parameters: { sort: "remaining_weight:asc", limit: "5" }
+  body-type: json
+  body:
+    template: >-
+      {%- set p = 'sensor.p2s_' -%}
+      {%- set ns = namespace(slots=[]) -%}
+      {%- for i in range(1, 5) -%}
+        {%- set e = p ~ 'ams_1_emplacement_' ~ i -%}
+        {%- set ns.slots = ns.slots + [{
+          'name': states(e), 'type': state_attr(e, 'type') or '',
+          'color': state_attr(e, 'color') or '#00000000', 'remain': state_attr(e, 'remain') | int(-1),
+          'active': state_attr(e, 'active') == true, 'empty': state_attr(e, 'empty') == true}] -%}
+      {%- endfor -%}
+      {%- set rem = (states(p ~ 'temps_restant') | float(0) * 60) | round | int -%}
+      {{ {
+        'online': is_state('binary_sensor.p2s_en_ligne', 'on'),
+        'state': states(p ~ 'etat_de_l_impression'),
+        'stage': states(p ~ 'etape_actuelle') | replace('_', ' '),
+        'progress': states(p ~ 'progression_de_l_impression') | int(0),
+        'remaining': (rem // 60) ~ 'h' ~ ('%02d' | format(rem % 60)),
+        'end': (now() + timedelta(minutes=rem)).strftime('%H:%M') if rem > 0 else '',
+        'task': states(p ~ 'nom_de_la_tache'),
+        'layer': states(p ~ 'couche_actuelle') | int(0),
+        'layers': states(p ~ 'nombre_total_de_couches') | int(0),
+        'nozzle': states(p ~ 'temperature_de_la_buse') | float(0) | round | int,
+        'bed': states(p ~ 'temperature_du_lit') | float(0) | round | int,
+        'ams_humidity': states(p ~ 'ams_1_humidite') | int(0),
+        'ams_temp': states(p ~ 'ams_1_temperature') | float(0) | round | int,
+        'slots': ns.slots } | tojson }}
+  template: |
+    {{ $state := .JSON.String "state" }}
+    {{ $busy := or (eq $state "running") (eq $state "pause") (eq $state "prepare") }}
+    <div class="kv">
+      <span class="size-h3 color-highlight">P2S</span>
+      {{ if not (.JSON.Bool "online") }}<span class="color-negative">OFFLINE</span>
+      {{ else if eq $state "running" }}<span class="color-primary">PRINTING</span>
+      {{ else if eq $state "failed" }}<span class="color-negative">FAILED</span>
+      {{ else if eq $state "finish" }}<span class="color-positive">FINISHED</span>
+      {{ else }}<span class="color-subdue">{{ $state }}</span>{{ end }}
+    </div>
+    {{ if $busy }}
+    <div class="text-truncate margin-top-10" title="{{ .JSON.String "task" }}">{{ .JSON.String "task" }}</div>
+    <div class="bar"><div class="data" style="width: {{ .JSON.Int "progress" }}%"></div></div>
+    <div class="stat-row">
+      <div><div class="size-h3 color-highlight">{{ .JSON.Int "progress" }}%</div><div class="size-h6">done</div></div>
+      <div><div class="size-h3 color-highlight">{{ .JSON.String "remaining" }}</div><div class="size-h6">left</div></div>
+      <div><div class="size-h3 color-highlight">{{ .JSON.String "end" }}</div><div class="size-h6">eta</div></div>
+    </div>
+    <div class="kv margin-top-10 size-h6 color-subdue">
+      <span>{{ .JSON.String "stage" }}</span>
+      <span>layer {{ .JSON.Int "layer" }}/{{ .JSON.Int "layers" }}</span>
+    </div>
+    {{ end }}
+    <div class="kv margin-top-10">
+      <span class="color-subdue">Nozzle / bed</span>
+      <span class="shrink-0">{{ .JSON.Int "nozzle" }}° / {{ .JSON.Int "bed" }}°</span>
+    </div>
+    <div class="kv margin-top-15">
+      <span class="size-h4 color-highlight">AMS 2 Pro</span>
+      <span class="shrink-0 size-h6 color-subdue">{{ .JSON.Int "ams_humidity" }}% RH · {{ .JSON.Int "ams_temp" }}°</span>
+    </div>
+    <div class="stat-row">
+    {{ range .JSON.Array "slots" }}
+      <div title="{{ .String "name" }}">
+        {{ if .Bool "empty" }}
+        <div style="width: 22px; height: 22px; margin: 0 auto 4px; border-radius: 50%; border: 2px dashed var(--color-text-subdue);"></div>
+        <div class="size-h6 color-subdue">empty</div>
+        {{ else }}
+        <div style="width: 22px; height: 22px; margin: 0 auto 4px; border-radius: 50%; background: {{ .String "color" }}; border: 2px solid {{ if .Bool "active" }}var(--color-primary){{ else }}var(--color-widget-background-highlight){{ end }};"></div>
+        <div class="size-h6 {{ if .Bool "active" }}color-primary{{ else }}color-highlight{{ end }}">{{ .String "type" }}</div>
+        {{ if ge (.Int "remain") 0 }}<div class="size-h6 color-subdue">{{ .Int "remain" }}%</div>{{ end }}
+        {{ end }}
+      </div>
+    {{ end }}
+    </div>
+    <div class="kv margin-top-15">
+      <span class="size-h4 color-highlight">Low stock</span>
+      <span class="shrink-0 size-h6 color-subdue">buy soon</span>
+    </div>
+    <ul class="list list-gap-4 margin-top-5">
+    {{ range (.Subrequest "spoolman").JSON.Array "" }}{{ $left := .Float "remaining_weight" }}
+      <li class="kv size-h6" title="#{{ .Int "id" }} · {{ .String "location" }}">
+        <span class="text-truncate"><span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; background: #{{ .String "filament.color_hex" }}; border: 1px solid var(--color-widget-background-highlight);"></span>{{ .String "filament.vendor.name" }} · {{ .String "filament.name" }} <span class="color-subdue">{{ .String "filament.material" }}</span></span>
+        <span class="shrink-0 {{ if lt $left 150.0 }}color-negative{{ else if lt $left 400.0 }}color-highlight{{ else }}color-subdue{{ end }}">{{ printf "%.0f" $left }} g</span>
+      </li>
+    {{ end }}
+    </ul>

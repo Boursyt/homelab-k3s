@@ -1,0 +1,27 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: headlamp
+  namespace: kube-system
+spec:
+  repo: https://kubernetes-sigs.github.io/headlamp/
+  chart: headlamp
+  version: 0.45.0
+  targetNamespace: headlamp
+  failurePolicy: abort
+  valuesContent: |-
+    clusterRoleBinding:
+      create: false
+
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - host: headlamp.lab.theoboursy.fr
+          paths:
+            - path: /
+              type: Prefix
+
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits:   { memory: 128Mi }

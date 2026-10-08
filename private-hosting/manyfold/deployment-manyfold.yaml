@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manyfold
+  namespace: manyfold
+  labels: { app.kubernetes.io/name: manyfold }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: manyfold }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: manyfold }
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: manyfold
+          image: ghcr.io/manyfold3d/manyfold:0.150.0
+          env:
+            - { name: TZ, value: Europe/Paris }
+            - { name: PUID, value: "1000" }
+            - { name: PGID, value: "10" }
+            - { name: SECRET_KEY_BASE, valueFrom: { secretKeyRef: { name: manyfold-app, key: SECRET_KEY_BASE } } }
+            - { name: REDIS_URL, value: "redis://valkey.manyfold.svc.cluster.local:6379/1" }
+            - { name: DATABASE_ADAPTER, value: postgresql }
+            - { name: DATABASE_HOST, value: postgres.databases.svc.cluster.local }
+            - { name: DATABASE_PORT, value: "5432" }
+            - { name: DATABASE_NAME, value: manyfold }
+            - { name: DATABASE_USER, value: manyfold }
+            - { name: DATABASE_PASSWORD, valueFrom: { secretKeyRef: { name: manyfold-db, key: password } } }
+            - { name: PGSSLMODE, value: require }
+            # libpq looks for a client cert in $HOME=/root (unreadable as uid 1000)
+            - { name: PGSSLCERT, value: /tmp/no-client-cert.crt }
+            - { name: PGSSLKEY, value: /tmp/no-client-cert.key }
+            - { name: PUBLIC_HOSTNAME, value: manyfold.lab.theoboursy.fr }
+            - { name: PUBLIC_PORT, value: "443" }
+            - { name: DEFAULT_WORKER_CONCURRENCY, value: "2" }   # 4 parallel 3MF analyses OOM the pod
+          ports:
+            - { name: http, containerPort: 3214 }
+          # s6 starts as root, chowns tmp/log, then runs the app as PUID 1000 (its entrypoint cannot
+          # run non-root): root keeps only what that needs
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL], add: [CHOWN, FOWNER, SETUID, SETGID, DAC_OVERRIDE] }
+          volumeMounts:
+            - { name: models, mountPath: /models }
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 15
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 100m, memory: 768Mi }
+            limits:   { memory: 3Gi }
+      volumes:
+        - name: models
+          persistentVolumeClaim: { claimName: models }

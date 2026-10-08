@@ -1,0 +1,20 @@
+services:
+  nginx:
+    image: nginxinc/nginx-unprivileged:1.30.5-alpine
+    container_name: nginx
+    restart: unless-stopped
+    # host network: listens on the public IP and reaches the cluster through wg0
+    network_mode: host
+    # non-root (uid 101) on 80/443: needs net.ipv4.ip_unprivileged_port_start=80 on the host
+    user: "101:101"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp]
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./stream.d:/etc/nginx/stream.d:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
+    healthcheck:
+      test: ["CMD", "nginx", "-t", "-q"]
+      interval: 1m

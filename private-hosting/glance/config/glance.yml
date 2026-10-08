@@ -1,0 +1,86 @@
+server:
+  port: 8080
+
+branding:
+  app-name: Homelab
+  logo-text: "hypto@lab:~#"
+  hide-footer: true
+
+document:
+  head: |
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      body, .header-container, .widget { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+      .header.widget-content-frame { background: none; border: none; box-shadow: none; position: relative; }
+      .header::after {
+        content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 2px; border-radius: 2px; opacity: .85;
+        background: linear-gradient(90deg, #a6e3a1, #94e2d5, #89b4fa, #cba6f7, #f5c2e7, #fab387, #f9e2af, #a6e3a1);
+      }
+      .logo { width: auto; padding-inline: 0 1rem; font-weight: 700; border-right: none; color: #a6e3a1; }
+      .logo::after { content: "▋"; margin-left: .35rem; color: var(--color-primary); animation: cursor-blink 1.1s steps(1) infinite; }
+      @keyframes cursor-blink { 50% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) { .logo::after { animation: none; } }
+      .kv { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+      .kv > .shrink-0 { white-space: nowrap; }
+      .bar { height: 7px; border-radius: 4px; background: var(--color-widget-background-highlight); margin: 6px 0 14px; overflow: hidden; }
+      .bar > div { height: 100%; border-radius: 4px; background: hsl(45 90% 62%); }
+      .bar > div.data { background: var(--color-primary); }
+      .bar > div.hot { background: var(--color-negative); }
+      .stat-row { display: flex; justify-content: space-between; text-align: center; margin-top: 10px; }
+      .stat-row > div { flex: 1; min-width: 0; }
+      .stat-row .size-h6 { text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+      .head-widgets, .page-column {
+        padding: 16px 20px 20px; border-radius: 22px;
+        background: linear-gradient(135deg, hsl(217 92% 83% / .08), hsl(240 21% 30% / .18) 50%, hsl(267 84% 81% / .07));
+        border: 1px solid hsl(0 0% 100% / .10);
+        box-shadow: inset 0 1px 0 hsl(0 0% 100% / .14), inset 0 -1px 0 hsl(0 0% 0% / .30), 0 12px 32px hsl(240 21% 4% / .45);
+        /* no backdrop-filter: constant GPU repaint in the browser */
+      }
+      .head-widgets .masonry-column > .widget { flex: 1; display: flex; flex-direction: column; }
+      .head-widgets .masonry-column > .widget > .widget-content { flex: 1; }
+      .head-widgets .widget-content:not(.widget-content-frameless),
+      .page-column .widget-content:not(.widget-content-frameless) {
+        background: hsl(240 21% 11% / .55); border-color: hsl(0 0% 100% / .06);
+      }
+    </style>
+    <script>
+      // every 30 s: swap the content of each titled widget (no reload)
+      (() => {
+        const key = (w) => {
+          const h = w.querySelector(':scope > .widget-header');
+          return h ? w.className + '|' + h.textContent.trim() : null;
+        };
+        const refresh = async () => {
+          if (document.hidden || typeof pageData === 'undefined' || !pageData.slug) return;
+          try {
+            const r = await fetch(`${pageData.baseURL || ''}/api/pages/${pageData.slug}/content/`);
+            if (!r.ok) return;
+            const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+            const fresh = new Map();
+            doc.querySelectorAll('.widget').forEach((w) => { const k = key(w); if (k) fresh.set(k, w); });
+            let matched = 0, swapped = 0;
+            document.querySelectorAll('#page-content .widget').forEach((w) => {
+              const k = key(w); const n = k && fresh.get(k);
+              if (n) matched++;
+              const cur = w.querySelector(':scope > .widget-content'), upd = n && n.querySelector(':scope > .widget-content');
+              if (cur && upd && cur.innerHTML !== upd.innerHTML) {
+                cur.innerHTML = upd.innerHTML;
+                // Glance only reveals lazy images on page load
+                cur.querySelectorAll('img[loading=lazy]').forEach((i) => i.classList.add('cached', 'finished-transition'));
+                swapped++;
+              }
+            });
+            Object.assign(document.documentElement.dataset, { refreshAt: new Date().toLocaleTimeString(), refreshMatched: matched, refreshSwapped: swapped, refreshKeys: fresh.size });
+          } catch (e) { document.documentElement.dataset.refreshError = String(e); }
+        };
+        setInterval(refresh, 30000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+      })();
+    </script>
+
+$include: theme.yml
+
+pages:
+  - $include: homelab.yml

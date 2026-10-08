@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-gitea-gitea-shared-storage
+spec:
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-ssd
+  # nocto: ~7x faster git; safe only with a single writer (Gitea is 1 replica, Recreate)
+  mountOptions: [nfsvers=3, hard, noatime, nocto, actimeo=60]
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 192.168.1.51/volume2/k3s/gitea/gitea-shared-storage
+    volumeAttributes: { server: 192.168.1.51, share: /volume2/k3s, subDir: gitea/gitea-shared-storage }
+  claimRef: { namespace: gitea, name: gitea-shared-storage }

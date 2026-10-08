@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vmauth-public
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: vmauth-public }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: glance-public }
+      ports:
+        - { port: 8427 }

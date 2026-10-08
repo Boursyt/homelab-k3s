@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: mosquitto, namespace: zigbee }
+data:
+  mosquitto.conf: |
+    listener 1883
+    allow_anonymous false
+    password_file /mosquitto/auth/passwd
+    persistence false
+    log_dest stdout
+    log_type error
+    log_type warning
+    log_type notice

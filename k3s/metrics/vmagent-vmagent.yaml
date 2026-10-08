@@ -1,0 +1,28 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  selectAllByDefault: true
+  # operator-generated non-root, read-only, no-capability containers
+  useStrictSecurity: true
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile: { type: RuntimeDefault }
+  scrapeInterval: 60s
+  externalLabels:
+    prometheus: monitoring/kps-kube-prometheus-stack-prometheus
+    prometheus_replica: prometheus-kps-kube-prometheus-stack-prometheus-0
+  remoteWrite:
+    - url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/write
+      basicAuth:
+        username: { name: victoriametrics-auth, key: username }
+        password: { name: victoriametrics-auth, key: password }
+  extraArgs:
+    remoteWrite.disableOnDiskQueue: "true"
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits:   { memory: 768Mi }

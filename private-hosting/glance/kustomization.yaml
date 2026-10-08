@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: glance
+resources:
+  - namespace.yaml
+  - deployment-glance.yaml
+  - ingress-glance.yaml
+  - pdb-glance.yaml
+  - service-glance.yaml
+configMapGenerator:
+  - name: glance-config
+    files:
+      - config/glance.yml
+      - config/theme.yml
+      - config/homelab.yml
+      - config/hardware.yml
+      - config/k3s.yml
+      - config/nas.yml
+      - config/apps.yml
+      - config/printer.yml
+      - config/services.yml
+      - config/network.yml
+      - config/speedtest.yml
+      - config/databases.yml
+      - config/backups.yml
+      - config/ingress.yml
+      - config/status.yml

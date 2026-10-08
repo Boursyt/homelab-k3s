@@ -1,0 +1,8 @@
+[Unit]
+Description=Delete k3s pods stuck in the Unknown phase on this node
+After=k3s.service
+Requires=k3s.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/k3s-reap-unknown-pods.sh

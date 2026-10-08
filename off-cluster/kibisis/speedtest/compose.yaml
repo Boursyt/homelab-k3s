@@ -1,0 +1,19 @@
+services:
+  speedtest:
+    image: alpine:3.22
+    container_name: speedtest
+    restart: unless-stopped
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    # exec: the speedtest binary is downloaded there
+    tmpfs: ["/tmp:exec,mode=1777,size=64m"]
+    environment:
+      HOME: /tmp
+      VM_USER: ${VM_USER:?missing in .env}
+      VM_PASSWORD: ${VM_PASSWORD:?missing in .env}
+    volumes:
+      - ./speedtest.sh:/speedtest.sh:ro
+    # every 6 h at hh:47 UTC (00, 06, 12, 18): a sleep loop, no crond (needs root)
+    command: ["sh", "-c", "while :; do now=$$(date +%s); next=$$(( (now - 2820) / 21600 * 21600 + 21600 + 2820 )); sleep $$((next - now)); sh /speedtest.sh || true; done"]

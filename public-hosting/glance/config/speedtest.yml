@@ -1,0 +1,23 @@
+- type: custom-api
+  title: Internet speed
+  cache: 5m
+  url: http://vmauth-public.monitoring.svc.cluster.local:8427/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(max by (source) (last_over_time(speedtest_download_bits_per_second{source!=""}[13h])) / 1e6, "k", "down"),
+        label_set(max by (source) (last_over_time(speedtest_upload_bits_per_second{source!=""}[13h])) / 1e6, "k", "upl"),
+        label_set(max by (source) (last_over_time(speedtest_ping_ms{source!=""}[13h])), "k", "ping"),
+        label_set((time() - max by (source) (last_over_time(speedtest_last_run_timestamp_seconds{source!=""}[13h]))) / 60, "k", "age")
+      )
+  template: |
+    <div class="kv size-h6 color-subdue"><span></span><span>↓ down · ↑ up · ping</span></div>
+    {{ $down := 0.0 }}{{ $upl := 0.0 }}{{ $ping := 0.0 }}{{ $age := 9999.0 }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.source") "nas" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "down" }}{{ $down = $x }}{{ end }}{{ if eq $k "upl" }}{{ $upl = $x }}{{ end }}{{ if eq $k "ping" }}{{ $ping = $x }}{{ end }}{{ if eq $k "age" }}{{ $age = $x }}{{ end }}{{ end }}{{ end }}
+    <div class="kv margin-top-10"><span class="size-h5 color-highlight">FIBRE <span class="color-subdue">(NAS)</span></span><span class="shrink-0 color-highlight">{{ printf "%.0f" $down }} · {{ printf "%.0f" $upl }} · {{ printf "%.0f" $ping }}<span class="color-subdue">ms</span></span></div>
+    <div class="kv size-h6 color-subdue"><span>Mbit/s</span><span class="{{ if gt $age 780.0 }}color-negative{{ end }}">{{ if ge $age 9999.0 }}no result in 13 h{{ else if lt $age 120.0 }}{{ printf "%.0f" $age }} min ago{{ else }}{{ printf "%.1f" (div $age 60.0) }} h ago{{ end }}</span></div>
+    {{ $down := 0.0 }}{{ $upl := 0.0 }}{{ $ping := 0.0 }}{{ $age := 9999.0 }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.source") "cluster" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "down" }}{{ $down = $x }}{{ end }}{{ if eq $k "upl" }}{{ $upl = $x }}{{ end }}{{ if eq $k "ping" }}{{ $ping = $x }}{{ end }}{{ if eq $k "age" }}{{ $age = $x }}{{ end }}{{ end }}{{ end }}
+    <div class="kv margin-top-10"><span class="size-h5 color-highlight">CLUSTER <span class="color-subdue">(Pi)</span></span><span class="shrink-0 color-highlight">{{ printf "%.0f" $down }} · {{ printf "%.0f" $upl }} · {{ printf "%.0f" $ping }}<span class="color-subdue">ms</span></span></div>
+    <div class="kv size-h6 color-subdue"><span>Mbit/s</span><span class="{{ if gt $age 780.0 }}color-negative{{ end }}">{{ if ge $age 9999.0 }}no result in 13 h{{ else if lt $age 120.0 }}{{ printf "%.0f" $age }} min ago{{ else }}{{ printf "%.1f" (div $age 60.0) }} h ago{{ end }}</span></div>

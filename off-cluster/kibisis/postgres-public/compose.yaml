@@ -1,0 +1,106 @@
+x-postgres: &postgres
+  image: pgvector/pgvector:0.8.7-pg17-bookworm
+  restart: unless-stopped
+  shm_size: 128mb
+  environment:
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?missing in .env}
+    MONITORING_PASSWORD: ${MONITORING_PASSWORD:?missing in .env}
+    REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:?missing in .env}
+    PGBOUNCER_PASSWORD: ${PGBOUNCER_PASSWORD:?missing in .env}
+  healthcheck:
+    test: ["CMD", "pg_isready", "-U", "postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+x-postgres-args: &postgres-args
+  - postgres
+  - -c
+  - shared_buffers=256MB
+  - -c
+  - max_connections=100
+  - -c
+  - password_encryption=scram-sha-256
+  - -c
+  - ssl=on
+  - -c
+  - ssl_cert_file=/etc/postgresql/tls/server.crt
+  - -c
+  - ssl_key_file=/etc/postgresql/tls/server.key
+  - -c
+  - hba_file=/etc/postgresql/pg_hba.conf
+
+x-exporter: &exporter
+  image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+  restart: unless-stopped
+
+services:
+  postgres-public-primary:
+    <<: *postgres
+    container_name: postgres-public-primary
+    command: *postgres-args
+    volumes:
+      - ./data/primary:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./tls:/etc/postgresql/tls:ro
+
+  postgres-public-replica:
+    <<: *postgres
+    container_name: postgres-public-replica
+    entrypoint: ["/replica-entrypoint.sh"]
+    command: *postgres-args
+    volumes:
+      - ./data/replica:/var/lib/postgresql/data
+      - ./replica-entrypoint.sh:/replica-entrypoint.sh:ro
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./tls:/etc/postgresql/tls:ro
+    depends_on:
+      postgres-public-primary: { condition: service_healthy }
+
+  pgbouncer-public:
+    image: edoburu/pgbouncer:v1.26.0-p0
+    container_name: pgbouncer-public
+    restart: unless-stopped
+    ports:
+      - "192.168.1.51:5433:5432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+      - ./pgbouncer/tls:/etc/pgbouncer/tls:ro
+    depends_on:
+      postgres-public-primary: { condition: service_healthy }
+
+  postgres-exporter-public-primary:
+    <<: *exporter
+    container_name: postgres-exporter-public-primary
+    environment: &pgexp
+      DATA_SOURCE_URI: postgres-public-primary:5432/postgres?sslmode=require
+      DATA_SOURCE_USER: monitoring
+      DATA_SOURCE_PASS: ${MONITORING_PASSWORD:?missing in .env}
+    ports:
+      - "192.168.1.51:9189:9187"
+    depends_on:
+      postgres-public-primary: { condition: service_healthy }
+
+  postgres-exporter-public-replica:
+    <<: *exporter
+    container_name: postgres-exporter-public-replica
+    environment:
+      <<: *pgexp
+      DATA_SOURCE_URI: postgres-public-replica:5432/postgres?sslmode=require
+    ports:
+      - "192.168.1.51:9190:9187"
+    depends_on:
+      postgres-public-replica: { condition: service_healthy }
+
+  pgbouncer-exporter-public:
+    image: quay.io/prometheuscommunity/pgbouncer-exporter:v0.12.1
+    container_name: pgbouncer-exporter-public
+    restart: unless-stopped
+    environment:
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: postgres://monitoring:${MONITORING_PASSWORD:?missing in .env}@pgbouncer-public:5432/pgbouncer?sslmode=require
+    ports:
+      - "192.168.1.51:9191:9127"
+    depends_on:
+      - pgbouncer-public

@@ -1,0 +1,14 @@
+theme:
+  background-color: 213 33 6
+  contrast-multiplier: 1.1
+  primary-color: 192 87 50
+  positive-color: 153 58 52
+  negative-color: 342 100 73
+  presets:
+    light:
+      light: true
+      background-color: 200 30 97
+      contrast-multiplier: 1.1
+      primary-color: 192 100 31
+      positive-color: 154 69 33
+      negative-color: 336 78 43

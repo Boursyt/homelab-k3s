@@ -1,0 +1,16 @@
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: postgres-public-nas
+  namespace: databases
+  labels:
+    kubernetes.io/service-name: postgres-public
+    endpointslice.kubernetes.io/managed-by: homelab
+addressType: IPv4
+ports:
+  - name: postgres
+    port: 5433
+    protocol: TCP
+endpoints:
+  - addresses: ["192.168.1.51"]
+    conditions: { ready: true }

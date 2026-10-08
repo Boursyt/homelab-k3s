@@ -1,0 +1,21 @@
+storage:
+  type: postgres
+  path: "postgres://gatus:${GATUS_DB_PASSWORD}@postgres.databases.svc.cluster.local:5432/gatus?sslmode=require"
+
+ui:
+  title: "Homelab status"
+  header: "Homelab status"
+  default-sort-by: group
+
+metrics: true
+
+# notifications on the phone (ntfy.sh, topic from Secret gatus-ntfy)
+alerting:
+  ntfy:
+    url: "https://ntfy.sh"
+    topic: "${GATUS_NTFY_TOPIC}"
+    priority: 4
+    default-alert:
+      failure-threshold: 3
+      success-threshold: 2
+      send-on-resolved: true

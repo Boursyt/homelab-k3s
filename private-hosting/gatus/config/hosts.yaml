@@ -1,0 +1,43 @@
+endpoints:
+  - name: aegis
+    group: Hosts
+    url: "http://192.168.1.41:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: keraunos
+    group: Hosts
+    url: "http://192.168.1.49:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: harpe
+    group: Hosts
+    url: "http://192.168.1.78:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: bident
+    group: Hosts
+    url: "http://192.168.1.52:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: trident (VPN)
+    group: Hosts
+    url: "http://10.8.0.1:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: kibisis (NAS)
+    group: Hosts
+    url: "http://192.168.1.51:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"

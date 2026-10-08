@@ -1,0 +1,67 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ingressRoute:
+      dashboard:
+        enabled: true
+        entryPoints: ["web", "websecure"]
+        matchRule: Host(`traefik.lab.theoboursy.fr`)
+
+    metrics:
+      prometheus:
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+          # keep Traefik's own \"service\" label
+          honorLabels: true
+    resources:
+      requests: { cpu: 75m, memory: 128Mi }
+      limits:   { memory: 256Mi }
+    deployment:
+      replicas: 2
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: traefik
+                app.kubernetes.io/instance: traefik-kube-system
+    # one pod per node: no room for a surge pod
+    updateStrategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 1
+        maxSurge: 0
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    # routers without an explicit entrypoint (all private Ingresses) only get web/websecure;
+    # websecure-pub (VIP:8443, target of the public reverse proxy) only has the public routers
+    ports:
+      web:
+        asDefault: true
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true
+      websecure:
+        asDefault: true
+        http:
+          tls:
+            enabled: true
+      websecure-pub:
+        port: 8444
+        exposedPort: 8443
+        expose: { default: true }
+        protocol: TCP
+        http:
+          tls:
+            enabled: true

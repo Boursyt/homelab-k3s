@@ -1,0 +1,22 @@
+write-kubeconfig-mode: "0644"
+server: https://192.168.1.200:6443
+token-file: /etc/rancher/k3s/cluster-token
+node-ip: 192.168.1.52
+flannel-iface: eth0
+tls-san:
+  - 192.168.1.200
+  - bident
+etcd-arg:   # relaxed etcd timeouts for SD cards
+  - heartbeat-interval=500
+  - election-timeout=5000
+etcd-snapshot-schedule-cron: "0 */12 * * *"
+etcd-snapshot-retention: 10
+etcd-s3: true
+etcd-s3-config-secret: k3s-etcd-s3   # no other etcd-s3-* option, or the Secret is ignored
+kubelet-arg:
+  - kube-reserved=cpu=500m,memory=1536Mi
+  - system-reserved=cpu=250m,memory=512Mi
+  - eviction-hard=memory.available<300Mi
+kube-apiserver-arg:
+  - default-not-ready-toleration-seconds=60
+  - default-unreachable-toleration-seconds=60

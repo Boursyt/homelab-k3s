@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatus
+  namespace: gatus-public
+  labels: { app.kubernetes.io/name: gatus }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: gatus }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: gatus }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: gatus
+          image: ghcr.io/twin/gatus:v5.37.0
+          ports:
+            - { name: http, containerPort: 8080 }
+          env:
+            - name: GATUS_CONFIG_PATH
+              value: /config
+            - name: GATUS_NTFY_TOPIC
+              valueFrom:
+                secretKeyRef: { name: gatus-ntfy, key: topic }
+            - name: GATUS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: gatus-db, key: password }
+          volumeMounts:
+            - { name: config, mountPath: /config, readOnly: true }
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 15
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits:   { memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+      volumes:
+        - name: config
+          configMap: { name: gatus-config }

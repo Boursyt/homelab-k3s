@@ -1,0 +1,30 @@
+endpoints:
+  - name: Postgres (kibisis, PgBouncer)
+    group: Services
+    url: "tcp://192.168.1.51:5432"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: VictoriaMetrics (kibisis)
+    group: Services
+    url: "tcp://192.168.1.51:8428"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: Gitea SSH
+    group: Services
+    url: "tcp://git.lab.theoboursy.fr:2222"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: Traefik dashboard
+    group: Services
+    url: "https://traefik.lab.theoboursy.fr/dashboard/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"

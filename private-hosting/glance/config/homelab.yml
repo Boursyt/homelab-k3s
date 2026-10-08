@@ -1,0 +1,25 @@
+- name: Homelab
+  width: wide
+  head-widgets:
+    - type: split-column
+      max-columns: 4
+      widgets:
+        - $include: hardware.yml
+        - $include: k3s.yml
+        - $include: nas.yml
+        - $include: printer.yml
+  columns:
+    - size: small
+      widgets:
+        - $include: status.yml
+        - $include: backups.yml
+        - $include: databases.yml
+    - size: full
+      widgets:
+        - $include: apps.yml
+        - $include: services.yml
+    - size: small
+      widgets:
+        - $include: network.yml
+        - $include: speedtest.yml
+        - $include: ingress.yml

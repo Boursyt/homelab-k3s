@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - configmap-mosquitto.yaml
+  - configmap-zigbee2mqtt-seed.yaml
+  - deployment-mosquitto.yaml
+  - deployment-zigbee2mqtt.yaml
+  - ingress-zigbee2mqtt.yaml
+  - pvc-zigbee2mqtt-data.yaml
+  - service-mosquitto.yaml
+  - service-zigbee2mqtt.yaml

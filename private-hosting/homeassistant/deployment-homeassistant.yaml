@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homeassistant
+  namespace: homeassistant
+  labels: { app.kubernetes.io/name: homeassistant }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: homeassistant }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: homeassistant }
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      automountServiceAccountToken: false
+      initContainers:
+        - name: init-files
+          image: busybox:1.37
+          command: ["sh", "-c", "cd /config && touch automations.yaml scripts.yaml scenes.yaml && [ -s automations.yaml ] || echo '[]' > automations.yaml"]
+          volumeMounts:
+            - { name: config, mountPath: /config }
+          resources: { requests: { cpu: 5m, memory: 8Mi }, limits: { memory: 32Mi } }
+      containers:
+        - name: homeassistant
+          image: ghcr.io/home-assistant/home-assistant:2026.9.4
+          env:
+            - { name: TZ, value: Europe/Paris }
+            - { name: DB_PASSWORD, valueFrom: { secretKeyRef: { name: homeassistant-db, key: password } } }
+            - { name: HA_DB_URL, value: "postgresql://homeassistant:$(DB_PASSWORD)@postgres.databases.svc.cluster.local:5432/homeassistant?sslmode=require" }
+          ports:
+            - { name: http, containerPort: 8123 }
+          volumeMounts:
+            - { name: config, mountPath: /config }
+            - { name: core-config, mountPath: /config/configuration.yaml, subPath: configuration.yaml, readOnly: true }
+            - { name: core-config, mountPath: /config/packages/spoolman_ams_sync.yaml, subPath: spoolman_ams_sync.yaml, readOnly: true }
+            - { name: core-config, mountPath: /config/packages/spoolman_deduct.yaml, subPath: spoolman_deduct.yaml, readOnly: true }
+          startupProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 15
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 200m, memory: 512Mi }
+            limits:   { memory: 2Gi }
+      volumes:
+        - name: config
+          persistentVolumeClaim: { claimName: homeassistant-config }
+        - name: core-config
+          configMap: { name: homeassistant-config }

@@ -1,0 +1,630 @@
+{
+ "uid": "homelab-plugs",
+ "title": "Smart plugs (Zigbee)",
+ "tags": [
+  "homelab",
+  "zigbee",
+  "energy"
+ ],
+ "schemaVersion": 39,
+ "time": {
+  "from": "now-24h",
+  "to": "now"
+ },
+ "refresh": "1m",
+ "timezone": "browser",
+ "templating": {
+  "list": [
+   {
+    "name": "plug",
+    "label": "Plug",
+    "type": "query",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prometheus"
+    },
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "selected": true,
+     "text": [
+      "All"
+     ],
+     "value": [
+      "$__all"
+     ]
+    },
+    "refresh": 2,
+    "sort": 1,
+    "query": {
+     "query": "label_values(homeassistant_sensor_power_w, friendly_name)",
+     "refId": "plug"
+    },
+    "regex": "/^(.*) Puissance$/"
+   },
+   {
+    "name": "price",
+    "label": "€ / kWh",
+    "type": "textbox",
+    "query": "0.25",
+    "current": {
+     "text": "0.25",
+     "value": "0.25"
+    }
+   }
+  ]
+ },
+ "panels": [
+  {
+   "type": "stat",
+   "title": "Power now",
+   "description": "total of the selected plugs, then each plug",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"})",
+     "legendFormat": "Total",
+     "refId": "A",
+     "instant": true
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "B",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "watt",
+     "decimals": 0,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "orange"
+     }
+    }
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name",
+    "orientation": "vertical"
+   },
+   "id": 1,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 8,
+    "h": 5
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Energy (period)",
+   "description": "selected plugs, over the dashboard time range",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(integrate(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}[$__range])) / 3600000",
+     "legendFormat": "Total",
+     "refId": "A",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "kwatth",
+     "decimals": 2,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "green"
+     }
+    }
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value",
+    "orientation": "vertical"
+   },
+   "id": 2,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 0,
+    "w": 4,
+    "h": 5
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Last 24 h",
+   "description": "selected plugs",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(integrate(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}[1d])) / 3600000",
+     "legendFormat": "Total",
+     "refId": "A",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "kwatth",
+     "decimals": 2,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "green"
+     }
+    }
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value",
+    "orientation": "vertical"
+   },
+   "id": 3,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 4,
+    "h": 5
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Last 30 days",
+   "description": "selected plugs",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(integrate(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}[30d])) / 3600000",
+     "legendFormat": "Total",
+     "refId": "A",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "kwatth",
+     "decimals": 2,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "green"
+     }
+    }
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value",
+    "orientation": "vertical"
+   },
+   "id": 4,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 0,
+    "w": 4,
+    "h": 5
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Cost (period)",
+   "description": "selected plugs, over the dashboard time range, × the price per kWh at the top",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(integrate(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}[$__range])) / 3600000 * $price",
+     "legendFormat": "Total",
+     "refId": "A",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyEUR",
+     "decimals": 2,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "purple"
+     }
+    }
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value",
+    "orientation": "vertical"
+   },
+   "id": 5,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 20,
+    "y": 0,
+    "w": 4,
+    "h": 5
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Power",
+   "description": "",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "watt",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 12,
+      "lineWidth": 2,
+      "showPoints": "never",
+      "spanNulls": true,
+      "barAlignment": 0
+     }
+    }
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "bottom",
+     "calcs": [
+      "lastNotNull",
+      "mean",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "id": 6,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 5,
+    "w": 24,
+    "h": 9
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Energy per day",
+   "description": "power integrated over each day (W·s → kWh), independent of the plugs' own energy counters",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(integrate(homeassistant_sensor_power_w{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}[1d]) / 3600000, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "kwatth",
+     "custom": {
+      "drawStyle": "bars",
+      "fillOpacity": 70,
+      "lineWidth": 1,
+      "showPoints": "never",
+      "spanNulls": true,
+      "barAlignment": 0
+     },
+     "decimals": 2
+    }
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "bottom",
+     "calcs": [
+      "sum"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "interval": "1d",
+   "id": 7,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 14,
+    "w": 24,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Voltage",
+   "description": "",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(homeassistant_sensor_voltage_v{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "volt",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 12,
+      "lineWidth": 2,
+      "showPoints": "never",
+      "spanNulls": true,
+      "barAlignment": 0
+     },
+     "decimals": 1
+    }
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "bottom",
+     "calcs": [
+      "lastNotNull",
+      "mean",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "id": 8,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 22,
+    "w": 12,
+    "h": 7
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Current",
+   "description": "",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(homeassistant_sensor_current_a{friendly_name=~\"(${plug:regex}) (Puissance|Énergie|Tension|Courant)\"}, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "amp",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 12,
+      "lineWidth": 2,
+      "showPoints": "never",
+      "spanNulls": true,
+      "barAlignment": 0
+     },
+     "decimals": 2
+    }
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "bottom",
+     "calcs": [
+      "lastNotNull",
+      "mean",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "id": 9,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 22,
+    "w": 12,
+    "h": 7
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "All plugs — power now",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(homeassistant_sensor_power_w, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "A",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "watt",
+     "decimals": 0,
+     "min": 0,
+     "color": {
+      "mode": "continuous-GrYlRd"
+     }
+    }
+   },
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "id": 10,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 29,
+    "w": 12,
+    "h": 7
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "All plugs — energy (period)",
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "label_replace(integrate(homeassistant_sensor_power_w[$__range]) / 3600000, \"plug\", \"$1\", \"friendly_name\", \"(.*) (Puissance|Énergie|Tension|Courant)\")",
+     "legendFormat": "{{plug}}",
+     "refId": "A",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "kwatth",
+     "decimals": 2,
+     "min": 0,
+     "color": {
+      "mode": "continuous-GrYlRd"
+     }
+    }
+   },
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "id": 11,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 29,
+    "w": 12,
+    "h": 7
+   }
+  }
+ ]
+}

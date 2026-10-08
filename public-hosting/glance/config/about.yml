@@ -1,0 +1,13 @@
+- type: html
+  title: About
+  source: |
+    <div class="about">
+      <p class="color-highlight">My home server, built to learn.</p>
+      <p class="margin-top-10">A few Raspberry Pis run Kubernetes, a NAS keeps the data, and a small cloud server connects it to the internet. This page shows it live.</p>
+      <div class="repo">
+        <div class="repo-head"><img class="flat-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/github.svg" alt=""><a href="https://github.com/Boursyt/homelab-k3s" target="_blank" rel="noreferrer">Boursyt / homelab-k3s</a></div>
+        <div class="size-h6 color-subdue margin-top-5">the whole setup, as code</div>
+        <div class="tags"><span>k3s</span><span>kustomize</span><span>helm</span><span>wireguard</span></div>
+        <div class="cmd"><span>git clone https://github.com/Boursyt/homelab-k3s</span><button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent);this.textContent='copied'">copy</button></div>
+      </div>
+    </div>

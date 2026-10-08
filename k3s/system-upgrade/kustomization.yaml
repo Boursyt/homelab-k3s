@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - clusterrole-system-upgrade-controller-drainer.yaml
+  - clusterrole-system-upgrade-controller.yaml
+  - clusterrolebinding-system-upgrade-drainer.yaml
+  - clusterrolebinding-system-upgrade.yaml
+  - configmap-default-controller-env.yaml
+  - crd-plans.yaml
+  - deployment-system-upgrade-controller.yaml
+  - plan-k3s-agent.yaml
+  - plan-k3s-server.yaml
+  - role-system-upgrade-controller.yaml
+  - rolebinding-system-upgrade.yaml
+  - serviceaccount-system-upgrade.yaml

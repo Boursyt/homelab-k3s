@@ -1,0 +1,49 @@
+- type: custom-api
+  title: Databases
+  title-url: https://grafana.lab.theoboursy.fr/d/homelab-postgres
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(max(up{job="postgres",stack="private",role="primary"}) or vector(0), "k", "pup"),
+        label_set(max(up{job="postgres",stack="private",role="replica"}) or vector(0), "k", "rup"),
+        label_set(max(pgbouncer_up{stack="private"}) or vector(0), "k", "bup"),
+        label_set(max(pg_replication_lag_seconds{stack="private",role="replica"}) or vector(0), "k", "lag"),
+        label_set(sum(pg_stat_database_numbackends{stack="private",role="primary"}), "k", "conns"),
+        label_set(max(pg_settings_max_connections{stack="private",role="primary"}), "k", "maxc"),
+        label_set(sum(rate(pg_stat_database_xact_commit{stack="private",role="primary"}[5m])), "k", "tps"),
+        label_set(100 * sum(rate(pg_stat_database_blks_hit{stack="private",role="primary"}[5m])) / (sum(rate(pg_stat_database_blks_hit{stack="private",role="primary"}[5m])) + sum(rate(pg_stat_database_blks_read{stack="private",role="primary"}[5m]))) or vector(100), "k", "hit"),
+        label_set(sum(rate(pgbouncer_stats_totals_queries_pooled_total{stack="private"}[5m])), "k", "qps"),
+        label_set(1000 * sum(rate(pgbouncer_stats_totals_queries_duration_seconds_total{stack="private"}[5m])) / sum(rate(pgbouncer_stats_totals_queries_pooled_total{stack="private"}[5m])) or vector(0), "k", "qms"),
+        label_set(sum(pgbouncer_pools_client_active_connections{stack="private",database!="pgbouncer"}), "k", "cla"),
+        label_set(sum(pgbouncer_pools_client_waiting_connections{stack="private",database!="pgbouncer"}) or vector(0), "k", "clw"),
+        label_set(sum(pgbouncer_pools_server_active_connections{stack="private",database!="pgbouncer"}) + sum(pgbouncer_pools_server_idle_connections{stack="private",database!="pgbouncer"}), "k", "sv"),
+        label_set(pg_database_size_bytes{stack="private",role="primary",datname!~"template.*|postgres"} / 1e6, "k", "size")
+      )
+  template: |
+    {{ $pup := 0.0 }}{{ $rup := 0.0 }}{{ $bup := 0.0 }}{{ $lag := 0.0 }}{{ $conns := 0.0 }}{{ $maxc := 0.0 }}{{ $tps := 0.0 }}{{ $hit := 0.0 }}{{ $qps := 0.0 }}{{ $qms := 0.0 }}{{ $cla := 0.0 }}{{ $clw := 0.0 }}{{ $sv := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "pup" }}{{ $pup = $x }}{{ end }}{{ if eq $k "rup" }}{{ $rup = $x }}{{ end }}{{ if eq $k "bup" }}{{ $bup = $x }}{{ end }}{{ if eq $k "lag" }}{{ $lag = $x }}{{ end }}{{ if eq $k "conns" }}{{ $conns = $x }}{{ end }}{{ if eq $k "maxc" }}{{ $maxc = $x }}{{ end }}{{ if eq $k "tps" }}{{ $tps = $x }}{{ end }}{{ if eq $k "hit" }}{{ $hit = $x }}{{ end }}{{ if eq $k "qps" }}{{ $qps = $x }}{{ end }}{{ if eq $k "qms" }}{{ $qms = $x }}{{ end }}{{ if eq $k "cla" }}{{ $cla = $x }}{{ end }}{{ if eq $k "clw" }}{{ $clw = $x }}{{ end }}{{ if eq $k "sv" }}{{ $sv = $x }}{{ end }}{{ end }}
+    <ul class="list list-gap-10">
+      <li class="kv"><span class="color-highlight text-truncate">Postgres primary</span><span class="shrink-0">{{ if eq $pup 1.0 }}<span class="color-positive">●</span>{{ else }}<span class="color-negative">● down</span>{{ end }}</span></li>
+      <li class="kv"><span class="color-highlight text-truncate">Postgres replica</span><span class="shrink-0"><span class="color-subdue">lag {{ printf "%.0f" $lag }}s</span>{{ if eq $rup 1.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● down</span>{{ end }}</span></li>
+      <li class="kv"><span class="color-highlight text-truncate">PgBouncer</span><span class="shrink-0"><span class="color-subdue">{{ printf "%.0f" $sv }} pg conns</span>{{ if eq $bup 1.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● down</span>{{ end }}</span></li>
+    </ul>
+    {{ $cp := mul (div $conns $maxc) 100 }}
+    <div class="kv margin-top-15"><span class="size-h5 color-highlight">CONNECTIONS</span><span class="color-highlight">{{ printf "%.0f" $conns }}/{{ printf "%.0f" $maxc }}</span></div>
+    <div class="bar"><div class="{{ if ge $cp 85.0 }} hot{{ end }}" style="width: {{ $cp }}%"></div></div>
+    <div class="stat-row">
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $tps }}</div><div class="size-h6">tx/s</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $qps }}</div><div class="size-h6">queries/s</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $qms }}</div><div class="size-h6">ms/query</div></div>
+    </div>
+    <div class="stat-row">
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $hit }}%</div><div class="size-h6">cache hit</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $cla }}</div><div class="size-h6">clients</div></div>
+      <div><div class="{{ if gt $clw 0.0 }}color-negative{{ else }}color-highlight{{ end }} size-h4">{{ printf "%.0f" $clw }}</div><div class="size-h6">waiting</div></div>
+    </div>
+    <div class="size-h5 color-highlight margin-top-15">SIZE</div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "size" }}
+    <div class="kv size-h6 margin-top-5"><span class="color-subdue">{{ .String "metric.datname" }}</span><span>{{ printf "%.1f" (.Float "value.1") }} MB</span></div>
+    {{ end }}{{ end }}

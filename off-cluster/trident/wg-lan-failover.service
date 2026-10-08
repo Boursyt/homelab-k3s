@@ -1,0 +1,8 @@
+[Unit]
+Description=Route the home LAN through the WireGuard gateway that answers (aegis, else keraunos)
+After=wg-quick@wg0.service
+Requires=wg-quick@wg0.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/wg-lan-failover

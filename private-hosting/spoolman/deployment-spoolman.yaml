@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spoolman
+  namespace: spoolman
+  labels: { app.kubernetes.io/name: spoolman }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: spoolman }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: spoolman }
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false   # a Service named spoolman would set SPOOLMAN_PORT=tcp://…
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: spoolman
+          image: ghcr.io/donkie/spoolman:0.27.0
+          env:
+            - { name: TZ, value: Europe/Paris }
+            - { name: SPOOLMAN_DB_TYPE, value: postgres }
+            - { name: SPOOLMAN_DB_HOST, value: postgres.databases.svc.cluster.local }
+            - { name: SPOOLMAN_DB_PORT, value: "5432" }
+            - { name: SPOOLMAN_DB_NAME, value: spoolman }
+            - { name: SPOOLMAN_DB_USERNAME, value: spoolman }
+            - { name: SPOOLMAN_DB_PASSWORD, valueFrom: { secretKeyRef: { name: spoolman-db, key: password } } }
+            - { name: SPOOLMAN_DB_QUERY, value: "ssl=require" }
+            - { name: SPOOLMAN_AUTOMATIC_BACKUP, value: "FALSE" }
+          ports:
+            - { name: http, containerPort: 8000 }
+          volumeMounts:
+            - { name: data, mountPath: /home/app/.local/share/spoolman }
+            - { name: tmp, mountPath: /tmp }
+          startupProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            periodSeconds: 15
+          livenessProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            periodSeconds: 30
+            failureThreshold: 5
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 20m, memory: 128Mi }
+            limits:   { memory: 384Mi }
+      volumes:
+        - { name: data, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }

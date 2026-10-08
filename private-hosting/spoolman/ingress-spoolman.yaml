@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spoolman
+  namespace: spoolman
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: spoolman.lab.theoboursy.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spoolman
+                port: { number: 8000 }

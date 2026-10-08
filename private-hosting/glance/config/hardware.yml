@@ -1,0 +1,23 @@
+- type: monitor
+  title: Hardware
+  style: compact
+  cache: 1m
+  sites:
+    - title: aegis · Pi 5 8 GB
+      url: http://192.168.1.41:9100/
+      icon: si:raspberrypi
+    - title: keraunos · Pi 5 8 GB
+      url: http://192.168.1.49:9100/
+      icon: si:raspberrypi
+    - title: bident · Pi 4 8 GB
+      url: http://192.168.1.52:9100/
+      icon: si:raspberrypi
+    - title: harpe · Pi 4 4 GB
+      url: http://192.168.1.78:9100/
+      icon: si:raspberrypi
+    - title: kibisis · NAS DXP2800 GT
+      url: http://192.168.1.51:9100/
+      icon: di:ugreen
+    - title: trident · VPS
+      url: http://10.8.0.1:9100/
+      icon: si:wireguard

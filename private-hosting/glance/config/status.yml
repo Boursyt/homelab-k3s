@@ -1,0 +1,27 @@
+- type: custom-api
+  title: Status
+  title-url: https://status.lab.theoboursy.fr
+  cache: 1m
+  url: http://gatus.monitoring.svc.cluster.local/api/v1/endpoints/statuses
+  template: |
+    {{ $up := 0 }}{{ $down := 0 }}
+    {{ range .JSON.Array "" }}
+      {{ $r := .Array "results" }}
+      {{ if gt (len $r) 0 }}
+        {{ if (index $r (sub (len $r) 1)).Bool "success" }}{{ $up = add $up 1 }}{{ else }}{{ $down = add $down 1 }}{{ end }}
+      {{ end }}
+    {{ end }}
+    <div class="stat-row">
+      <div><div class="color-positive size-h3">{{ $up }}</div><div class="size-h6">up</div></div>
+      <div><div class="{{ if gt $down 0 }}color-negative{{ else }}color-subdue{{ end }} size-h3">{{ $down }}</div><div class="size-h6">down</div></div>
+    </div>
+    {{ if gt $down 0 }}
+    <ul class="list list-gap-4 margin-top-10">
+    {{ range .JSON.Array "" }}
+      {{ $r := .Array "results" }}
+      {{ if gt (len $r) 0 }}{{ if not ((index $r (sub (len $r) 1)).Bool "success") }}
+      <li class="color-negative size-h6">{{ .String "group" }} / {{ .String "name" }}</li>
+      {{ end }}{{ end }}
+    {{ end }}
+    </ul>
+    {{ end }}

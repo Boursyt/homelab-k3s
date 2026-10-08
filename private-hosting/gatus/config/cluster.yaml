@@ -1,0 +1,23 @@
+endpoints:
+  - name: k3s API (VIP)
+    group: Cluster
+    url: "https://192.168.1.200:6443/readyz"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    client:
+      insecure: true
+    headers:
+      Authorization: "Bearer ${GATUS_K8S_TOKEN}"
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY] == ok"
+  - name: CoreDNS
+    group: Cluster
+    url: "10.43.0.10"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    dns:
+      query-name: "kubernetes.default.svc.cluster.local"
+      query-type: "A"
+    conditions:
+      - "[DNS_RCODE] == NOERROR"

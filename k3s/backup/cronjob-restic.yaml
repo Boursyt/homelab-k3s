@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restic
+  namespace: backup
+spec:
+  schedule: "30 3 * * *"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: restic
+              image: restic/restic:0.19.1
+              envFrom:
+                - secretRef: { name: restic }
+              env:
+                - { name: TZ, value: Europe/Paris }
+                - { name: RESTIC_REPOSITORY, value: /backups/restic }
+                - { name: RESTIC_CACHE_DIR, value: /backups/.restic-cache }
+                - { name: GCS_REPO, value: "s3:https://storage.googleapis.com/homelab-pi-510022-k3s-backup/restic" }
+                - { name: AWS_DEFAULT_REGION, value: europe-west9 }
+                - { name: VM_USER, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: username } } }
+                - { name: VM_PASSWORD, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: password } } }
+              command:
+                - sh
+                - -euc
+                - |
+                  [ -f "$RESTIC_REPOSITORY/config" ] || restic init
+                  restic backup --host homelab --tag nightly --exclude '#recycle' /data/k3s /backups/postgres
+                  restic forget --prune --keep-daily 14 --keep-weekly 8 --keep-monthly 12
+                  restic check --read-data-subset=5%
+                  export RESTIC_FROM_REPOSITORY="$RESTIC_REPOSITORY" RESTIC_FROM_PASSWORD="$RESTIC_PASSWORD"
+                  restic -r "$GCS_REPO" cat config > /dev/null 2>&1 || restic -r "$GCS_REPO" init --copy-chunker-params
+                  restic -r "$GCS_REPO" copy
+                  restic -r "$GCS_REPO" forget --prune --keep-daily 7 --keep-weekly 4 --keep-monthly 6
+                  now=$(date +%s)
+                  size=$(restic stats --mode raw-data --json | sed -E 's/.*"total_size":([0-9]+).*/\1/')
+                  snaps=$(restic snapshots --json | grep -o '"short_id"' | wc -l)
+                  printf 'backup_last_success_timestamp_seconds{job="restic"} %s\nbackup_size_bytes{job="restic"} %s\nbackup_snapshots{job="restic"} %s\n' "$now" "$size" "$snaps" > /tmp/m.txt
+                  wget -qO- --header "Authorization: Basic $(printf '%s:%s' "$VM_USER" "$VM_PASSWORD" | base64 | tr -d '\n')" \
+                    --post-file /tmp/m.txt http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/import/prometheus
+                  restic snapshots --latest 1
+              # root, as it must read every app's files (any owner, often 0700): only DAC_READ_SEARCH
+              # (read anything, write nothing more), read-only filesystem and read-only data
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: [ALL], add: [DAC_READ_SEARCH] }
+              volumeMounts:
+                - { name: backups, mountPath: /backups }
+                - { name: tmp, mountPath: /tmp }
+                - { name: k3s-data, mountPath: /data/k3s, readOnly: true }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits:   { memory: 1Gi }
+          volumes:
+            - name: tmp
+              emptyDir: { sizeLimit: 64Mi }
+            - name: backups
+              persistentVolumeClaim: { claimName: backups-hdd }
+            - name: k3s-data
+              persistentVolumeClaim: { claimName: k3s-data-ro, readOnly: true }

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-backup-backups-hdd
+spec:
+  capacity: { storage: 3Ti }
+  accessModes: [ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-ssd
+  mountOptions: [nfsvers=3, hard, noatime]
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 192.168.1.51/volume1/backups
+    volumeAttributes: { server: 192.168.1.51, share: /volume1/backups }
+  claimRef: { namespace: backup, name: backups-hdd }

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - certificate-lab-pub-wildcard.yaml
+  - certificate-lab-wildcard.yaml
+  - clusterissuer-letsencrypt-prod.yaml
+  - clusterissuer-letsencrypt-staging.yaml
+  - helm-cert-manager.yaml
+  - tlsstore-default.yaml
+configMapGenerator:
+  - name: acme
+    namespace: cert-manager
+    envs: [acme.env]   # email=…, local file, not committed
+generatorOptions:
+  disableNameSuffixHash: true
+replacements:
+  - source: { kind: ConfigMap, name: acme, fieldPath: data.email }
+    targets:
+      - select: { kind: ClusterIssuer }
+        fieldPaths: [spec.acme.email]

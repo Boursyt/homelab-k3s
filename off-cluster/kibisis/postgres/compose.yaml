@@ -1,0 +1,97 @@
+x-postgres: &postgres
+  image: pgvector/pgvector:0.8.7-pg17-bookworm
+  restart: unless-stopped
+  shm_size: 256mb
+  environment:
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?missing in .env}
+    REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:?missing in .env}
+    PGBOUNCER_PASSWORD: ${PGBOUNCER_PASSWORD:?missing in .env}
+  healthcheck:
+    test: ["CMD", "pg_isready", "-U", "postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+x-postgres-args: &postgres-args
+  - postgres
+  - -c
+  - shared_buffers=1GB
+  - -c
+  - effective_cache_size=4GB
+  - -c
+  - max_connections=200
+  - -c
+  - max_wal_senders=5
+  - -c
+  - max_replication_slots=5
+  - -c
+  - password_encryption=scram-sha-256
+
+services:
+  postgres-primary:
+    <<: *postgres
+    container_name: postgres-primary
+    command: *postgres-args
+    volumes:
+      - ./data/primary:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+
+  postgres-replica:
+    <<: *postgres
+    container_name: postgres-replica
+    entrypoint: ["/replica-entrypoint.sh"]
+    command: *postgres-args
+    volumes:
+      - ./data/replica:/var/lib/postgresql/data
+      - ./replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    depends_on:
+      postgres-primary: { condition: service_healthy }
+
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.26.0-p0
+    container_name: pgbouncer
+    restart: unless-stopped
+    ports:
+      - "192.168.1.51:5432:5432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+      - ./pgbouncer/tls:/etc/pgbouncer/tls:ro
+    depends_on:
+      postgres-primary: { condition: service_healthy }
+
+  postgres-exporter-primary:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+    container_name: postgres-exporter-primary
+    restart: unless-stopped
+    environment: &pgexp
+      DATA_SOURCE_URI: postgres-primary:5432/postgres?sslmode=disable
+      DATA_SOURCE_USER: monitoring
+      DATA_SOURCE_PASS: ${MONITORING_PASSWORD:?missing in .env}
+    ports:
+      - "192.168.1.51:9187:9187"
+    depends_on:
+      postgres-primary: { condition: service_healthy }
+
+  postgres-exporter-replica:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+    container_name: postgres-exporter-replica
+    restart: unless-stopped
+    environment:
+      <<: *pgexp
+      DATA_SOURCE_URI: postgres-replica:5432/postgres?sslmode=disable
+    ports:
+      - "192.168.1.51:9188:9187"
+    depends_on:
+      postgres-replica: { condition: service_healthy }
+
+  pgbouncer-exporter:
+    image: quay.io/prometheuscommunity/pgbouncer-exporter:v0.12.1
+    container_name: pgbouncer-exporter
+    restart: unless-stopped
+    environment:
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: postgres://monitoring:${MONITORING_PASSWORD:?missing in .env}@pgbouncer:5432/pgbouncer?sslmode=require
+    ports:
+      - "192.168.1.51:9127:9127"
+    depends_on:
+      - pgbouncer

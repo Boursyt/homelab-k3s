@@ -1,0 +1,24 @@
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.153.0
+    container_name: victoriametrics
+    restart: unless-stopped
+    user: "65534:65534"   # owner of ./data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    command:
+      - -storageDataPath=/storage
+      - -retentionPeriod=12M
+      - -httpListenAddr=:8428
+      - -httpAuth.username=%{VM_USER}
+      - -httpAuth.password=%{VM_PASSWORD}
+      - -memory.allowedPercent=20
+      - -search.latencyOffset=5s
+    environment:
+      VM_USER: ${VM_USER:?missing in .env}
+      VM_PASSWORD: ${VM_PASSWORD:?missing in .env}
+    ports:
+      - "192.168.1.51:8428:8428"
+    volumes:
+      - ./data:/storage

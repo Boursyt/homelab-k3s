@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: pgbouncer-nas
+  namespace: monitoring
+spec:
+  jobName: pgbouncer
+  targetEndpoints:
+    - { targets: ["192.168.1.51:9127"], labels: { instance: kibisis, stack: private } }
+    - { targets: ["192.168.1.51:9191"], labels: { instance: kibisis, stack: public } }

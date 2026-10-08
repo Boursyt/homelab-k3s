@@ -1,0 +1,13 @@
+services:
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.12.1
+    container_name: node-exporter
+    command:
+      - --path.rootfs=/host
+      - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|host/var/lib/docker|host/volume[0-9]+/@docker)($|/)
+    network_mode: host
+    pid: host
+    read_only: true
+    volumes:
+      - /:/host:ro,rslave
+    restart: unless-stopped

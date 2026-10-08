@@ -1,0 +1,44 @@
+- type: monitor
+  title: Monitoring
+  cache: 1m
+  sites:
+    - title: Grafana
+      url: https://grafana.lab.theoboursy.fr
+      check-url: https://grafana.lab.theoboursy.fr/api/health
+      icon: di:grafana
+    - title: Status (Gatus)
+      url: https://status.lab.theoboursy.fr
+      icon: di:gatus
+    - title: VictoriaMetrics
+      url: https://grafana.lab.theoboursy.fr/explore
+      check-url: http://victoriametrics.monitoring.svc.cluster.local:8428/health
+      basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+      icon: di:victoriametrics
+    - title: vmagent
+      url: https://grafana.lab.theoboursy.fr/explore
+      check-url: http://vmagent-vmagent.monitoring.svc.cluster.local:8429/health
+      icon: di:victoriametrics
+    - title: vmalert
+      url: https://grafana.lab.theoboursy.fr/explore
+      check-url: http://vmalert-vmalert.monitoring.svc.cluster.local:8080/health
+      icon: di:victoriametrics
+- type: monitor
+  title: Infrastructure
+  cache: 1m
+  sites:
+    - title: Traefik
+      url: https://traefik.lab.theoboursy.fr/dashboard/
+      icon: di:traefik
+    - title: Headlamp
+      url: https://headlamp.lab.theoboursy.fr
+      icon: di:headlamp
+    - title: k3s API
+      url: https://headlamp.lab.theoboursy.fr
+      check-url: https://192.168.1.200:6443/readyz
+      allow-insecure: true
+      alt-status-codes: [401]
+      icon: si:k3s
+    - title: CoreDNS
+      url: https://headlamp.lab.theoboursy.fr
+      check-url: http://kube-dns.kube-system.svc.cluster.local:9153/metrics
+      icon: si:coredns

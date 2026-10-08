@@ -1,0 +1,80 @@
+endpoints:
+  - name: Grafana
+    group: Apps
+    url: "https://grafana.lab.theoboursy.fr/api/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].database == ok"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Gitea
+    group: Apps
+    extra-labels: { icon: "gitea", href: "https://git.lab.theoboursy.fr", order: "1" }   # Glance Apps block
+    url: "https://git.lab.theoboursy.fr/api/healthz"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Headlamp
+    group: Apps
+    url: "https://headlamp.lab.theoboursy.fr/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Glance
+    group: Apps
+    url: "https://lab.theoboursy.fr/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Open WebUI
+    group: Apps
+    extra-labels: { icon: "open-webui", href: "https://ai.lab.theoboursy.fr", order: "2" }   # Glance Apps block
+    url: "https://ai.lab.theoboursy.fr/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Home Assistant
+    group: Apps
+    extra-labels: { icon: "home-assistant", href: "https://ha.lab.theoboursy.fr", order: "3" }   # Glance Apps block
+    url: "https://ha.lab.theoboursy.fr/manifest.json"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Spoolman
+    group: Apps
+    extra-labels: { icon: "spoolman", href: "https://spoolman.lab.theoboursy.fr", order: "4" }   # Glance Apps block
+    url: "https://spoolman.lab.theoboursy.fr/api/v1/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Manyfold
+    group: Apps
+    extra-labels: { icon: "manyfold", href: "https://manyfold.lab.theoboursy.fr", order: "5" }   # Glance Apps block
+    url: "https://manyfold.lab.theoboursy.fr/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Zigbee2MQTT
+    group: Apps
+    extra-labels: { icon: "zigbee2mqtt", href: "https://zigbee.lab.theoboursy.fr", order: "6" }   # Glance Apps block
+    url: "https://zigbee.lab.theoboursy.fr/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"

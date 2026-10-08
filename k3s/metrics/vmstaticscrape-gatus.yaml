@@ -1,0 +1,9 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: gatus
+  namespace: monitoring
+spec:
+  jobName: gatus
+  targetEndpoints:
+    - { targets: ["gatus.monitoring.svc.cluster.local:80"], labels: { instance: gatus } }

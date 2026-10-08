@@ -1,0 +1,52 @@
+automation:
+  - id: spoolman_deduct_filament
+    alias: "Spoolman: deduct filament at print end"
+    mode: queued
+    triggers:
+      - trigger: state
+        entity_id: sensor.p2s_etat_de_l_impression
+        from: [running, pause]
+        to: [finish, failed]
+    variables:
+      ratio: >-
+        {{ 1 if trigger.to_state.state == 'finish'
+           else [states('sensor.p2s_progression_de_l_impression') | float(0), 100] | min / 100 }}
+      usage: >-
+        {% set ns = namespace(l=[]) %}
+        {% for k, v in states.sensor.p2s_poids_de_limpression.attributes.items() %}
+          {% if k.startswith('AMS 1 Tray ') or k == 'External Spool' %}
+            {% set loc = 'AMS ' ~ k[-1] if k.startswith('AMS 1 Tray ') else 'Externe' %}
+            {% set ns.l = ns.l + [{'loc': loc, 'g': ((v | float(0)) * ratio) | round(2)}] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.l }}
+    actions:
+      - repeat:
+          for_each: "{{ usage }}"
+          sequence:
+            - variables:
+                spools: >-
+                  {{ states.sensor | selectattr('entity_id', 'match', 'sensor\.spoolman_spool_\d+_location$')
+                     | selectattr('state', 'eq', repeat.item.loc) | map(attribute='entity_id')
+                     | map('regex_replace', '^sensor\.spoolman_spool_(\d+)_location$', '\\1') | map('int') | list }}
+            - if: "{{ repeat.item.g > 0 and spools | count == 1 }}"
+              then:
+                - action: spoolman.use_spool_filament
+                  data:
+                    id: "{{ spools[0] }}"
+                    use_weight: "{{ repeat.item.g }}"
+                - action: logbook.log
+                  data:
+                    name: Spoolman
+                    message: "{{ repeat.item.g }} g deducted from spool #{{ spools[0] }} ({{ repeat.item.loc }})"
+              else:
+                - if: "{{ repeat.item.g > 0 }}"
+                  then:
+                    - action: persistent_notification.create
+                      data:
+                        notification_id: "spoolman_{{ repeat.item.loc | slugify }}"
+                        title: "Spoolman: filament not deducted"
+                        message: >-
+                          {{ repeat.item.g }} g used from {{ repeat.item.loc }}, but
+                          {{ 'no spool has' if spools | count == 0 else (spools | count) ~ ' spools have' }}
+                          the Spoolman location "{{ repeat.item.loc }}". Fix it in Spoolman and deduct by hand.

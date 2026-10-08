@@ -1,0 +1,26 @@
+endpoints:
+  - name: Dashboard (lab.pub)
+    group: Homelab
+    url: "https://lab.pub.theoboursy.fr/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Status page
+    group: Homelab
+    url: "https://status.lab.pub.theoboursy.fr/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  # internal name: hidden on the page
+  - name: Database (PostgreSQL)
+    group: Homelab
+    ui: { hide-hostname: true, hide-port: true }
+    url: "tcp://postgres-public.databases.svc.cluster.local:5432"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"

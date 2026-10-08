@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: glance
+  namespace: glance-public
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure-pub
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: lab.pub.theoboursy.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: glance
+                port: { name: http }

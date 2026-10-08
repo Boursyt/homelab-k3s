@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lab-wildcard
+  namespace: kube-system
+spec:
+  secretName: lab-wildcard-tls
+  dnsNames:
+    - lab.theoboursy.fr
+    - "*.lab.theoboursy.fr"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  privateKey:
+    rotationPolicy: Always

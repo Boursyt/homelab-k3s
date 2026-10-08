@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-gitea-valkey-data-gitea-valkey-cluster-0
+spec:
+  capacity: { storage: 8Gi }
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-ssd
+  mountOptions: [nfsvers=3, hard, noatime]
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 192.168.1.51/volume2/k3s/gitea/valkey-data-gitea-valkey-cluster-0
+    volumeAttributes: { server: 192.168.1.51, share: /volume2/k3s, subDir: gitea/valkey-data-gitea-valkey-cluster-0 }
+  claimRef: { namespace: gitea, name: valkey-data-gitea-valkey-cluster-0 }

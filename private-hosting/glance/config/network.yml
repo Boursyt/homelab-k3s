@@ -1,0 +1,22 @@
+- type: custom-api
+  title: Network
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      sort_by_label(union(
+        label_set(max by (name, order) (gatus_results_endpoint_success{job="gatus",group="Network"}), "k", "ok"),
+        label_set(max by (name) (gatus_results_duration_seconds{job="gatus",group="Network"}) * 1000, "k", "ms")
+      ), "order")
+  template: |
+    <ul class="list list-gap-10">
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ok" }}{{ $i := .String "metric.name" }}{{ $ok := eq (.Float "value.1") 1.0 }}
+      <li class="kv">
+        <span class="color-highlight text-truncate">{{ .String "metric.name" }}</span>
+        <span class="shrink-0">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ms") (eq (.String "metric.name") $i) }}<span class="color-subdue">{{ if lt (.Float "value.1") 10.0 }}{{ printf "%.1f" (.Float "value.1") }}{{ else }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}ms</span>{{ end }}{{ end }}
+        {{ if $ok }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● down</span>{{ end }}</span>
+      </li>
+    {{ end }}{{ end }}
+    </ul>
+    <div class="size-h6 color-subdue text-center margin-top-10">ping · DNS query · HTTPS (Traefik), checked by Gatus</div>

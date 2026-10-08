@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigbee2mqtt
+  namespace: zigbee
+  labels: { app.kubernetes.io/name: zigbee2mqtt }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: zigbee2mqtt }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: zigbee2mqtt }
+    spec:
+      automountServiceAccountToken: false
+      # the dongle comes from the device plugin (homelab/zigbee, on aegis): no privileged mode
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        supplementalGroups: [20]   # dialout, to open the serial port
+        seccompProfile: { type: RuntimeDefault }
+      initContainers:
+        # first start only: skip the onboarding wizard
+        - name: seed-config
+          image: busybox:1.37
+          command: ["sh", "-c", "[ -f /app/data/configuration.yaml ] || cp /seed/configuration.yaml /app/data/configuration.yaml"]
+          volumeMounts:
+            - { name: data, mountPath: /app/data }
+            - { name: seed, mountPath: /seed, readOnly: true }
+          securityContext: &container
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          resources: { requests: { cpu: 5m, memory: 8Mi }, limits: { memory: 32Mi } }
+      containers:
+        - name: zigbee2mqtt
+          image: koenkk/zigbee2mqtt:2.14.2
+          env:
+            - { name: TZ, value: Europe/Paris }
+            - { name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER, value: "mqtt://mosquitto.zigbee.svc.cluster.local:1883" }
+            - { name: ZIGBEE2MQTT_CONFIG_MQTT_USER, value: zigbee2mqtt }
+            - { name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD, valueFrom: { secretKeyRef: { name: mqtt-users, key: zigbee2mqtt } } }
+            - { name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT, value: /dev/zigbee }
+            - { name: ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER, value: zstack }
+            - { name: ZIGBEE2MQTT_CONFIG_FRONTEND_AUTH_TOKEN, valueFrom: { secretKeyRef: { name: zigbee2mqtt, key: frontend_token } } }
+            - { name: ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN, value: ISO_8601 }
+          ports:
+            - { name: http, containerPort: 8080 }
+          volumeMounts:
+            - { name: data, mountPath: /app/data }
+          securityContext: *container
+          startupProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests: { cpu: 20m, memory: 128Mi }
+            limits:   { memory: 384Mi, homelab/zigbee: 1 }
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: zigbee2mqtt-data }
+        - name: seed
+          configMap: { name: zigbee2mqtt-seed }

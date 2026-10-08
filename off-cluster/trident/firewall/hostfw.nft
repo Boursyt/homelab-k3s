@@ -1,0 +1,24 @@
+#!/usr/sbin/nft -f
+# Inbound filter of trident. Own table only: Docker and WireGuard rules (iptables) are left alone.
+table inet hostfw
+delete table inet hostfw
+
+table inet hostfw {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        ct state established,related accept
+        ct state invalid drop
+        iif lo accept
+
+        # VPN peers (cluster scrapes and probes trident through the tunnel)
+        iifname "wg0" accept
+
+        meta l4proto { icmp, ipv6-icmp } accept
+        udp dport 68 accept comment "DHCP client (public IP)"
+
+        tcp dport 22 accept comment "SSH"
+        tcp dport { 80, 443 } accept comment "nginx"
+        udp dport 51820 accept comment "WireGuard"
+    }
+}

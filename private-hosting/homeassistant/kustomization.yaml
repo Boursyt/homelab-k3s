@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: homeassistant
+resources:
+  - namespace.yaml
+  - deployment-homeassistant.yaml
+  - ingress-homeassistant.yaml
+  - pvc-homeassistant-config.yaml
+  - service-homeassistant.yaml
+configMapGenerator:
+  - name: homeassistant-config
+    files:
+      - config/configuration.yaml
+      - spoolman_ams_sync.yaml=config/packages/spoolman_ams_sync.yaml
+      - spoolman_deduct.yaml=config/packages/spoolman_deduct.yaml

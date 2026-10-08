@@ -1,0 +1,37 @@
+- type: custom-api
+  title: NAS · kibisis
+  title-url: https://grafana.lab.theoboursy.fr/d/homelab-nas-docker
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(100 * (1 - avg(rate(node_cpu_seconds_total{mode="idle",instance="kibisis"}[5m]))), "k", "cpu"),
+        label_set(count(node_cpu_seconds_total{mode="idle",instance="kibisis"}), "k", "cores"),
+        label_set((node_memory_MemTotal_bytes{instance="kibisis"} - node_memory_MemAvailable_bytes{instance="kibisis"}) / 1e9, "k", "ramu"),
+        label_set(node_memory_MemTotal_bytes{instance="kibisis"} / 1e9, "k", "ramt"),
+        label_set((node_filesystem_size_bytes{mountpoint="/volume1",instance="kibisis"} - node_filesystem_avail_bytes{mountpoint="/volume1",instance="kibisis"}) / 1e12, "k", "v1u"),
+        label_set(node_filesystem_size_bytes{mountpoint="/volume1",instance="kibisis"} / 1e12, "k", "v1t"),
+        label_set((node_filesystem_size_bytes{mountpoint="/volume2",instance="kibisis"} - node_filesystem_avail_bytes{mountpoint="/volume2",instance="kibisis"}) / 1e9, "k", "v2u"),
+        label_set(node_filesystem_size_bytes{mountpoint="/volume2",instance="kibisis"} / 1e9, "k", "v2t"),
+        label_set(max(node_hwmon_temp_celsius{instance="kibisis",chip="pci0000:00_0000:00:18_3"}), "k", "temp"),   # k10temp = CPU
+        label_set((time() - node_boot_time_seconds{instance="kibisis"}) / 86400, "k", "up"),
+        label_set(count(container_last_seen{job="cadvisor-nas"}), "k", "ctr")
+      )
+  template: |
+    {{ $cpu := 0.0 }}{{ $cores := 0.0 }}{{ $ramu := 0.0 }}{{ $ramt := 0.0 }}{{ $v1u := 0.0 }}{{ $v1t := 0.0 }}{{ $v2u := 0.0 }}{{ $v2t := 0.0 }}{{ $temp := 0.0 }}{{ $up := 0.0 }}{{ $ctr := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "cpu" }}{{ $cpu = $x }}{{ end }} {{ if eq $k "cores" }}{{ $cores = $x }}{{ end }} {{ if eq $k "ramu" }}{{ $ramu = $x }}{{ end }} {{ if eq $k "ramt" }}{{ $ramt = $x }}{{ end }} {{ if eq $k "v1u" }}{{ $v1u = $x }}{{ end }} {{ if eq $k "v1t" }}{{ $v1t = $x }}{{ end }} {{ if eq $k "v2u" }}{{ $v2u = $x }}{{ end }} {{ if eq $k "v2t" }}{{ $v2t = $x }}{{ end }} {{ if eq $k "temp" }}{{ $temp = $x }}{{ end }} {{ if eq $k "up" }}{{ $up = $x }}{{ end }}{{ if eq $k "ctr" }}{{ $ctr = $x }}{{ end }}{{ end }}
+
+    <div class="kv"><span class="size-h5 color-highlight">CPU <span class="color-subdue">({{ printf "%.0f" $cores }} cores · {{ printf "%.0f" $temp }}°C)</span></span><span class="color-highlight">{{ printf "%.1f" $cpu }}%</span></div>
+    <div class="bar"><div class="{{ if ge $cpu 85.0 }} hot{{ end }}" style="width: {{ $cpu }}%"></div></div>
+    {{ $ramp := mul (div $ramu $ramt) 100 }}
+    <div class="kv"><span class="size-h5 color-highlight">RAM <span class="color-subdue">({{ printf "%.1f" $ramu }}/{{ printf "%.0f" $ramt }} GB)</span></span><span class="color-highlight">{{ printf "%.1f" $ramp }}%</span></div>
+    <div class="bar"><div class="{{ if ge $ramp 85.0 }} hot{{ end }}" style="width: {{ $ramp }}%"></div></div>
+    {{ $v1p := mul (div $v1u $v1t) 100 }}
+    <div class="kv"><span class="size-h5 color-highlight">VOLUME 1 <span class="color-subdue">(HDD · {{ printf "%.2f" $v1u }}/{{ printf "%.1f" $v1t }} TB)</span></span><span class="color-highlight">{{ printf "%.1f" $v1p }}%</span></div>
+    <div class="bar"><div class="data{{ if ge $v1p 85.0 }} hot{{ end }}" style="width: {{ $v1p }}%"></div></div>
+    {{ $v2p := mul (div $v2u $v2t) 100 }}
+    <div class="kv"><span class="size-h5 color-highlight">VOLUME 2 <span class="color-subdue">(SSD · {{ printf "%.1f" $v2u }}/{{ printf "%.0f" $v2t }} GB)</span></span><span class="color-highlight">{{ printf "%.1f" $v2p }}%</span></div>
+    <div class="bar"><div class="data{{ if ge $v2p 85.0 }} hot{{ end }}" style="width: {{ $v2p }}%"></div></div>
+    <div class="kv size-h6"><span class="color-subdue">uptime {{ printf "%.1f" $up }} days</span><span>{{ printf "%.0f" $ctr }} containers</span></div>

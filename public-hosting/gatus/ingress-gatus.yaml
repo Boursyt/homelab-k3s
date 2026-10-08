@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gatus
+  namespace: gatus-public
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure-pub
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: status.lab.pub.theoboursy.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: gatus, port: { name: http } }

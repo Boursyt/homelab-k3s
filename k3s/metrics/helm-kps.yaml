@@ -1,0 +1,65 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: kps
+  namespace: kube-system
+spec:
+  repo: https://prometheus-community.github.io/helm-charts
+  chart: kube-prometheus-stack
+  version: 91.8.1
+  targetNamespace: monitoring
+  failurePolicy: abort
+  valuesContent: |-
+    grafana:
+      enabled: false
+      forceDeployDashboards: true
+      forceDeployDatasources: true
+      sidecar:
+        datasources:
+          defaultDatasourceEnabled: false
+
+    nodeExporter:
+      enabled: false
+      forceDeployDashboards: true
+      operatingSystems:
+        aix: { enabled: false }
+        darwin: { enabled: false }
+
+    alertmanager:
+      enabled: false
+
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+
+    prometheus:
+      enabled: false
+
+    kubeApiServer:
+      serviceMonitor:
+        authorization:
+          type: Bearer
+          credentials: { name: vmagent-scrape-token, key: token }
+    kubelet:
+      serviceMonitor:
+        authorization:
+          type: Bearer
+          credentials: { name: vmagent-scrape-token, key: token }
+    coreDns:
+      serviceMonitor:
+        authorization:
+          type: Bearer
+          credentials: { name: vmagent-scrape-token, key: token }
+
+    prometheusOperator:
+      enabled: false
+
+    kube-state-metrics:
+      resources:
+        requests: { cpu: 10m, memory: 96Mi }
+        limits:   { memory: 192Mi }

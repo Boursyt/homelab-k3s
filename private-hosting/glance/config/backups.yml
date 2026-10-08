@@ -1,0 +1,27 @@
+- type: custom-api
+  title: Backups
+  cache: 5m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set((time() - last_over_time(backup_last_success_timestamp_seconds{job="pg-dump"}[30d])) / 3600, "k", "agepg"),
+        label_set((time() - last_over_time(backup_last_success_timestamp_seconds{job="restic"}[30d])) / 3600, "k", "agers"),
+        label_set(last_over_time(backup_size_bytes{job="pg-dump"}[30d]) / 1e6, "k", "sizepg"),
+        label_set(last_over_time(backup_size_bytes{job="restic"}[30d]) / 1e6, "k", "sizers"),
+        label_set(last_over_time(backup_snapshots{job="restic"}[30d]), "k", "snaps")
+      )
+  template: |
+    {{ $agepg := 999.0 }}{{ $agers := 999.0 }}{{ $sizepg := 0.0 }}{{ $sizers := 0.0 }}{{ $snaps := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "agepg" }}{{ $agepg = $x }}{{ end }}{{ if eq $k "agers" }}{{ $agers = $x }}{{ end }}{{ if eq $k "sizepg" }}{{ $sizepg = $x }}{{ end }}{{ if eq $k "sizers" }}{{ $sizers = $x }}{{ end }}{{ if eq $k "snaps" }}{{ $snaps = $x }}{{ end }}{{ end }}
+    <ul class="list list-gap-10">
+      <li class="kv"><span class="color-highlight text-truncate">Postgres dumps <span class="color-subdue">· NAS</span></span><span class="shrink-0"><span class="color-subdue">{{ printf "%.0f" $agepg }}h ago</span>{{ if lt $agepg 26.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● late</span>{{ end }}</span></li>
+      <li class="kv"><span class="color-highlight text-truncate">restic <span class="color-subdue">· NAS + GCS</span></span><span class="shrink-0"><span class="color-subdue">{{ printf "%.0f" $agers }}h ago</span>{{ if lt $agers 26.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● late</span>{{ end }}</span></li>
+    </ul>
+    <div class="stat-row">
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $sizepg }}</div><div class="size-h6">dump MB</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $sizers }}</div><div class="size-h6">restic MB</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $snaps }}</div><div class="size-h6">snapshots</div></div>
+    </div>
+    <div class="size-h6 color-subdue text-center margin-top-10">nightly 02:30 dumps · 03:30 restic → GCS</div>

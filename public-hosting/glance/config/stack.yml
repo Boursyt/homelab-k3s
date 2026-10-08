@@ -1,0 +1,16 @@
+- type: custom-api
+  title: Stack
+  cache: 10m
+  url: http://vmauth-public.monitoring.svc.cluster.local:8427/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: count by (kubelet_version) (kube_node_info)
+  template: |
+    <ul class="list list-gap-10 size-h5">
+      <li class="kv"><span class="color-highlight">k3s</span><span class="shrink-0">{{ range .JSON.Array "data.result" }}{{ .String "metric.kubelet_version" }} {{ end }}</span></li>
+      <li class="kv"><span class="color-highlight">ingress · TLS</span><span class="shrink-0">Traefik · cert-manager</span></li>
+      <li class="kv"><span class="color-highlight">metrics</span><span class="shrink-0">VictoriaMetrics · Grafana</span></li>
+      <li class="kv"><span class="color-highlight">databases</span><span class="shrink-0">PostgreSQL 17</span></li>
+      <li class="kv"><span class="color-highlight">network</span><span class="shrink-0">kube-vip · WireGuard</span></li>
+      <li class="kv"><span class="color-highlight">backups</span><span class="shrink-0">restic → GCS</span></li>
+    </ul>

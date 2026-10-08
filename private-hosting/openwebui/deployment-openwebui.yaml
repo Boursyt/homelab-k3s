@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui
+  namespace: openwebui
+  labels: { app.kubernetes.io/name: openwebui }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: openwebui }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: openwebui }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000   # owner of the data volume on the NAS
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      initContainers:
+        # the app rewrites its static files at start: give it a writable copy
+        - name: static
+          image: ghcr.io/open-webui/open-webui:v0.11.4-slim
+          command: ["sh", "-c", "cp -R /app/backend/open_webui/static/. /static/"]
+          securityContext: &container
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: static, mountPath: /static }
+          resources: { requests: { cpu: 10m, memory: 32Mi }, limits: { memory: 128Mi } }
+      containers:
+        - name: openwebui
+          image: ghcr.io/open-webui/open-webui:v0.11.4-slim
+          ports:
+            - { name: http, containerPort: 8080 }
+          env:
+            # non-root with HOME=/root: libpq would try /root/.postgresql/postgresql.crt (no client cert used)
+            - { name: HOME, value: /tmp }
+            - { name: PGSSLCERT, value: /tmp/no-client-cert.crt }
+            - { name: PGSSLKEY, value: /tmp/no-client-cert.key }
+            - { name: DB_PASSWORD, valueFrom: { secretKeyRef: { name: openwebui-db, key: password } } }
+            - { name: OPENROUTER_API_KEY, valueFrom: { secretKeyRef: { name: llm-keys, key: OPENROUTER_API_KEY } } }
+            - { name: GEMINI_API_KEY, valueFrom: { secretKeyRef: { name: llm-keys, key: GEMINI_API_KEY } } }
+            - { name: WEBUI_SECRET_KEY, valueFrom: { secretKeyRef: { name: openwebui-secret, key: WEBUI_SECRET_KEY } } }
+            - { name: DATABASE_URL, value: "postgresql://openwebui:$(DB_PASSWORD)@postgres.databases.svc.cluster.local:5432/openwebui?sslmode=require" }
+            - { name: VECTOR_DB, value: pgvector }
+            - { name: PGVECTOR_DB_URL, value: "postgresql://openwebui:$(DB_PASSWORD)@postgres.databases.svc.cluster.local:5432/openwebui?sslmode=require" }
+            - { name: WEBUI_URL, value: "https://ai.lab.theoboursy.fr" }
+            - { name: CORS_ALLOW_ORIGIN, value: "https://ai.lab.theoboursy.fr" }
+            - { name: ENABLE_OLLAMA_API, value: "false" }
+            - { name: OPENAI_API_BASE_URLS, value: "https://openrouter.ai/api/v1;https://generativelanguage.googleapis.com/v1beta/openai" }
+            - { name: OPENAI_API_KEYS, value: "$(OPENROUTER_API_KEY);$(GEMINI_API_KEY)" }
+            - { name: RAG_EMBEDDING_ENGINE, value: openai }
+            - { name: RAG_OPENAI_API_BASE_URL, value: "https://generativelanguage.googleapis.com/v1beta/openai" }
+            - { name: RAG_OPENAI_API_KEY, value: "$(GEMINI_API_KEY)" }
+            - { name: RAG_EMBEDDING_MODEL, value: gemini-embedding-001 }
+            - { name: CONTENT_EXTRACTION_ENGINE, value: tika }
+            - { name: TIKA_SERVER_URL, value: "http://tika.openwebui.svc.cluster.local:9998" }
+            - { name: ENABLE_SIGNUP, value: "true" }
+            - { name: DEFAULT_USER_ROLE, value: pending }
+            - { name: ANONYMIZED_TELEMETRY, value: "false" }
+            - { name: SCARF_NO_ANALYTICS, value: "true" }
+            - { name: DO_NOT_TRACK, value: "true" }
+          securityContext: *container
+          volumeMounts:
+            - { name: data, mountPath: /app/backend/data }
+            - { name: static, mountPath: /app/backend/open_webui/static }
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+            failureThreshold: 60
+          resources:
+            requests: { cpu: 100m, memory: 512Mi }
+            limits:   { memory: 1536Mi }
+      volumes:
+        - name: static
+          emptyDir: { sizeLimit: 64Mi }
+        - name: data
+          persistentVolumeClaim: { claimName: openwebui-data }

@@ -1,0 +1,53 @@
+# Glance Network block (order = display order)
+endpoints:
+  - name: Gateway
+    group: Network
+    extra-labels: { order: "1" }
+    url: "icmp://192.168.1.1"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: kube-vip
+    group: Network
+    extra-labels: { order: "2" }
+    url: "icmp://192.168.1.200"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: Traefik
+    group: Network
+    extra-labels: { order: "3" }
+    url: "https://traefik.lab.theoboursy.fr/api/version"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: VPN
+    group: Network
+    extra-labels: { order: "4" }
+    url: "icmp://10.8.0.1"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: Internet
+    group: Network
+    extra-labels: { order: "5" }
+    url: "icmp://1.1.1.1"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: DNS resolution
+    group: Network
+    extra-labels: { order: "6" }
+    url: "8.8.8.8"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    dns:
+      query-name: "lab.theoboursy.fr"
+      query-type: "A"
+    conditions:
+      - "[DNS_RCODE] == NOERROR"

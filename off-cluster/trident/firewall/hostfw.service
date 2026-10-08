@@ -1,0 +1,13 @@
+[Unit]
+Description=Inbound firewall (nftables table inet hostfw)
+Wants=network-pre.target
+Before=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/nftables.d/hostfw.nft
+ExecStop=/usr/sbin/nft delete table inet hostfw
+
+[Install]
+WantedBy=multi-user.target

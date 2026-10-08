@@ -1,0 +1,12 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: cadvisor-nas
+  namespace: monitoring
+spec:
+  jobName: cadvisor-nas
+  targetEndpoints:
+    - targets: ["192.168.1.51:9338"]
+      labels: { instance: kibisis }
+      metricRelabelConfigs:
+        - { sourceLabels: [name], regex: "", action: drop }
