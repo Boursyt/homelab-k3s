@@ -12,3 +12,4 @@ off-cluster/kibisis/**/tls/
 
 .helpers/
 k3s/cert-manager/acme.env
+rendered/

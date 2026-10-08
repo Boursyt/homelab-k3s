@@ -1,5 +1,3 @@
-# Every PR to main: validate, then merge it (squash). The Gitea push mirror copies main to GitHub, Flux deploys from there.
-# Secret MERGE_TOKEN: Gitea token with repository read/write (the automatic token is read-only on pull requests).
 name: validate
 on:
   pull_request:
@@ -11,40 +9,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - name: Tools
-        run: |
-          arch=$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')
-          mkdir -p "$HOME/bin" && cd "$HOME/bin"
-          curl -sSLo kubectl "https://dl.k8s.io/release/v1.36.5/bin/linux/$arch/kubectl" && chmod +x kubectl
-          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.7.0/kubeconform-linux-$arch.tar.gz" | tar xz kubeconform
-          ga=$([ "$arch" = arm64 ] && echo arm64 || echo x64)
-          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_$ga.tar.gz" | tar xz gitleaks
-          echo "$HOME/bin" >> "$GITHUB_PATH"
-      - name: No secrets (whole PR)
-        run: gitleaks git --no-banner --redact --log-opts "origin/${{ github.base_ref }}..HEAD" .
-      - name: Every directory builds and is valid
-        run: |
-          fail=0
-          for d in $(find k3s private-hosting public-hosting -name kustomization.yaml -exec dirname {} \; | sort); do
-            if out=$(kubectl kustomize "$d" 2>&1) && printf "%s\n" "$out" | kubeconform -strict -summary -ignore-missing-schemas \
-                 -schema-location default \
-                 -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' >/tmp/kc 2>&1; then
-              echo "ok   $d"
-            else
-              echo "FAIL $d"; printf "%s\n" "$out" | head -5; cat /tmp/kc 2>/dev/null | grep -v '^Summary' | head -10; fail=1
-            fi
-          done
-          exit $fail
+
+      - name: No secrets in the PR
+        uses: docker://ghcr.io/gitleaks/gitleaks:v8.30.1
+        with:
+          args: git --no-banner --redact --log-opts=origin/${{ github.base_ref }}..HEAD .
+
+      - uses: fluxcd/flux2/action@v2.9.5
+
+      - name: Render every Flux Kustomization
+        run: .gitea/validate.sh
+
+      - name: Every object is valid
+        uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
+        with:
+          args: >-
+            -strict -summary -ignore-missing-schemas
+            -schema-location default
+            -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
+            rendered
 
   merge:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - name: Merge the PR into main
+      - name: Squash-merge the PR into main
         run: |
-          code=$(curl -sS -o /tmp/merge.out -w '%{http_code}' -X POST \
+          code=$(curl -sS -o /tmp/out -w '%{http_code}' -X POST \
             -H "Authorization: token ${{ secrets.MERGE_TOKEN }}" -H "Content-Type: application/json" \
             -d '{"Do":"squash","delete_branch_after_merge":true}' \
             "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge")
-          echo "merge: HTTP $code"; cat /tmp/merge.out; echo
+          echo "HTTP $code"; cat /tmp/out
           [ "$code" = 200 ]
