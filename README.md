@@ -23,7 +23,10 @@ The NAS stores data, the Pis run compute.
 | `public-hosting/` | services exposed on the internet, on `*.lab.pub.theoboursy.fr` |
 | `off-cluster/` | machines outside Kubernetes: NAS stacks, VPS |
 
-Flux applies everything from this repository (`k3s/flux/`): push to `main`, the cluster follows within a minute.
+Changes go through a pull request on the self-hosted Gitea: `.gitea/workflows/validate.yaml` checks it (no secret,
+every directory builds and is valid) and merges it. Gitea mirrors `main` to GitHub, and Flux (`k3s/flux/`) applies it within a minute.
+
+    git switch -c my-change && git commit -am "…" && git push -u origin my-change   # then open the PR
 
 - own apps: plain Kustomize directories, one object per file named `<kind>-<name>.yaml`
 - third-party software: a Flux `HelmRelease` (`helmrelease-*.yaml`, chart version pinned, values inline) in its directory
