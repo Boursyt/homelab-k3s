@@ -1,0 +1,31 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: flux
+  namespace: kube-system
+spec:
+  repo: https://fluxcd-community.github.io/helm-charts
+  chart: flux2
+  version: 2.19.1
+  targetNamespace: flux-system
+  failurePolicy: abort
+  valuesContent: |-
+    # Helm charts stay k3s HelmChart objects: no Flux helm-controller; no image automation
+    helmController:
+      create: false
+    imageAutomationController:
+      create: false
+    imageReflectionController:
+      create: false
+    sourceController:
+      resources:
+        requests: { cpu: 20m, memory: 64Mi }
+        limits:   { memory: 256Mi }
+    kustomizeController:
+      resources:
+        requests: { cpu: 20m, memory: 64Mi }
+        limits:   { memory: 512Mi }
+    notificationController:
+      resources:
+        requests: { cpu: 10m, memory: 32Mi }
+        limits:   { memory: 128Mi }

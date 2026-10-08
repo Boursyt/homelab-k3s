@@ -1,0 +1,17 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gitea
+  namespace: flux-system
+spec:
+  path: ./private-hosting/gitea
+  sourceRef: { kind: GitRepository, name: homelab }
+  interval: 10m
+  retryInterval: 2m
+  timeout: 5m
+  prune: false   # true once its inventory has been checked (flux tree kustomization gitea)
+  dependsOn:
+    - { name: cert-manager }
+    - { name: traefik }
+    - { name: databases }
+    - { name: nfs }

@@ -1,0 +1,17 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gatus
+  namespace: flux-system
+spec:
+  path: ./private-hosting/gatus
+  sourceRef: { kind: GitRepository, name: homelab }
+  interval: 10m
+  retryInterval: 2m
+  timeout: 5m
+  prune: false   # true once its inventory has been checked (flux tree kustomization gatus)
+  dependsOn:
+    - { name: cert-manager }
+    - { name: traefik }
+    - { name: databases }
+    - { name: metrics }

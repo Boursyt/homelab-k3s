@@ -33,5 +33,4 @@ One object per file, named `<kind>-<name>.yaml`; each directory has a README des
 ## Notes
 
 - Secrets are created with `kubectl create secret` and never committed; manifests only reference them by name.
-- `k3s/cert-manager/acme.env` (not committed) holds the ACME email: `email=you@example.com`.
 - Files under `off-cluster/` and `k3s/nodes/` are copies of files on the machines: copy them back after editing.

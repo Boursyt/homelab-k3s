@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - helm-flux.yaml
+  - gitrepository-homelab.yaml
+  # directories handed over to Flux, one by one (the other kustomization-*.yaml are ready)
+  - kustomization-databases.yaml

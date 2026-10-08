@@ -5,7 +5,6 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: ${ACME_EMAIL}
     privateKeySecretRef: { name: letsencrypt-prod-account }
     solvers:
       - dns01:
