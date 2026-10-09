@@ -32,6 +32,9 @@
     - title: Headlamp
       url: https://headlamp.lab.theoboursy.fr
       icon: di:headlamp
+    - title: Flux
+      url: https://flux.lab.theoboursy.fr
+      icon: di:flux-cd
     - title: k3s API
       url: https://headlamp.lab.theoboursy.fr
       check-url: https://192.168.1.200:6443/readyz
