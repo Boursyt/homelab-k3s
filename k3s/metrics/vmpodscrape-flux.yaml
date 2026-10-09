@@ -1,0 +1,11 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  selector:
+    matchExpressions:
+      - { key: app, operator: In, values: [helm-controller, kustomize-controller, notification-controller, source-controller] }
+  podMetricsEndpoints:
+    - port: http-prom

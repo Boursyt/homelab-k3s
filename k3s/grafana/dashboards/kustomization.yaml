@@ -16,3 +16,7 @@ configMapGenerator:
     files: [nas-docker.json]
   - name: dashboard-plugs
     files: [plugs.json]
+  - name: dashboard-flux-cluster
+    files: [flux-cluster.json]
+  - name: dashboard-flux-control-plane
+    files: [flux-control-plane.json]

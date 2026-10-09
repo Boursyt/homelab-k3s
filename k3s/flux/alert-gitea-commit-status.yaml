@@ -1,0 +1,10 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: gitea-commit-status
+  namespace: flux-system
+spec:
+  providerRef: { name: gitea }
+  eventSeverity: info
+  eventSources:
+    - { kind: Kustomization, name: "*" }

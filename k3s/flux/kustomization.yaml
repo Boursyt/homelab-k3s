@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helm-flux.yaml
+  - provider-gitea.yaml
+  - alert-gitea-commit-status.yaml
   - sources
   - k3s
   - private-hosting

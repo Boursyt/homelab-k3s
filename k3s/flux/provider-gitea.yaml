@@ -1,0 +1,11 @@
+# Commit status on Gitea: each Flux Kustomization reports whether it applied the commit.
+# Secret gitea-commit-status (key token): Gitea token of user hypto, repository read/write.
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: gitea
+  namespace: flux-system
+spec:
+  type: gitea
+  address: https://git.lab.theoboursy.fr/hypto/homelab-k3s
+  secretRef: { name: gitea-commit-status }

@@ -7,6 +7,7 @@ Own apps are plain Kustomize directories; third-party software is a Flux `HelmRe
 |---|---|
 | `namespace.yaml` | `flux-system` namespace |
 | `helm-flux.yaml` | Flux itself, installed by the k3s Helm controller (with Traefik, the only charts k3s installs) |
+| `provider-gitea.yaml`, `alert-gitea-commit-status.yaml` | Flux posts a commit status on Gitea per Kustomization (applied or failed). Secret `gitea-commit-status` created by hand |
 | `sources/` | this repository and the chart repositories |
 | `k3s/`, `private-hosting/`, `public-hosting/` | one Flux `Kustomization` per directory of the same area, with its dependencies |
 
