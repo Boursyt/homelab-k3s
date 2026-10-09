@@ -1,0 +1,24 @@
+# Flux Operator (installs Flux from fluxinstance-flux.yaml) and the Flux Web UI, installed by the k3s Helm controller.
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: flux-operator
+  namespace: kube-system
+spec:
+  chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+  version: 0.61.0
+  targetNamespace: flux-system
+  failurePolicy: abort
+  valuesContent: |-
+    priorityClassName: system-cluster-critical
+    resources:
+      requests: { cpu: 20m, memory: 64Mi }
+      limits:   { memory: 512Mi }
+    # Web UI: private (LAN + VPN), no login; the anonymous user gets the flux-admin group (clusterrolebinding-flux-web-admin.yaml)
+    web:
+      config:
+        authentication:
+          type: Anonymous
+          anonymous:
+            username: flux
+            groups: [flux-admin]

@@ -2,7 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - helm-flux.yaml
+  - helm-flux-operator.yaml
+  - fluxinstance-flux.yaml
+  - clusterrolebinding-flux-web-admin.yaml
+  - ingress-flux-web.yaml
   - provider-gitea.yaml
   - alert-gitea-commit-status.yaml
   - sources

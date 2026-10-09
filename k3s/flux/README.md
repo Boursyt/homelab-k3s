@@ -6,7 +6,9 @@ Own apps are plain Kustomize directories; third-party software is a Flux `HelmRe
 | Path | Content |
 |---|---|
 | `namespace.yaml` | `flux-system` namespace |
-| `helm-flux.yaml` | Flux itself, installed by the k3s Helm controller (with Traefik, the only charts k3s installs) |
+| `helm-flux-operator.yaml` | Flux Operator and the Flux Web UI, installed by the k3s Helm controller (with Traefik, the only charts k3s installs) |
+| `fluxinstance-flux.yaml` | Flux itself (version, controllers, resources), installed and upgraded by the Flux Operator |
+| `ingress-flux-web.yaml`, `clusterrolebinding-flux-web-admin.yaml` | Web UI on https://flux.lab.theoboursy.fr, no login, with actions (reconcile, suspend, resume) |
 | `provider-gitea.yaml`, `alert-gitea-commit-status.yaml` | Flux posts a commit status on Gitea per Kustomization (applied or failed). Secret `gitea-commit-status` created by hand |
 | `sources/` | this repository and the chart repositories |
 | `k3s/`, `private-hosting/`, `public-hosting/` | one Flux `Kustomization` per directory of the same area, with its dependencies |
@@ -33,6 +35,8 @@ Gitea mirrors `main` to GitHub, Flux applies within a minute.
 then copy a `kustomization-*.yaml` here into the matching folder, change `name`, `path`, `dependsOn`, and list it in that folder's `kustomization.yaml`.
 
 **Add a third-party chart**: a `helmrepository-<repo>.yaml` in `sources/` (if new) and a `helmrelease-<name>.yaml` in the app directory.
+
+**Upgrade Flux**: change `distribution.version` in `fluxinstance-flux.yaml`. The operator itself: `version` in `helm-flux-operator.yaml`.
 
 **Upgrade a chart**: change `version:` in its `helmrelease-*.yaml` and push. A failed upgrade is retried, then rolled back.
 

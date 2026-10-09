@@ -1,0 +1,38 @@
+# Flux itself, installed and upgraded by the Flux Operator. Charts are HelmReleases; no image automation.
+# No sync: the GitRepository and Kustomizations live in sources/ and the area folders.
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  distribution:
+    version: "2.9.5"
+    registry: ghcr.io/fluxcd
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: true
+    domain: cluster.local
+  kustomize:
+    patches:
+      - target: { kind: Deployment, name: "(source-controller|helm-controller|kustomize-controller)" }
+        patch: |
+          - op: replace
+            path: /spec/template/spec/containers/0/resources
+            value: { requests: { cpu: 20m, memory: 64Mi }, limits: { memory: 512Mi } }
+      - target: { kind: Deployment, name: source-controller }
+        patch: |
+          - op: replace
+            path: /spec/template/spec/containers/0/resources/limits/memory
+            value: 256Mi
+      - target: { kind: Deployment, name: notification-controller }
+        patch: |
+          - op: replace
+            path: /spec/template/spec/containers/0/resources
+            value: { requests: { cpu: 10m, memory: 32Mi }, limits: { memory: 128Mi } }
