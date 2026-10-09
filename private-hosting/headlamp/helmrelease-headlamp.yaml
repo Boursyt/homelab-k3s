@@ -31,3 +31,17 @@ spec:
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits:   { memory: 128Mi }
+
+    # Flux plugin (Kustomizations, HelmReleases, sources), installed by a sidecar at start
+    pluginsManager:
+      enabled: true
+      baseImage: node:24-alpine
+      version: 0.1.1
+      configContent: |
+        plugins:
+          - name: flux
+            source: https://artifacthub.io/packages/headlamp/headlamp-plugins/headlamp_flux
+            version: 0.7.0
+      resources:
+        requests: { cpu: 10m, memory: 64Mi }
+        limits:   { memory: 256Mi }
