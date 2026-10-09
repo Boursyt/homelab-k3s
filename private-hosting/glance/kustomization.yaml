@@ -19,6 +19,7 @@ configMapGenerator:
       - config/apps.yml
       - config/printer.yml
       - config/services.yml
+      - config/public.yml
       - config/network.yml
       - config/speedtest.yml
       - config/databases.yml

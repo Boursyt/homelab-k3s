@@ -1,6 +1,7 @@
 endpoints:
   - name: Dashboard (lab.pub)
     group: Homelab
+    extra-labels: { icon: "glance", href: "https://lab.pub.theoboursy.fr", order: "1" }   # private Glance Public block
     url: "https://lab.pub.theoboursy.fr/"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -9,6 +10,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Status page
     group: Homelab
+    extra-labels: { icon: "gatus", href: "https://status.lab.pub.theoboursy.fr", order: "2" }   # private Glance Public block
     url: "https://status.lab.pub.theoboursy.fr/health"
     interval: 1m
     alerts: [{ type: ntfy }]

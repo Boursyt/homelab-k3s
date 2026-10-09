@@ -13,6 +13,7 @@ Glance dashboard, one file per block.
 | `printer.yml` | 3D printer, AMS and low stock spools (Home Assistant, Spoolman) |
 | `apps.yml` | user apps |
 | `services.yml` | infrastructure services |
+| `public.yml` | public services (lab.pub), from the public Gatus |
 | `status.yml` | Gatus summary |
 | `backups.yml` | last backups |
 | `databases.yml` | Postgres and PgBouncer |
