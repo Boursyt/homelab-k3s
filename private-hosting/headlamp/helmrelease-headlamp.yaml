@@ -19,6 +19,10 @@ spec:
     clusterRoleBinding:
       create: false
 
+    # load plugins installed by the plugin sidecar after start
+    config:
+      watchPlugins: true
+
     ingress:
       enabled: true
       ingressClassName: traefik
