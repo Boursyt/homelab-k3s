@@ -46,10 +46,10 @@
     "name": "price",
     "label": "€ / kWh",
     "type": "textbox",
-    "query": "0.25",
+    "query": "0.2453",
     "current": {
-     "text": "0.25",
-     "value": "0.25"
+     "text": "0.2453",
+     "value": "0.2453"
     }
    }
   ]
