@@ -20,3 +20,5 @@ kubelet-arg:
 kube-apiserver-arg:
   - default-not-ready-toleration-seconds=60
   - default-unreachable-toleration-seconds=60
+disable:
+  - traefik   # Traefik is a Flux HelmRelease (k3s/traefik)

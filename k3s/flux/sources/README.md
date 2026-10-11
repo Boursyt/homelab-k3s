@@ -11,4 +11,5 @@ Where Flux reads from: this repository (GitHub mirror) and the chart repositorie
 | `helmrepository-headlamp.yaml` | https://kubernetes-sigs.github.io/headlamp/ |
 | `helmrepository-jetstack.yaml` | https://charts.jetstack.io |
 | `helmrepository-prometheus-community.yaml` | https://prometheus-community.github.io/helm-charts |
+| `helmrepository-traefik.yaml` | https://traefik.github.io/charts |
 | `helmrepository-victoriametrics.yaml` | https://victoriametrics.github.io/helm-charts/ |

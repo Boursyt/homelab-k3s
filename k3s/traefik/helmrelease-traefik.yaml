@@ -1,10 +1,39 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChartConfig
+# Was the Traefik bundled with k3s (HelmChart + HelmChartConfig); same release name, so Flux took the release over.
+# k3s runs with `disable: [traefik]` (k3s/nodes/config-*.yaml).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
 metadata:
   name: traefik
   namespace: kube-system
 spec:
-  valuesContent: |-
+  interval: 1h
+  chart:
+    spec:
+      chart: traefik
+      version: 41.6.1   # Traefik v3.7.13
+      sourceRef: { kind: HelmRepository, name: traefik, namespace: flux-system }
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    remediation: { retries: 3 }
+  values:
+    # k3s defaults, kept as they were
+    image:
+      repository: rancher/mirrored-library-traefik
+      tag: 3.7.13
+    priorityClassName: system-cluster-critical
+    tolerations:
+      - { key: CriticalAddonsOnly, operator: Exists }
+      - { key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule }
+    service:
+      spec:
+        ipFamilyPolicy: PreferDualStack
+    providers:
+      kubernetesIngress:
+        publishedService:
+          enabled: true
+
     ingressRoute:
       dashboard:
         enabled: true
@@ -17,13 +46,16 @@ spec:
           enabled: true
         serviceMonitor:
           enabled: true
-          # keep Traefik's own \"service\" label
+          # keep Traefik's own "service" label
           honorLabels: true
     resources:
       requests: { cpu: 75m, memory: 128Mi }
       limits:   { memory: 256Mi }
     deployment:
       replicas: 2
+      podAnnotations:
+        prometheus.io/port: "8082"
+        prometheus.io/scrape: "true"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
