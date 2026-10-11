@@ -24,14 +24,19 @@ spec:
       resources:
         requests: { cpu: 25m, memory: 64Mi }
         limits:   { memory: 2Gi }
-      actRunner:
+      dind:
+        resources:
+          requests: { cpu: 500m, memory: 128Mi }
+          limits:   { memory: 2Gi }
+      runner:
         config: |
           log:
             level: info
           runner:
+            capacity: 2
             labels:
-              - "ubuntu-latest:docker://gitea/runner-images:ubuntu-latest"
-              - "ubuntu-22.04:docker://gitea/runner-images:ubuntu-22.04"
+              - "ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest"
           container:
-            privileged: true
             require_docker: true
+            docker_timeout: 300s
+            force_pull: false
