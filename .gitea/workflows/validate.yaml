@@ -34,7 +34,24 @@ jobs:
     if: ${{ !startsWith(github.head_ref, 'renovate/manual-') }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Update the branch if it is behind main
+        id: update
+        run: |
+          git fetch -q origin main
+          if git merge-base --is-ancestor origin/main ${{ github.event.pull_request.head.sha }}; then exit 0; fi
+          code=$(curl -sS -o /tmp/out -w '%{http_code}' -X POST \
+            -H "Authorization: token ${{ secrets.MERGE_TOKEN }}" \
+            "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/update?style=merge")
+          echo "HTTP $code"; cat /tmp/out
+          [ "$code" = 200 ]
+          echo "Branch updated: the new run validates and merges it"
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+
       - name: Squash-merge the PR into main
+        if: steps.update.outputs.updated != 'true'
         run: |
           code=$(curl -sS -o /tmp/out -w '%{http_code}' -X POST \
             -H "Authorization: token ${{ secrets.MERGE_TOKEN }}" -H "Content-Type: application/json" \
