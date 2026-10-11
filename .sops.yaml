@@ -1,0 +1,6 @@
+# SOPS: encrypt the values of Kubernetes Secrets with age. Flux decrypts them with the Secret flux-system/sops-age.
+# The private key is not in git (Bitwarden + ~/Library/Application Support/sops/age/keys.txt). Edit: sops <file>
+creation_rules:
+  - path_regex: \.sops\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    age: age1n9vekwj7ru2smrh4mn8lm8juz4436s8fm2s2jzkhmswwsxhzas8qjnf94p

@@ -10,3 +10,4 @@ spec:
   retryInterval: 2m
   timeout: 5m
   prune: false   # true once its inventory has been checked (flux tree kustomization kube-vip)
+  decryption: { provider: sops, secretRef: { name: sops-age } }

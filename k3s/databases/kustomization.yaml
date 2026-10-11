@@ -6,3 +6,5 @@ resources:
   - endpointslice-postgres-public-nas.yaml
   - service-postgres.yaml
   - service-postgres-public.yaml
+  - secret-kibisis-postgres-admin.sops.yaml
+  - secret-postgres-public-admin.sops.yaml

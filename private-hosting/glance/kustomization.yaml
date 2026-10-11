@@ -6,6 +6,9 @@ resources:
   - deployment-glance.yaml
   - ingress-glance.yaml
   - pdb-glance.yaml
+  - secret-homeassistant-token.sops.yaml
+  - secret-llm-keys.sops.yaml
+  - secret-victoriametrics-auth.sops.yaml
   - service-glance.yaml
 configMapGenerator:
   - name: glance-config

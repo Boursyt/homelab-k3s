@@ -7,4 +7,5 @@ resources:
   - clusterissuer-letsencrypt-prod.yaml
   - clusterissuer-letsencrypt-staging.yaml
   - helmrelease-cert-manager.yaml
+  - secret-clouddns-key.sops.yaml
   - tlsstore-default.yaml

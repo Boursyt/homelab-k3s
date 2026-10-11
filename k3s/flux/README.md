@@ -9,9 +9,11 @@ Own apps are plain Kustomize directories; third-party software is a Flux `HelmRe
 | `helm-flux-operator.yaml` | Flux Operator and the Flux Web UI, installed by the k3s Helm controller (with Traefik, the only charts k3s installs) |
 | `fluxinstance-flux.yaml` | Flux itself (version, controllers, resources), installed and upgraded by the Flux Operator |
 | `ingress-flux-web.yaml`, `clusterrolebinding-flux-web-admin.yaml` | Web UI on https://flux.lab.theoboursy.fr, no login, with actions (reconcile, suspend, resume) |
-| `provider-gitea.yaml`, `alert-gitea-commit-status.yaml` | Flux posts a commit status on Gitea per Kustomization (applied or failed). Secret `gitea-commit-status` created by hand |
+| `provider-gitea.yaml`, `alert-gitea-commit-status.yaml` | Flux posts a commit status on Gitea per Kustomization (applied or failed). Secret `gitea-commit-status` (SOPS) |
 | `sources/` | this repository and the chart repositories |
 | `k3s/`, `private-hosting/`, `public-hosting/` | one Flux `Kustomization` per directory of the same area, with its dependencies |
+| `bootstrap.sh` | rebuilds the cluster contents from git on a fresh k3s (see the root README) |
+| `secret-gitea-commit-status.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
 
 A new directory gets a `kustomization-<name>.yaml` in the matching folder. `prune` stays `false` until `flux tree kustomization <name>` has been checked.
 Not managed by Flux: `k3s/nodes/` and `off-cluster/`.
@@ -49,4 +51,4 @@ then copy a `kustomization-*.yaml` here into the matching folder, change `name`,
 
 **Remove something**: `prune` is `false`, so deleting a file does not delete the object: delete it with `kubectl delete` too.
 
-**Secrets** are never in git: `kubectl create secret …` by hand, manifests only reference them.
+**Secrets** are in git encrypted with SOPS (`secret-*.sops.yaml`); `decryption` is set on every Kustomization and uses the Secret `sops-age`, created by hand from the age key (Bitwarden): `kubectl -n flux-system create secret generic sops-age --from-file=age.agekey=<key file>`.

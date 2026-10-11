@@ -10,3 +10,4 @@ Homelab dashboard (lab.theoboursy.fr).
 | `pdb-glance.yaml` | keeps one replica during node drains |
 | `service-glance.yaml` | Service |
 | `ingress-glance.yaml` | `lab.theoboursy.fr` |
+| `secret-homeassistant-token.sops.yaml`, `secret-llm-keys.sops.yaml`, `secret-victoriametrics-auth.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

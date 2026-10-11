@@ -7,5 +7,7 @@ resources:
   - ingress-manyfold.yaml
   - pv-nfs-manyfold-models.yaml
   - pvc-models.yaml
+  - secret-manyfold-app.sops.yaml
+  - secret-manyfold-db.sops.yaml
   - service-manyfold.yaml
   - service-valkey.yaml

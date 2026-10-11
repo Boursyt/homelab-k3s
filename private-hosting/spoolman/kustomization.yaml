@@ -4,4 +4,5 @@ resources:
   - namespace.yaml
   - deployment-spoolman.yaml
   - ingress-spoolman.yaml
+  - secret-spoolman-db.sops.yaml
   - service-spoolman.yaml

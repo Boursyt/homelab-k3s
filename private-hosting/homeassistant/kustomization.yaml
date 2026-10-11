@@ -6,6 +6,7 @@ resources:
   - deployment-homeassistant.yaml
   - ingress-homeassistant.yaml
   - pvc-homeassistant-config.yaml
+  - secret-homeassistant-db.sops.yaml
   - service-homeassistant.yaml
 configMapGenerator:
   - name: homeassistant-config

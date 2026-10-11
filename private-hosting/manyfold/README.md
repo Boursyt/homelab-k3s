@@ -12,3 +12,4 @@
 | `deployment-valkey.yaml` | job queue, in memory |
 | `service-valkey.yaml` | Service |
 | `ingress-manyfold.yaml` | `manyfold.lab.theoboursy.fr` |
+| `secret-manyfold-app.sops.yaml`, `secret-manyfold-db.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

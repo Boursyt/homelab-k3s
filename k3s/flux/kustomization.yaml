@@ -12,3 +12,4 @@ resources:
   - k3s
   - private-hosting
   - public-hosting
+  - secret-gitea-commit-status.sops.yaml

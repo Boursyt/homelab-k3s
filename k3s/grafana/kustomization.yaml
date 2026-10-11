@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - helmrelease-grafana.yaml
   - dashboards
+  - secret-grafana-admin.sops.yaml
+  - secret-grafana-db.sops.yaml

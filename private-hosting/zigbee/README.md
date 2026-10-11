@@ -13,3 +13,4 @@ Zigbee devices through a USB dongle plugged into aegis (zigbee.lab).
 | `deployment-zigbee2mqtt.yaml` | Zigbee2MQTT as uid 1000 (group dialout), read-only; gets the dongle from the device plugin (`homelab/zigbee`, see `k3s/devices`), hence runs on aegis |
 | `service-zigbee2mqtt.yaml` | Service |
 | `ingress-zigbee2mqtt.yaml` | `zigbee.lab.theoboursy.fr` |
+| `secret-mqtt-users.sops.yaml`, `secret-zigbee2mqtt.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

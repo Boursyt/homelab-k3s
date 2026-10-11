@@ -9,7 +9,9 @@ resources:
   - helmrelease-kps.yaml
   - helmrelease-vm-operator.yaml
   - networkpolicy-vmauth-public.yaml
+  - secret-victoriametrics-auth.sops.yaml
   - secret-vmagent-scrape-token.yaml
+  - secret-vmauth-public.sops.yaml
   - service-victoriametrics.yaml
   - service-vmauth-public.yaml
   - vmagent-vmagent.yaml

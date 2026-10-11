@@ -13,3 +13,4 @@ Git server (git.lab) with an Actions runner. Repositories, runner and cache data
 | `pvc-valkey-data-gitea-valkey-cluster-0.yaml` | claim for the volume above |
 | `pv-nfs-gitea-data-act-runner-gitea-runner-actions-act-runner-0.yaml` | NFS volume of the runner |
 | `pvc-data-act-runner-gitea-runner-actions-act-runner-0.yaml` | claim for the volume above |
+| `secret-gitea-admin-secret.sops.yaml`, `secret-gitea-db.sops.yaml`, `secret-gitea-runner-secret.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

@@ -11,5 +11,6 @@ Nightly backups of every Postgres database and of all app volumes, to the NAS an
 | `pvc-k3s-data-ro.yaml` | claim for the volume above |
 | `cronjob-pg-dump.yaml` | 02:30: `pg_dump` of every database + globals of both instances (public one under `public/`), 14 days kept, success metric pushed to VictoriaMetrics |
 | `cronjob-restic.yaml` | 03:30: restic backup of the app volumes and dumps to the NAS, then copy to GCS |
+| `secret-k3s-etcd-s3.sops.yaml`, `secret-postgres-admin.sops.yaml`, `secret-postgres-public-admin.sops.yaml`, `secret-restic.sops.yaml`, `secret-victoriametrics-auth.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
 
 `pg-dump` runs as uid 999 (owner of `/backups/postgres` on the NAS). `restic` stays root because it reads every app's files, with only `DAC_READ_SEARCH` and read-only mounts.

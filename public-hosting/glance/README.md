@@ -12,5 +12,6 @@ Public dashboard (lab.pub.theoboursy.fr). Same base as the private one, with the
 | `service-glance.yaml` | Service |
 | `ingress-glance.yaml` | `lab.pub.theoboursy.fr` |
 | `networkpolicy-glance.yaml` | in: Traefik only; out: DNS, vmauth-public, internet on 443 (no private ranges) |
+| `secret-vmauth-public.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
 
-Secret (not committed): `vmauth-public` (`username`, `password`).
+Secret (SOPS-encrypted): `vmauth-public` (`username`, `password`).

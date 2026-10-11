@@ -8,3 +8,4 @@ Filament spool inventory (spoolman.lab). Database in the NAS Postgres.
 | `deployment-spoolman.yaml` | Spoolman |
 | `service-spoolman.yaml` | Service |
 | `ingress-spoolman.yaml` | `spoolman.lab.theoboursy.fr` |
+| `secret-spoolman-db.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

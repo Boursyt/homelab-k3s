@@ -17,3 +17,4 @@ Collection of every metric into VictoriaMetrics on the NAS (no Prometheus).
 | `cronjob-speedtest.yaml` | internet speed from a Pi every 6 h |
 | `*-vmauth-public.yaml` | read-only VictoriaMetrics proxy for the public Glance: query endpoints only, reachable only from `glance-public` |
 | `vmstaticscrape-gatus.yaml`, `vmstaticscrape-gatus-public.yaml` | check results of the private and public Gatus (jobs `gatus`, `gatus-public`) |
+| `secret-victoriametrics-auth.sops.yaml`, `secret-vmauth-public.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

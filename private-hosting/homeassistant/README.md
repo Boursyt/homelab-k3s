@@ -12,3 +12,4 @@ Home automation (ha.lab). Host network for LAN discovery, history in the NAS Pos
 | `deployment-homeassistant.yaml` | Home Assistant |
 | `service-homeassistant.yaml` | Service |
 | `ingress-homeassistant.yaml` | `ha.lab.theoboursy.fr` |
+| `secret-homeassistant-db.sops.yaml` | Secrets encrypted with SOPS (see the root README) |

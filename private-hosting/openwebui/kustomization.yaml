@@ -6,5 +6,8 @@ resources:
   - deployment-tika.yaml
   - ingress-openwebui.yaml
   - pvc-openwebui-data.yaml
+  - secret-llm-keys.sops.yaml
+  - secret-openwebui-db.sops.yaml
+  - secret-openwebui-secret.sops.yaml
   - service-openwebui.yaml
   - service-tika.yaml

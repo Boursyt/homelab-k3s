@@ -8,3 +8,8 @@ resources:
   - pv-nfs-backup-k3s-data-ro.yaml
   - pvc-backups-hdd.yaml
   - pvc-k3s-data-ro.yaml
+  - secret-k3s-etcd-s3.sops.yaml
+  - secret-postgres-admin.sops.yaml
+  - secret-postgres-public-admin.sops.yaml
+  - secret-restic.sops.yaml
+  - secret-victoriametrics-auth.sops.yaml

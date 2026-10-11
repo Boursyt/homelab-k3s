@@ -6,6 +6,8 @@ resources:
   - deployment-gatus.yaml
   - ingress-gatus.yaml
   - networkpolicy-gatus.yaml
+  - secret-gatus-db.sops.yaml
+  - secret-gatus-ntfy.sops.yaml
   - service-gatus.yaml
 configMapGenerator:
   - name: gatus-config

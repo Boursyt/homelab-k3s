@@ -8,5 +8,7 @@ resources:
   - deployment-zigbee2mqtt.yaml
   - ingress-zigbee2mqtt.yaml
   - pvc-zigbee2mqtt-data.yaml
+  - secret-mqtt-users.sops.yaml
+  - secret-zigbee2mqtt.sops.yaml
   - service-mosquitto.yaml
   - service-zigbee2mqtt.yaml

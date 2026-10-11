@@ -10,6 +10,7 @@ spec:
   retryInterval: 2m
   timeout: 5m
   prune: false   # true once its inventory has been checked (flux tree kustomization homeassistant)
+  decryption: { provider: sops, secretRef: { name: sops-age } }
   dependsOn:
     - { name: cert-manager }
     - { name: traefik }
