@@ -22,7 +22,7 @@ spec:
       initContainers:
         # the app rewrites its static files at start: give it a writable copy
         - name: static
-          image: ghcr.io/open-webui/open-webui:v0.11.4-slim
+          image: ghcr.io/open-webui/open-webui:v0.12.0-slim
           command: ["sh", "-c", "cp -R /app/backend/open_webui/static/. /static/"]
           securityContext: &container
             allowPrivilegeEscalation: false
@@ -32,7 +32,7 @@ spec:
           resources: { requests: { cpu: 10m, memory: 32Mi }, limits: { memory: 128Mi } }
       containers:
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:v0.11.4-slim
+          image: ghcr.io/open-webui/open-webui:v0.12.0-slim
           ports:
             - { name: http, containerPort: 8080 }
           env:

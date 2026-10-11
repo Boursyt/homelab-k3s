@@ -24,7 +24,7 @@ spec:
       initContainers:
         # first start only: skip the onboarding wizard
         - name: seed-config
-          image: busybox:1.37
+          image: busybox:1.38
           command: ["sh", "-c", "[ -f /app/data/configuration.yaml ] || cp /seed/configuration.yaml /app/data/configuration.yaml"]
           volumeMounts:
             - { name: data, mountPath: /app/data }
