@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: 41.6.1   # Traefik v3.7.13
+      version: 41.7.1   # Traefik v3.7.13
       sourceRef: { kind: HelmRepository, name: traefik, namespace: flux-system }
   install:
     crds: CreateReplace
@@ -21,7 +21,7 @@ spec:
     # k3s defaults, kept as they were
     image:
       repository: rancher/mirrored-library-traefik
-      tag: 3.7.13
+      tag: 3.7.14
     priorityClassName: system-cluster-critical
     tolerations:
       - { key: CriticalAddonsOnly, operator: Exists }
