@@ -15,7 +15,7 @@ jobs:
         env:
           RENOVATE_PLATFORM: gitea
           RENOVATE_ENDPOINT: ${{ github.server_url }}/api/v1
-          RENOVATE_TOKEN: ${{ secrets.MERGE_TOKEN }}
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
           RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }}
           RENOVATE_REPOSITORIES: ${{ github.repository }}
           RENOVATE_CONFIG_FILE: .gitea/renovate.json
