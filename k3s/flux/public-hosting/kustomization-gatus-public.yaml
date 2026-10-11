@@ -9,7 +9,7 @@ spec:
   interval: 10m
   retryInterval: 2m
   timeout: 5m
-  prune: false   # true once its inventory has been checked (flux tree kustomization gatus-public)
+  prune: true
   decryption: { provider: sops, secretRef: { name: sops-age } }
   dependsOn:
     - { name: cert-manager }

@@ -4,3 +4,5 @@ metadata:
   labels:
     pod-security.kubernetes.io/enforce: privileged
   name: system-upgrade
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled

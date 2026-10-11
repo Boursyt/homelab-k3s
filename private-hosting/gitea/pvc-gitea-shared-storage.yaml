@@ -4,6 +4,7 @@ metadata:
   name: gitea-shared-storage
   namespace: gitea
   annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
     helm.sh/resource-policy: keep
 spec:
   accessModes: [ReadWriteOnce]

@@ -9,5 +9,5 @@ spec:
   interval: 10m
   retryInterval: 2m
   timeout: 5m
-  prune: false   # true once its inventory has been checked (flux tree kustomization flux)
+  prune: true
   decryption: { provider: sops, secretRef: { name: sops-age } }

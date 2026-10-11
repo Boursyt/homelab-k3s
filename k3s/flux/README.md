@@ -15,7 +15,8 @@ Own apps are plain Kustomize directories; third-party software is a Flux `HelmRe
 | `bootstrap.sh` | rebuilds the cluster contents from git on a fresh k3s (see the root README) |
 | `secret-gitea-commit-status.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
 
-A new directory gets a `kustomization-<name>.yaml` in the matching folder. `prune` stays `false` until `flux tree kustomization <name>` has been checked.
+A new directory gets a `kustomization-<name>.yaml` in the matching folder. Every Kustomization has `prune: true`.
+Namespaces, PVCs, the FluxInstance and the Flux Operator HelmChart carry `kustomize.toolkit.fluxcd.io/prune: disabled`: Flux never deletes them.
 Not managed by Flux: `k3s/nodes/` and `off-cluster/`.
 
 ## How to
@@ -49,6 +50,7 @@ then copy a `kustomization-*.yaml` here into the matching folder, change `name`,
 
 **Undo a change**: `git revert <commit>` and push.
 
-**Remove something**: `prune` is `false`, so deleting a file does not delete the object: delete it with `kubectl delete` too.
+**Remove something**: delete the file (and its line in `kustomization.yaml`); Flux deletes the object. Namespaces and PVCs stay: delete them by hand.
+Removing a `kustomization-<name>.yaml` deletes everything that Kustomization applied.
 
 **Secrets** are in git encrypted with SOPS (`secret-*.sops.yaml`); `decryption` is set on every Kustomization and uses the Secret `sops-age`, created by hand from the age key (Bitwarden): `kubectl -n flux-system create secret generic sops-age --from-file=age.agekey=<key file>`.
