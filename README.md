@@ -22,6 +22,7 @@ The NAS stores data, the Pis run compute.
 | `private-hosting/` | services for the home network and VPN only, on `*.lab.theoboursy.fr` |
 | `public-hosting/` | services exposed on the internet, on `*.lab.pub.theoboursy.fr` |
 | `off-cluster/` | machines outside Kubernetes: NAS stacks, VPS |
+| `iac/` | Terraform for GCP: DNS records, backup bucket, service accounts |
 
 Changes go through a pull request on the self-hosted Gitea: `.gitea/workflows/validate.yaml` checks it (no secret,
 every directory builds and is valid) and merges it. Gitea mirrors `main` to GitHub, and Flux (`k3s/flux/`) applies it within a minute.
