@@ -1,0 +1,23 @@
+name: renovate
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open PRs for new chart and image versions
+        uses: docker://ghcr.io/renovatebot/renovate:44.149.3
+        env:
+          RENOVATE_PLATFORM: gitea
+          RENOVATE_ENDPOINT: ${{ github.server_url }}/api/v1
+          RENOVATE_TOKEN: ${{ secrets.MERGE_TOKEN }}
+          RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }}
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          RENOVATE_CONFIG_FILE: .gitea/renovate.json
+          RENOVATE_GIT_AUTHOR: hypto <86895272+Boursyt@users.noreply.github.com>
+          LOG_LEVEL: info

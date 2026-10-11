@@ -1,0 +1,53 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "onboarding": false,
+  "requireConfig": "optional",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/Paris",
+  "flux": { "managerFilePatterns": ["/^(k3s|private-hosting|public-hosting)/.+\\.yaml$/"] },
+  "kubernetes": { "managerFilePatterns": ["/^(k3s|private-hosting|public-hosting)/.+\\.yaml$/"] },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Image set as repository + tag in HelmRelease values",
+      "managerFilePatterns": ["/helmrelease-[^/]+\\.yaml$/"],
+      "matchStrings": ["repository: (?<depName>[^\\s]+)\\n\\s+tag: \"?(?<currentValue>[^\\s\"]+)\"?"],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Flux Operator chart installed by the k3s Helm controller",
+      "managerFilePatterns": ["/^k3s/flux/helm-flux-operator\\.yaml$/"],
+      "matchStrings": ["chart: oci://(?<depName>[^\\s]+)\\n\\s+version: \"?(?<currentValue>[^\\s\"]+)\"?"],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Flux version in the FluxInstance",
+      "managerFilePatterns": ["/^k3s/flux/fluxinstance-flux\\.yaml$/"],
+      "matchStrings": ["distribution:\\n\\s+version: \"?(?<currentValue>[^\\s\"]+)\"?"],
+      "depNameTemplate": "fluxcd/flux2",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Files copied to machines by hand, not applied by Flux",
+      "matchFileNames": ["off-cluster/**", "k3s/nodes/**"],
+      "enabled": false
+    },
+    {
+      "matchDepNames": ["fluxcd/flux2", "fluxcd/flux2/action"],
+      "groupName": "flux"
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "additionalBranchPrefix": "manual-"
+    },
+    {
+      "matchFileNames": ["iac/**"],
+      "additionalBranchPrefix": "manual-"
+    }
+  ]
+}

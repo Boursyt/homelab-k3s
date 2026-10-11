@@ -31,6 +31,7 @@ jobs:
 
   merge:
     needs: validate
+    if: ${{ !startsWith(github.head_ref, 'renovate/manual-') }}
     runs-on: ubuntu-latest
     steps:
       - name: Squash-merge the PR into main
