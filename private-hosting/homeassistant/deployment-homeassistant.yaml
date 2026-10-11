@@ -18,7 +18,7 @@ spec:
       automountServiceAccountToken: false
       initContainers:
         - name: init-files
-          image: busybox:1.37
+          image: busybox:1.38
           command: ["sh", "-c", "cd /config && touch automations.yaml scripts.yaml scenes.yaml && [ -s automations.yaml ] || echo '[]' > automations.yaml"]
           volumeMounts:
             - { name: config, mountPath: /config }
