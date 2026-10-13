@@ -19,7 +19,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: manyfold
-          image: ghcr.io/manyfold3d/manyfold:0.150.0
+          image: ghcr.io/manyfold3d/manyfold:0.151.0
           env:
             - { name: TZ, value: Europe/Paris }
             - { name: PUID, value: "1000" }
