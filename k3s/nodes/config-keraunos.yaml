@@ -1,7 +1,7 @@
 write-kubeconfig-mode: "0644"
 server: https://192.168.1.200:6443
 token-file: /etc/rancher/k3s/cluster-token
-node-ip: 192.168.1.49
+node-ip: 192.168.1.205
 flannel-iface: eth0
 tls-san:
   - 192.168.1.200

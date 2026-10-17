@@ -1,10 +1,11 @@
 write-kubeconfig-mode: "0644"
-node-ip: 192.168.1.41
+server: https://192.168.1.200:6443
+token-file: /etc/rancher/k3s/cluster-token
+node-ip: 192.168.1.204
 flannel-iface: eth0
 tls-san:
   - 192.168.1.200
   - aegis
-cluster-init: true
 etcd-arg:   # relaxed etcd timeouts for SD cards
   - heartbeat-interval=500
   - election-timeout=5000

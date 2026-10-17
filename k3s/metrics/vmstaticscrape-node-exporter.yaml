@@ -6,9 +6,9 @@ metadata:
 spec:
   jobName: node-exporter
   targetEndpoints:
-    - { targets: ["192.168.1.41:9100"], labels: { instance: aegis } }
-    - { targets: ["192.168.1.49:9100"], labels: { instance: keraunos } }
+    - { targets: ["192.168.1.204:9100"], labels: { instance: aegis } }
+    - { targets: ["192.168.1.205:9100"], labels: { instance: keraunos } }
     - { targets: ["192.168.1.207:9100"], labels: { instance: harpe } }
-    - { targets: ["192.168.1.52:9100"], labels: { instance: bident } }
+    - { targets: ["192.168.1.206:9100"], labels: { instance: bident } }
     - { targets: ["10.8.0.1:9100"], labels: { instance: trident } }
     - { targets: ["192.168.1.210:9100"], labels: { instance: kibisis } }

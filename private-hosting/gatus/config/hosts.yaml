@@ -1,14 +1,14 @@
 endpoints:
   - name: aegis
     group: Hosts
-    url: "http://192.168.1.41:9100/metrics"
+    url: "http://192.168.1.204:9100/metrics"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
       - "[STATUS] == 200"
   - name: keraunos
     group: Hosts
-    url: "http://192.168.1.49:9100/metrics"
+    url: "http://192.168.1.205:9100/metrics"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
@@ -22,7 +22,7 @@ endpoints:
       - "[STATUS] == 200"
   - name: bident
     group: Hosts
-    url: "http://192.168.1.52:9100/metrics"
+    url: "http://192.168.1.206:9100/metrics"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:

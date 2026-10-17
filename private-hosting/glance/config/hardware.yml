@@ -4,13 +4,13 @@
   cache: 1m
   sites:
     - title: aegis · Pi 5 8 GB
-      url: http://192.168.1.41:9100/
+      url: http://192.168.1.204:9100/
       icon: si:raspberrypi
     - title: keraunos · Pi 5 8 GB
-      url: http://192.168.1.49:9100/
+      url: http://192.168.1.205:9100/
       icon: si:raspberrypi
     - title: bident · Pi 4 8 GB
-      url: http://192.168.1.52:9100/
+      url: http://192.168.1.206:9100/
       icon: si:raspberrypi
     - title: harpe · Pi 4 4 GB
       url: http://192.168.1.207:9100/

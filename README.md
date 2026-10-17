@@ -37,7 +37,7 @@ every directory builds and is valid) and merges it. Gitea mirrors `main` to GitH
 
 Everything in the cluster comes back from git; the data stays on the NAS (NFS volumes, PostgreSQL), so apps find it again.
 
-1. Install k3s on the nodes with the configs in `k3s/nodes/` (first server with `cluster-init`, the others join it).
+1. Install k3s on the nodes with the configs in `k3s/nodes/`. On a fresh cluster the first server starts alone: remove its `server:` line and add `cluster-init: true` once; the others join it through the VIP.
 2. Get the age private key from Bitwarden into a file, then run `k3s/flux/bootstrap.sh <key file>`: it creates the
    `sops-age` Secret, installs the Flux Operator and Flux, and points Flux at this repository.
 3. Flux installs the rest. Apps restart a few times while their dependencies come up (certificates, NFS, databases).
