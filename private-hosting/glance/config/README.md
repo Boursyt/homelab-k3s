@@ -11,8 +11,7 @@ Glance dashboard, one file per block.
 | `k3s.yml` | cluster usage and nodes |
 | `nas.yml` | NAS usage |
 | `printer.yml` | 3D printer, AMS and low stock spools (Home Assistant, Spoolman) |
-| `apps.yml` | user apps |
-| `services.yml` | infrastructure services |
+| `apps.yml` | launcher: every private Gatus check with an `href` label, grouped by its `section` label, sorted by `order` (2 digits, first = section) |
 | `public.yml` | public services (lab.pub), from the public Gatus |
 | `status.yml` | Gatus summary |
 | `backups.yml` | last backups |

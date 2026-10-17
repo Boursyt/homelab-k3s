@@ -1,6 +1,7 @@
 endpoints:
   - name: Grafana
     group: Apps
+    extra-labels: { desc: "metrics dashboards", section: "Monitoring", href: "https://grafana.lab.theoboursy.fr", order: "21" }
     url: "https://grafana.lab.theoboursy.fr/api/health"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -10,7 +11,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Gitea
     group: Apps
-    extra-labels: { icon: "gitea", href: "https://git.lab.theoboursy.fr", order: "1" }   # Glance Apps block
+    extra-labels: { desc: "git hosting, mirrored to GitHub", section: "Apps", href: "https://git.lab.theoboursy.fr", order: "11" }
     url: "https://git.lab.theoboursy.fr/api/healthz"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -19,6 +20,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Headlamp
     group: Apps
+    extra-labels: { desc: "Kubernetes web UI", section: "Infrastructure", href: "https://headlamp.lab.theoboursy.fr", order: "32" }
     url: "https://headlamp.lab.theoboursy.fr/"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -27,6 +29,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Glance
     group: Apps
+    extra-labels: { desc: "the private version of this page" }
     url: "https://lab.theoboursy.fr/"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -35,7 +38,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Open WebUI
     group: Apps
-    extra-labels: { icon: "open-webui", href: "https://ai.lab.theoboursy.fr", order: "2" }   # Glance Apps block
+    extra-labels: { desc: "chat with LLMs", section: "Apps", href: "https://ai.lab.theoboursy.fr", order: "12" }
     url: "https://ai.lab.theoboursy.fr/health"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -44,7 +47,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Home Assistant
     group: Apps
-    extra-labels: { icon: "home-assistant", href: "https://ha.lab.theoboursy.fr", order: "3" }   # Glance Apps block
+    extra-labels: { desc: "home automation, Zigbee, 3D printer", section: "Apps", href: "https://ha.lab.theoboursy.fr", order: "13" }
     url: "https://ha.lab.theoboursy.fr/manifest.json"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -53,7 +56,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Spoolman
     group: Apps
-    extra-labels: { icon: "spoolman", href: "https://spoolman.lab.theoboursy.fr", order: "4" }   # Glance Apps block
+    extra-labels: { desc: "3D printing filament inventory", section: "Apps", href: "https://spoolman.lab.theoboursy.fr", order: "14" }
     url: "https://spoolman.lab.theoboursy.fr/api/v1/health"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -62,7 +65,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Manyfold
     group: Apps
-    extra-labels: { icon: "manyfold", href: "https://manyfold.lab.theoboursy.fr", order: "5" }   # Glance Apps block
+    extra-labels: { desc: "3D model library", section: "Apps", href: "https://manyfold.lab.theoboursy.fr", order: "15" }
     url: "https://manyfold.lab.theoboursy.fr/health"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -71,7 +74,7 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Zigbee2MQTT
     group: Apps
-    extra-labels: { icon: "zigbee2mqtt", href: "https://zigbee.lab.theoboursy.fr", order: "6" }   # Glance Apps block
+    extra-labels: { desc: "Zigbee bridge", section: "Apps", href: "https://zigbee.lab.theoboursy.fr", order: "16" }
     url: "https://zigbee.lab.theoboursy.fr/"
     interval: 1m
     alerts: [{ type: ntfy }]

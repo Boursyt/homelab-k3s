@@ -22,6 +22,8 @@ document:
       .logo::after { content: "▋"; margin-left: .35rem; color: var(--color-primary); animation: cursor-blink 1.1s steps(1) infinite; }
       @keyframes cursor-blink { 50% { opacity: 0; } }
       @media (prefers-reduced-motion: reduce) { .logo::after { animation: none; } }
+      .launcher-section { text-transform: uppercase; letter-spacing: .06em; margin: 18px 0 10px; }
+      .launcher-section:first-child { margin-top: 0; }
       .kv { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
       .kv > .shrink-0 { white-space: nowrap; }
       .bar { height: 7px; border-radius: 4px; background: var(--color-widget-background-highlight); margin: 6px 0 14px; overflow: hidden; }

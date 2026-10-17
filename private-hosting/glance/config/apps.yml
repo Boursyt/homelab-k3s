@@ -1,13 +1,18 @@
 - type: custom-api
-  title: Apps
+  title: Launcher
   cache: 1m
   url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
   basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
   parameters:
     query: |
       sort_by_label(union(
-        label_set(max by (name, icon, href, order) (gatus_results_endpoint_success{job="gatus",group="Apps",order!=""}), "k", "ok"),
-        label_set(max by (name) (gatus_results_duration_seconds{job="gatus",group="Apps",order!=""}) * 1000, "k", "ms")
+        label_set(union(
+          max by (section, name, icon, href, order) (gatus_results_endpoint_success{job="gatus",href!="",section!="",icon!=""}),
+          label_lowercase(label_transform(label_transform(label_copy(
+            max by (section, name, href, order) (gatus_results_endpoint_success{job="gatus",href!="",section!="",icon=""}),
+            "name", "icon"), "icon", "\\s*\\(.*\\)", ""), "icon", " ", "-"), "icon")
+        ), "k", "ok"),
+        label_set(max by (name) (gatus_results_duration_seconds{job="gatus",href!="",section!=""}) * 1000, "k", "ms")
       ), "order")
   subrequests:
     openrouter:
@@ -17,10 +22,13 @@
   template: |
     {{ $or := .Subrequest "openrouter" }}
     {{ $balance := sub ($or.JSON.Float "data.total_credits") ($or.JSON.Float "data.total_usage") }}
-    <ul class="dynamic-columns list-gap-20 list-with-separator">
-    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ok" }}{{ $i := .String "metric.name" }}{{ $ok := eq (.Float "value.1") 1.0 }}{{ $name := .String "metric.name" }}
+    {{ $sec := "" }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ok" }}{{ $i := .String "metric.name" }}
+    {{ if ne $sec (.String "metric.section") }}{{ if ne $sec "" }}</ul>{{ end }}{{ $sec = .String "metric.section" }}
+    <div class="launcher-section size-h5 color-subdue">{{ $sec }}</div>
+    <ul class="dynamic-columns list-gap-20 list-with-separator">{{ end }}{{ $ok := eq (.Float "value.1") 1.0 }}{{ $name := .String "metric.name" }}
       <div class="monitor-site flex items-center gap-15">
-        <img class="monitor-site-icon" src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{{ .String "metric.icon" }}.svg" alt="" loading="lazy">
+        <img class="monitor-site-icon" src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{{ .String "metric.icon" }}.svg" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
         <div class="grow min-width-0">
           <a class="size-h3 color-highlight text-truncate block" href="{{ .String "metric.href" }}" target="_blank" rel="noreferrer">{{ $name }}</a>
           <ul class="list-horizontal-text">
@@ -35,4 +43,4 @@
         </div>
       </div>
     {{ end }}{{ end }}
-    </ul>
+    {{ if ne $sec "" }}</ul>{{ end }}

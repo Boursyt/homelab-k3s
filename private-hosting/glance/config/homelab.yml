@@ -17,7 +17,6 @@
     - size: full
       widgets:
         - $include: apps.yml
-        - $include: services.yml
         - $include: public.yml
     - size: small
       widgets:

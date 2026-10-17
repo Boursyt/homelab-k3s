@@ -8,6 +8,7 @@ endpoints:
       - "[CONNECTED] == true"
   - name: VictoriaMetrics (kibisis)
     group: Services
+    extra-labels: { section: "Monitoring", href: "https://grafana.lab.theoboursy.fr/explore", order: "23" }
     url: "tcp://192.168.1.51:8428"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -22,6 +23,7 @@ endpoints:
       - "[CONNECTED] == true"
   - name: Traefik dashboard
     group: Services
+    extra-labels: { section: "Infrastructure", icon: "traefik", href: "https://traefik.lab.theoboursy.fr/dashboard/", order: "31" }
     url: "https://traefik.lab.theoboursy.fr/dashboard/"
     interval: 1m
     alerts: [{ type: ntfy }]
@@ -30,9 +32,33 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Flux Web UI
     group: Services
+    extra-labels: { section: "Infrastructure", icon: "flux-cd", href: "https://flux.lab.theoboursy.fr", order: "33" }
     url: "https://flux.lab.theoboursy.fr/"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
       - "[STATUS] == 200"
       - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Gatus
+    group: Services
+    extra-labels: { section: "Monitoring", href: "https://status.lab.theoboursy.fr", order: "22" }
+    url: "http://gatus.monitoring.svc.cluster.local/health"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+  - name: vmagent
+    group: Services
+    extra-labels: { section: "Monitoring", icon: "victoriametrics", href: "https://grafana.lab.theoboursy.fr/explore", order: "24" }
+    url: "http://vmagent-vmagent.monitoring.svc.cluster.local:8429/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: vmalert
+    group: Services
+    extra-labels: { section: "Monitoring", icon: "victoriametrics", href: "https://grafana.lab.theoboursy.fr/explore", order: "25" }
+    url: "http://vmalert-vmalert.monitoring.svc.cluster.local:8080/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
