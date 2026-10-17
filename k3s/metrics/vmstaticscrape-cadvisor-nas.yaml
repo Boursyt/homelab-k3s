@@ -6,7 +6,7 @@ metadata:
 spec:
   jobName: cadvisor-nas
   targetEndpoints:
-    - targets: ["192.168.1.51:9338"]
+    - targets: ["192.168.1.210:9338"]
       labels: { instance: kibisis }
       metricRelabelConfigs:
         - { sourceLabels: [name], regex: "", action: drop }

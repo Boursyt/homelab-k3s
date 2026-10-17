@@ -19,6 +19,6 @@ services:
       VM_USER: ${VM_USER:?missing in .env}
       VM_PASSWORD: ${VM_PASSWORD:?missing in .env}
     ports:
-      - "192.168.1.51:8428:8428"
+      - "192.168.1.210:8428:8428"
     volumes:
       - ./data:/storage

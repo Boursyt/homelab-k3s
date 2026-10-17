@@ -11,7 +11,7 @@ services:
       - --whitelisted_container_labels=com.docker.compose.project,com.docker.compose.service
       - --disable_metrics=advtcp,cpu_topology,cpuset,hugetlb,memory_numa,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp
     ports:
-      - "192.168.1.51:9338:9338"
+      - "192.168.1.210:9338:9338"
     privileged: true
     devices:
       - /dev/kmsg

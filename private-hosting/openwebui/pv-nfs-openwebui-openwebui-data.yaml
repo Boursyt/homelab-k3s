@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-openwebui-openwebui-data
+spec:
+  capacity: { storage: 5Gi }
+  accessModes: [ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-ssd
+  mountOptions: [nfsvers=3, hard, noatime]
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 192.168.1.210/volume2/k3s/openwebui/openwebui-data
+    volumeAttributes: { server: 192.168.1.210, share: /volume2/k3s, subDir: openwebui/openwebui-data }
+  claimRef: { namespace: openwebui, name: openwebui-data }

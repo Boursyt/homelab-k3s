@@ -6,7 +6,7 @@ metadata:
 spec:
   jobName: postgres
   targetEndpoints:
-    - { targets: ["192.168.1.51:9187"], labels: { instance: kibisis, role: primary, stack: private } }
-    - { targets: ["192.168.1.51:9188"], labels: { instance: kibisis, role: replica, stack: private } }
-    - { targets: ["192.168.1.51:9189"], labels: { instance: kibisis, role: primary, stack: public } }
-    - { targets: ["192.168.1.51:9190"], labels: { instance: kibisis, role: replica, stack: public } }
+    - { targets: ["192.168.1.210:9187"], labels: { instance: kibisis, role: primary, stack: private } }
+    - { targets: ["192.168.1.210:9188"], labels: { instance: kibisis, role: replica, stack: private } }
+    - { targets: ["192.168.1.210:9189"], labels: { instance: kibisis, role: primary, stack: public } }
+    - { targets: ["192.168.1.210:9190"], labels: { instance: kibisis, role: replica, stack: public } }

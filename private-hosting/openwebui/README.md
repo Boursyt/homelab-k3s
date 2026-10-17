@@ -5,6 +5,7 @@ LLM chat (ai.lab) on OpenRouter and Gemini. Database in the NAS Postgres (pgvect
 | File | Content |
 |---|---|
 | `namespace.yaml` | `openwebui` namespace |
+| `pv-nfs-openwebui-openwebui-data.yaml` | NFS volume on the NAS (`/volume2/k3s/openwebui/openwebui-data`) |
 | `pvc-openwebui-data.yaml` | uploads |
 | `deployment-openwebui.yaml` | Open WebUI |
 | `service-openwebui.yaml` | Service |

@@ -8,6 +8,7 @@ Home automation (ha.lab). Host network for LAN discovery, history in the NAS Pos
 | `config/packages/spoolman_ams_sync.yaml` | assigns each AMS slot to its Spoolman spool |
 | `config/packages/spoolman_deduct.yaml` | deducts the filament of each print from the spools |
 | `namespace.yaml` | `homeassistant` namespace |
+| `pv-nfs-homeassistant-homeassistant-config.yaml` | NFS volume on the NAS (`/volume2/k3s/homeassistant/homeassistant-config`) |
 | `pvc-homeassistant-config.yaml` | `/config` volume |
 | `deployment-homeassistant.yaml` | Home Assistant |
 | `service-homeassistant.yaml` | Service |

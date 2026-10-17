@@ -11,4 +11,4 @@ spec:
     - { targets: ["192.168.1.78:9100"], labels: { instance: harpe } }
     - { targets: ["192.168.1.52:9100"], labels: { instance: bident } }
     - { targets: ["10.8.0.1:9100"], labels: { instance: trident } }
-    - { targets: ["192.168.1.51:9100"], labels: { instance: kibisis } }
+    - { targets: ["192.168.1.210:9100"], labels: { instance: kibisis } }

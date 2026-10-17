@@ -11,6 +11,6 @@ spec:
   csi:
     driver: nfs.csi.k8s.io
     readOnly: true
-    volumeHandle: 192.168.1.51/volume2/k3s#ro
-    volumeAttributes: { server: 192.168.1.51, share: /volume2/k3s }
+    volumeHandle: 192.168.1.210/volume2/k3s#ro
+    volumeAttributes: { server: 192.168.1.210, share: /volume2/k3s }
   claimRef: { namespace: backup, name: k3s-data-ro }

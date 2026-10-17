@@ -8,4 +8,5 @@ metadata:
 spec:
   accessModes: [ReadWriteMany]
   storageClassName: nfs-ssd
+  volumeName: nfs-homeassistant-homeassistant-config
   resources: { requests: { storage: 5Gi } }

@@ -4,7 +4,7 @@ metadata:
   name: nfs-ssd
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: 192.168.1.51
+  server: 192.168.1.210
   share: /volume2/k3s
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
   onDelete: retain

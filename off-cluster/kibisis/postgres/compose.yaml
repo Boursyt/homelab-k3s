@@ -52,7 +52,7 @@ services:
     container_name: pgbouncer
     restart: unless-stopped
     ports:
-      - "192.168.1.51:5432:5432"
+      - "192.168.1.210:5432:5432"
     volumes:
       - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
       - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
@@ -69,7 +69,7 @@ services:
       DATA_SOURCE_USER: monitoring
       DATA_SOURCE_PASS: ${MONITORING_PASSWORD:?missing in .env}
     ports:
-      - "192.168.1.51:9187:9187"
+      - "192.168.1.210:9187:9187"
     depends_on:
       postgres-primary: { condition: service_healthy }
 
@@ -81,7 +81,7 @@ services:
       <<: *pgexp
       DATA_SOURCE_URI: postgres-replica:5432/postgres?sslmode=disable
     ports:
-      - "192.168.1.51:9188:9187"
+      - "192.168.1.210:9188:9187"
     depends_on:
       postgres-replica: { condition: service_healthy }
 
@@ -92,6 +92,6 @@ services:
     environment:
       PGBOUNCER_EXPORTER_CONNECTION_STRING: postgres://monitoring:${MONITORING_PASSWORD:?missing in .env}@pgbouncer:5432/pgbouncer?sslmode=require
     ports:
-      - "192.168.1.51:9127:9127"
+      - "192.168.1.210:9127:9127"
     depends_on:
       - pgbouncer

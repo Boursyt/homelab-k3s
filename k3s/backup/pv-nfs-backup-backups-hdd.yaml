@@ -10,6 +10,6 @@ spec:
   mountOptions: [nfsvers=3, hard, noatime]
   csi:
     driver: nfs.csi.k8s.io
-    volumeHandle: 192.168.1.51/volume1/backups
-    volumeAttributes: { server: 192.168.1.51, share: /volume1/backups }
+    volumeHandle: 192.168.1.210/volume1/backups
+    volumeAttributes: { server: 192.168.1.210, share: /volume1/backups }
   claimRef: { namespace: backup, name: backups-hdd }

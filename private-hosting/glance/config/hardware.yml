@@ -16,7 +16,7 @@
       url: http://192.168.1.78:9100/
       icon: si:raspberrypi
     - title: kibisis · NAS DXP2800 GT
-      url: http://192.168.1.51:9100/
+      url: http://192.168.1.210:9100/
       icon: di:ugreen
     - title: trident · VPS
       url: http://10.8.0.1:9100/

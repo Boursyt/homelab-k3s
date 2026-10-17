@@ -8,6 +8,7 @@ Zigbee devices through a USB dongle plugged into aegis (zigbee.lab).
 | `configmap-mosquitto.yaml` | Mosquitto config (authentication required) |
 | `deployment-mosquitto.yaml` | MQTT broker; passwords hashed at start from a Secret |
 | `service-mosquitto.yaml` | Service |
+| `pv-nfs-zigbee-zigbee2mqtt-data.yaml` | NFS volume on the NAS (`/volume2/k3s/zigbee/zigbee2mqtt-data`) |
 | `pvc-zigbee2mqtt-data.yaml` | Zigbee2MQTT data: network key, devices, coordinator backup |
 | `configmap-zigbee2mqtt-seed.yaml` | initial config, written only on first start |
 | `deployment-zigbee2mqtt.yaml` | Zigbee2MQTT as uid 1000 (group dialout), read-only; gets the dongle from the device plugin (`homelab/zigbee`, see `k3s/devices`), hence runs on aegis |

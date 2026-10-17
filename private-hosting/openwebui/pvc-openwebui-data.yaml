@@ -8,4 +8,5 @@ metadata:
 spec:
   accessModes: [ReadWriteMany]
   storageClassName: nfs-ssd
+  volumeName: nfs-openwebui-openwebui-data
   resources: { requests: { storage: 5Gi } }

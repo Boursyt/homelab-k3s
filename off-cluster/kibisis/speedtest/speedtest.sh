@@ -18,5 +18,5 @@ awk -F'\t' -v now="$(date +%s)" '
     printf "speedtest_last_run_timestamp_seconds{%s} %s\n", l, now }' out.tsv > metrics.txt
 cat metrics.txt
 wget -qO- --header "Authorization: Basic $(printf '%s:%s' "$VM_USER" "$VM_PASSWORD" | base64 | tr -d '\n')" \
-  --post-file metrics.txt http://192.168.1.51:8428/api/v1/import/prometheus
+  --post-file metrics.txt http://192.168.1.210:8428/api/v1/import/prometheus
 echo "$(date -Iseconds) pushed"

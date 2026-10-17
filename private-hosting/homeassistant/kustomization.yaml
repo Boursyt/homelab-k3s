@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - deployment-homeassistant.yaml
   - ingress-homeassistant.yaml
+  - pv-nfs-homeassistant-homeassistant-config.yaml
   - pvc-homeassistant-config.yaml
   - secret-homeassistant-db.sops.yaml
   - service-homeassistant.yaml
