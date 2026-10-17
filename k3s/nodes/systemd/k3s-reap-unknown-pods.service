@@ -1,7 +1,7 @@
 [Unit]
 Description=Delete k3s pods stuck in the Unknown phase on this node
 After=k3s.service
-Requires=k3s.service
+Requisite=k3s.service
 
 [Service]
 Type=oneshot
