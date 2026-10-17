@@ -41,7 +41,7 @@
     </ul>
     <div class="kv margin-top-20"><span class="size-h5 color-highlight">PRIVATE <span class="color-subdue">· home network + VPN only</span></span>{{ if gt $checks 0.0 }}<span class="size-h6 color-subdue shrink-0">{{ printf "%.0f" $green }}/{{ printf "%.0f" $checks }} checks green</span>{{ end }}</div>
     <ul class="dynamic-columns list-gap-20 list-with-separator margin-top-10">
-    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "app" }}
+    {{ range sortByString "metric.name" "asc" (.JSON.Array "data.result") }}{{ if eq (.String "metric.k") "app" }}
       <div class="monitor-site flex items-center gap-15">
         <img class="monitor-site-icon" src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{{ .String "metric.icon" }}.svg" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
         <div class="grow min-width-0">
