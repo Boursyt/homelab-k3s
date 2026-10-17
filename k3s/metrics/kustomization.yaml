@@ -6,13 +6,17 @@ resources:
   - cronjob-speedtest.yaml
   - deployment-vmauth-public.yaml
   - endpointslice-victoriametrics-nas.yaml
+  - endpointslice-victorialogs-nas.yaml
   - helmrelease-kps.yaml
+  - helmrelease-victoria-logs-collector.yaml
   - helmrelease-vm-operator.yaml
   - networkpolicy-vmauth-public.yaml
   - secret-victoriametrics-auth.sops.yaml
+  - secret-victorialogs-auth.sops.yaml
   - secret-vmagent-scrape-token.yaml
   - secret-vmauth-public.sops.yaml
   - service-victoriametrics.yaml
+  - service-victorialogs.yaml
   - service-vmauth-public.yaml
   - vmagent-vmagent.yaml
   - vmalert-vmalert.yaml

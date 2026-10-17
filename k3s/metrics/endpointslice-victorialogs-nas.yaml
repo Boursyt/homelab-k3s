@@ -1,0 +1,16 @@
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: victorialogs-nas
+  namespace: monitoring
+  labels:
+    kubernetes.io/service-name: victorialogs
+    endpointslice.kubernetes.io/managed-by: homelab
+addressType: IPv4
+ports:
+  - name: http
+    port: 9428
+    protocol: TCP
+endpoints:
+  - addresses: ["192.168.1.210"]
+    conditions: { ready: true }

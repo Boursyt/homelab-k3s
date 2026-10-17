@@ -1,0 +1,31 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs-collector
+  namespace: monitoring
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: victoria-logs-collector
+      version: 0.3.8
+      sourceRef: { kind: HelmRepository, name: victoriametrics, namespace: flux-system }
+  upgrade:
+    remediation: { retries: 3 }
+  values:
+    remoteWrite:
+      - url: http://victorialogs.monitoring.svc.cluster.local:9428
+    env:
+      - name: VL_remoteWrite_basicAuth_username
+        valueFrom: { secretKeyRef: { name: victorialogs-auth, key: username } }
+      - name: VL_remoteWrite_basicAuth_password
+        valueFrom: { secretKeyRef: { name: victorialogs-auth, key: password } }
+    # root without capabilities: owns the pod log files it reads
+    securityContext:
+      enabled: true
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities: { drop: [ALL] }
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { memory: 128Mi }
