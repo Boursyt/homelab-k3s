@@ -3,11 +3,10 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helmrelease-gitea-runner.yaml
+  - helmrelease-gitea-runner-arm.yaml
   - helmrelease-gitea.yaml
-  - pv-nfs-gitea-data-act-runner-gitea-runner-actions-act-runner-0.yaml
   - pv-nfs-gitea-gitea-shared-storage.yaml
   - pv-nfs-gitea-valkey-data-gitea-valkey-cluster-0.yaml
-  - pvc-data-act-runner-gitea-runner-actions-act-runner-0.yaml
   - pvc-gitea-shared-storage.yaml
   - pvc-valkey-data-gitea-valkey-cluster-0.yaml
   - secret-gitea-admin-secret.sops.yaml

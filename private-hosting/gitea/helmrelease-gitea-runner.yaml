@@ -21,6 +21,18 @@ spec:
     existingSecretKey: token
     giteaRootURL: http://gitea-http.gitea.svc.cluster.local:6969
     statefulset:
+      replicas: 3
+      timezone: Europe/Paris
+      # one runner per OptiPlex (amd64); its volume (local-path on /data) also holds the Docker cache
+      nodeSelector: { kubernetes.io/arch: amd64 }
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels: { app.kubernetes.io/name: actions-runner, app.kubernetes.io/instance: gitea-runner }
+      persistence:
+        size: 1Gi   # local-path does not enforce it; the size of a volumeClaimTemplate cannot change
       resources:
         requests: { cpu: 25m, memory: 64Mi }
         limits:   { memory: 2Gi }
@@ -29,9 +41,11 @@ spec:
         extraArgs:
           - --mtu=1400
           - --default-network-opt=bridge=com.docker.network.driver.mtu=1400
+        extraVolumeMounts:
+          - { name: data-runner, mountPath: /var/lib/docker, subPath: docker }
         resources:
           requests: { cpu: 500m, memory: 128Mi }
-          limits:   { memory: 2Gi }
+          limits:   { memory: 4Gi }
       runner:
         config: |
           log:
@@ -40,6 +54,10 @@ spec:
             capacity: 2
             labels:
               - "ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest"
+              - "amd64:docker://docker.gitea.com/runner-images:ubuntu-latest"
+          cache:
+            enabled: true
+            dir: /data/cache
           container:
             require_docker: true
             docker_timeout: 300s

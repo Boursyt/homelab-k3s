@@ -1,0 +1,61 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gitea-runner-arm
+  namespace: gitea
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: actions
+      version: 0.1.2
+      sourceRef: { kind: HelmRepository, name: gitea, namespace: flux-system }
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    remediation: { retries: 3 }
+  values:
+    enabled: true
+    existingSecret: gitea-runner-secret
+    existingSecretKey: token
+    giteaRootURL: http://gitea-http.gitea.svc.cluster.local:6969
+    statefulset:
+      replicas: 2
+      timezone: Europe/Paris
+      # one runner on each Pi 5; Docker data stays ephemeral (SD cards, overlayfs cannot live on NFS)
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - { key: kubernetes.io/hostname, operator: In, values: [aegis, keraunos] }
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels: { app.kubernetes.io/name: actions-runner, app.kubernetes.io/instance: gitea-runner-arm }
+      resources:
+        requests: { cpu: 25m, memory: 64Mi }
+        limits:   { memory: 1Gi }
+      dind:
+        # pod network (flannel VXLAN) is 1450: job containers must stay below it
+        extraArgs:
+          - --mtu=1400
+          - --default-network-opt=bridge=com.docker.network.driver.mtu=1400
+        resources:
+          requests: { cpu: 250m, memory: 128Mi }
+          limits:   { memory: 2Gi }
+      runner:
+        config: |
+          log:
+            level: info
+          runner:
+            capacity: 1
+            labels:
+              # no ubuntu-latest: existing workflows stay on the amd64 runners
+              - "arm64:docker://docker.gitea.com/runner-images:ubuntu-latest"
+          container:
+            require_docker: true
+            docker_timeout: 300s
+            force_pull: false
