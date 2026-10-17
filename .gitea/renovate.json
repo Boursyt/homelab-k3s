@@ -9,6 +9,15 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Flux CLI version given to the flux2 action in CI",
+      "managerFilePatterns": ["/^\\.gitea/workflows/.+\\.yaml$/"],
+      "matchStrings": ["with: \\{ version: (?<currentValue>[0-9.]+) \\}"],
+      "depNameTemplate": "fluxcd/flux2",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
       "description": "Image set as repository + tag in HelmRelease values",
       "managerFilePatterns": ["/helmrelease-[^/]+\\.yaml$/"],
       "matchStrings": ["repository: (?<depName>[^\\s]+)\\n\\s+tag: \"?(?<currentValue>[^\\s\"]+)\"?"],
