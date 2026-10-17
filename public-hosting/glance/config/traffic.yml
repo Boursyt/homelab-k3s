@@ -6,12 +6,12 @@
   parameters:
     query: |
       WITH (
-        rx(i, d) = sum(rate(node_network_receive_bytes_total{job="node-exporter",instance=~i,device=d}[5m])) * 8 / 1e6,
-        tx(i, d) = sum(rate(node_network_transmit_bytes_total{job="node-exporter",instance=~i,device=d}[5m])) * 8 / 1e6
+        rx(i, d) = sum(rate(node_network_receive_bytes_total{job="node-exporter",instance=~i,device=~d}[5m])) * 8 / 1e6,
+        tx(i, d) = sum(rate(node_network_transmit_bytes_total{job="node-exporter",instance=~i,device=~d}[5m])) * 8 / 1e6
       )
       union(
-        label_set(rx("aegis|keraunos|bident|harpe", "eth0"), "k", "crx"),
-        label_set(tx("aegis|keraunos|bident|harpe", "eth0"), "k", "ctx"),
+        label_set(rx("aegis|keraunos|bident|harpe|labrys|doru|xiphos", "eth0|enp.*"), "k", "crx"),
+        label_set(tx("aegis|keraunos|bident|harpe|labrys|doru|xiphos", "eth0|enp.*"), "k", "ctx"),
         label_set(rx("kibisis", "eth0"), "k", "nrx"),
         label_set(tx("kibisis", "eth0"), "k", "ntx"),
         label_set(rx("trident", "ens3"), "k", "vrx"),
@@ -27,7 +27,7 @@
     {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "crx" }}{{ $crx = $x }}{{ end }}{{ if eq $k "ctx" }}{{ $ctx = $x }}{{ end }}{{ if eq $k "nrx" }}{{ $nrx = $x }}{{ end }}{{ if eq $k "ntx" }}{{ $ntx = $x }}{{ end }}{{ if eq $k "vrx" }}{{ $vrx = $x }}{{ end }}{{ if eq $k "vtx" }}{{ $vtx = $x }}{{ end }}{{ if eq $k "wrx" }}{{ $wrx = $x }}{{ end }}{{ if eq $k "wtx" }}{{ $wtx = $x }}{{ end }}{{ if eq $k "rps" }}{{ $rps = $x }}{{ end }}{{ if eq $k "p50" }}{{ $p50 = $x }}{{ end }}{{ if eq $k "err" }}{{ $err = $x }}{{ end }}{{ end }}
     <div class="kv size-h6 color-subdue"><span></span><span>↓ in · ↑ out, Mbit/s</span></div>
     <ul class="list list-gap-10 margin-top-10">
-      <li class="kv"><span class="color-highlight">Cluster <span class="color-subdue">(4 Pi)</span></span><span class="shrink-0">{{ printf "%.1f" $crx }} · {{ printf "%.1f" $ctx }}</span></li>
+      <li class="kv"><span class="color-highlight">Cluster <span class="color-subdue">(all nodes)</span></span><span class="shrink-0">{{ printf "%.1f" $crx }} · {{ printf "%.1f" $ctx }}</span></li>
       <li class="kv"><span class="color-highlight">NAS</span><span class="shrink-0">{{ printf "%.1f" $nrx }} · {{ printf "%.1f" $ntx }}</span></li>
       <li class="kv"><span class="color-highlight">VPS</span><span class="shrink-0">{{ printf "%.2f" $vrx }} · {{ printf "%.2f" $vtx }}</span></li>
       <li class="kv"><span class="color-highlight">VPN tunnel</span><span class="shrink-0">{{ printf "%.2f" $wrx }} · {{ printf "%.2f" $wtx }}</span></li>

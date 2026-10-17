@@ -20,6 +20,27 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[STATUS] == 200"
+  - name: labrys
+    group: Hosts
+    url: "http://192.168.1.201:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: doru
+    group: Hosts
+    url: "http://192.168.1.202:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+  - name: xiphos
+    group: Hosts
+    url: "http://192.168.1.203:9100/metrics"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
   - name: bident
     group: Hosts
     url: "http://192.168.1.206:9100/metrics"

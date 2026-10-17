@@ -15,6 +15,15 @@
     - title: harpe · Pi 4 4 GB
       url: http://192.168.1.207:9100/
       icon: si:raspberrypi
+    - title: labrys · OptiPlex i3 16 GB
+      url: http://192.168.1.201:9100/
+      icon: si:dell
+    - title: doru · OptiPlex i3 16 GB
+      url: http://192.168.1.202:9100/
+      icon: si:dell
+    - title: xiphos · OptiPlex i5 16 GB
+      url: http://192.168.1.203:9100/
+      icon: si:dell
     - title: kibisis · NAS DXP2800 GT
       url: http://192.168.1.210:9100/
       icon: di:ugreen
