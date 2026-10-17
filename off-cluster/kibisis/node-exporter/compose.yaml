@@ -4,6 +4,7 @@ services:
     container_name: node-exporter
     command:
       - --path.rootfs=/host
+      - --collector.hwmon.chip-exclude=^nvme_nvme1$   # its temperature read sometimes takes >1 s
       - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|host/var/lib/docker|host/volume[0-9]+/@docker)($|/)
     network_mode: host
     pid: host

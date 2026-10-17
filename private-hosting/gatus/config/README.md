@@ -8,7 +8,7 @@ Checks, one file per section; Gatus merges them.
 | `apps.yaml` | user apps |
 | `services.yaml` | infrastructure services |
 | `cluster.yaml` | Kubernetes API and nodes |
-| `hosts.yaml` | machines (node-exporter reachability) |
+| `hosts.yaml` | machines: ping (ICMP), grouped in the Glance Hardware block by their `category` label; node-exporter health is the `up` metric in VictoriaMetrics |
 | `network.yaml` | gateway, VIP, Traefik, VPN, internet, public DNS (Glance Network block) |
 | `announcements.yaml` | incidents shown at the top of the page |
 

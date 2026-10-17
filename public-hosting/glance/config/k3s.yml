@@ -14,8 +14,8 @@
         label_set(count(k(node_cpu_seconds_total{mode="idle"})), "k", "cores"),
         label_set(sum(k(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)) / 1e9, "k", "ramu"),
         label_set(sum(k(node_memory_MemTotal_bytes)) / 1e9, "k", "ramt"),
-        label_set(sum(k(node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_avail_bytes{mountpoint="/"})) / 1e9, "k", "disku"),
-        label_set(sum(k(node_filesystem_size_bytes{mountpoint="/"})) / 1e9, "k", "diskt"),
+        label_set(sum(k(node_filesystem_size_bytes{mountpoint=~"/|/data"} - node_filesystem_avail_bytes{mountpoint=~"/|/data"})) / 1e9, "k", "disku"),
+        label_set(sum(k(node_filesystem_size_bytes{mountpoint=~"/|/data"})) / 1e9, "k", "diskt"),
         label_set(100 * (1 - avg by (instance) (k(rate(node_cpu_seconds_total{mode="idle"}[5m])))), "k", "ncpu"),
         label_set(100 * (1 - k(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)), "k", "nram"),
         label_set(max by (instance) (k(node_thermal_zone_temp{type="cpu-thermal"} or node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"})), "k", "ntemp"),   # Pi CPU sensor / Intel package

@@ -2,72 +2,72 @@ endpoints:
   - name: aegis
     group: Hosts
     extra-labels: { category: "Raspberry Pi", model: "Pi 5 · 8 GB", order: "11" }
-    url: "http://192.168.1.204:9100/metrics"
+    url: "icmp://192.168.1.204"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: keraunos
     group: Hosts
     extra-labels: { category: "Raspberry Pi", model: "Pi 5 · 8 GB", order: "12" }
-    url: "http://192.168.1.205:9100/metrics"
+    url: "icmp://192.168.1.205"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: harpe
     group: Hosts
     extra-labels: { category: "Raspberry Pi", model: "Pi 4 · 4 GB", order: "14" }
-    url: "http://192.168.1.207:9100/metrics"
+    url: "icmp://192.168.1.207"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: labrys
     group: Hosts
     extra-labels: { category: "OptiPlex", model: "i3-10100T · 16 GB", order: "21" }
-    url: "http://192.168.1.201:9100/metrics"
+    url: "icmp://192.168.1.201"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: doru
     group: Hosts
     extra-labels: { category: "OptiPlex", model: "i3-10100T · 16 GB", order: "22" }
-    url: "http://192.168.1.202:9100/metrics"
+    url: "icmp://192.168.1.202"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: xiphos
     group: Hosts
     extra-labels: { category: "OptiPlex", model: "i5-9500T · 16 GB", order: "23" }
-    url: "http://192.168.1.203:9100/metrics"
+    url: "icmp://192.168.1.203"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: bident
     group: Hosts
     extra-labels: { category: "Raspberry Pi", model: "Pi 4 · 8 GB", order: "13" }
-    url: "http://192.168.1.206:9100/metrics"
+    url: "icmp://192.168.1.206"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: trident (VPN)
     group: Hosts
     extra-labels: { category: "VPS", model: "OVH · WireGuard hub + public proxy", order: "41" }
-    url: "http://10.8.0.1:9100/metrics"
+    url: "icmp://10.8.0.1"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"
   - name: kibisis (NAS)
     group: Hosts
     extra-labels: { category: "NAS", model: "Ugreen DXP2800 GT", order: "31" }
-    url: "http://192.168.1.210:9100/metrics"
+    url: "icmp://192.168.1.210"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
-      - "[STATUS] == 200"
+      - "[CONNECTED] == true"

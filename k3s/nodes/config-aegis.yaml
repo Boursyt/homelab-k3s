@@ -5,4 +5,4 @@ flannel-iface: eth0
 kubelet-arg:
   - kube-reserved=cpu=200m,memory=384Mi
   - system-reserved=cpu=200m,memory=256Mi
-  - eviction-hard=memory.available<200Mi
+  - eviction-hard=memory.available<200Mi,nodefs.available<10%,imagefs.available<10%
