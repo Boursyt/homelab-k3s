@@ -17,5 +17,5 @@ Glance dashboard, one file per block.
 | `backups.yml` | last backups |
 | `databases.yml` | Postgres and PgBouncer |
 | `network.yml` | latency probes |
-| `speedtest.yml` | internet speed (NAS and Pi) |
+| `speedtest.yml` | internet speed (NAS and cluster) |
 | `ingress.yml` | Traefik traffic |

@@ -42,7 +42,7 @@ spec:
                 - -euc
                 - |
                   cd /tmp
-                  wget -qO cli.tgz https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-aarch64.tgz
+                  wget -qO cli.tgz https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-$(uname -m).tgz
                   tar xzf cli.tgz speedtest
                   for try in 1 2 3; do
                     if ./speedtest --accept-license --accept-gdpr --server-id=62493 -f tsv --output-header 2>/dev/null | tail -2 > out.tsv && [ "$(wc -l < out.tsv)" -eq 2 ]; then break; fi
