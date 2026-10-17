@@ -5,4 +5,4 @@ Requisite=k3s.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/k3s-reap-unknown-pods.sh
+ExecStart=/usr/local/bin/reap-unknown-pods.sh

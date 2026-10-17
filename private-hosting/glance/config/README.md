@@ -7,8 +7,8 @@ Glance dashboard, one file per block.
 | `glance.yml` | server, branding, custom CSS, 30 s auto-refresh, page include |
 | `theme.yml` | Catppuccin Mocha |
 | `homelab.yml` | page layout |
-| `hardware.yml` | machines reachability |
-| `k3s.yml` | cluster usage and nodes |
+| `hardware.yml` | machines reachability, from the Gatus `Hosts` checks grouped by their `category` label (`model`, `order` labels) |
+| `k3s.yml` | cluster usage and nodes (control plane / workers, CPU temperature of Pis and OptiPlex) |
 | `nas.yml` | NAS usage |
 | `printer.yml` | 3D printer, AMS and low stock spools (Home Assistant, Spoolman) |
 | `apps.yml` | launcher: every private Gatus check with an `href` label, grouped by its `section` label, sorted by `order` (2 digits, first = section) |

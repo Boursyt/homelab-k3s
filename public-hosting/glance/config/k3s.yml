@@ -18,7 +18,8 @@
         label_set(sum(k(node_filesystem_size_bytes{mountpoint="/"})) / 1e9, "k", "diskt"),
         label_set(100 * (1 - avg by (instance) (k(rate(node_cpu_seconds_total{mode="idle"}[5m])))), "k", "ncpu"),
         label_set(100 * (1 - k(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)), "k", "nram"),
-        label_set(max by (instance) (k(node_thermal_zone_temp{type="cpu-thermal"})), "k", "ntemp"),   # CPU sensor (hwmon max = Pi 5 RP1 chip)
+        label_set(max by (instance) (k(node_thermal_zone_temp{type="cpu-thermal"} or node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"})), "k", "ntemp"),   # Pi CPU sensor / Intel package
+        label_set(max by (instance) (label_replace(kube_node_role{role="control-plane"}, "instance", "$1", "node", "(.*)")), "k", "ncp"),
         label_set(sum(kube_node_status_condition{condition="Ready",status="true"}), "k", "nodesr"),
         label_set(count(kube_node_info), "k", "nodes"),
         label_set(sum(kube_pod_status_phase{phase="Running"}), "k", "podsr"),
@@ -41,9 +42,14 @@
     <div class="kv"><span class="size-h5 color-highlight">SYSTEM DISKS <span class="color-subdue">({{ printf "%.0f" $disku }}/{{ printf "%.0f" $diskt }} GB)</span></span><span class="color-highlight">{{ printf "%.1f" $diskp }}%</span></div>
     <div class="bar"><div class="data{{ if ge $diskp 85.0 }} hot{{ end }}" style="width: {{ $diskp }}%"></div></div>
     <div class="kv margin-top-15"><span class="size-h5 color-highlight">NODES</span><span class="color-highlight">{{ printf "%.0f" $nodesr }}/{{ printf "%.0f" $nodes }}</span></div>
-    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ncpu" }}{{ $i := .String "metric.instance" }}
+    <div class="size-h6 color-subdue margin-top-10" style="text-transform: uppercase; letter-spacing: .06em">control plane</div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ncpu" }}{{ $i := .String "metric.instance" }}{{ $cp := false }}{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ncp") (eq (.String "metric.instance") $i) }}{{ $cp = true }}{{ end }}{{ end }}{{ if $cp }}
     <div class="kv size-h6 margin-top-5"><span class="color-subdue">{{ $i }}</span><span>{{ printf "%.1f" (.Float "value.1") }}% CPU · {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "nram") (eq (.String "metric.instance") $i) }}{{ printf "%.0f" (.Float "value.1") }}% RAM{{ end }}{{ if and (eq (.String "metric.k") "ntemp") (eq (.String "metric.instance") $i) }} · {{ printf "%.0f" (.Float "value.1") }}°C{{ end }}{{ end }}</span></div>
-    {{ end }}{{ end }}
+    {{ end }}{{ end }}{{ end }}
+    <div class="size-h6 color-subdue margin-top-10" style="text-transform: uppercase; letter-spacing: .06em">workers</div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ncpu" }}{{ $i := .String "metric.instance" }}{{ $cp := false }}{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ncp") (eq (.String "metric.instance") $i) }}{{ $cp = true }}{{ end }}{{ end }}{{ if not $cp }}
+    <div class="kv size-h6 margin-top-5"><span class="color-subdue">{{ $i }}</span><span>{{ printf "%.1f" (.Float "value.1") }}% CPU · {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "nram") (eq (.String "metric.instance") $i) }}{{ printf "%.0f" (.Float "value.1") }}% RAM{{ end }}{{ if and (eq (.String "metric.k") "ntemp") (eq (.String "metric.instance") $i) }} · {{ printf "%.0f" (.Float "value.1") }}°C{{ end }}{{ end }}</span></div>
+    {{ end }}{{ end }}{{ end }}
     <div class="stat-row">
       <div><div class="color-highlight size-h3">{{ printf "%.0f" $podsr }}/{{ printf "%.0f" $pods }}</div><div class="size-h6">pods</div></div>
       <div><div class="color-highlight size-h3">{{ printf "%.0f" $wlr }}/{{ printf "%.0f" $wl }}</div><div class="size-h6">replicas</div></div>

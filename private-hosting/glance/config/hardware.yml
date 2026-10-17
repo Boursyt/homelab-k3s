@@ -1,32 +1,20 @@
-- type: monitor
+- type: custom-api
   title: Hardware
-  style: compact
   cache: 1m
-  sites:
-    - title: aegis · Pi 5 8 GB
-      url: http://192.168.1.204:9100/
-      icon: si:raspberrypi
-    - title: keraunos · Pi 5 8 GB
-      url: http://192.168.1.205:9100/
-      icon: si:raspberrypi
-    - title: bident · Pi 4 8 GB
-      url: http://192.168.1.206:9100/
-      icon: si:raspberrypi
-    - title: harpe · Pi 4 4 GB
-      url: http://192.168.1.207:9100/
-      icon: si:raspberrypi
-    - title: labrys · OptiPlex i3 16 GB
-      url: http://192.168.1.201:9100/
-      icon: si:dell
-    - title: doru · OptiPlex i3 16 GB
-      url: http://192.168.1.202:9100/
-      icon: si:dell
-    - title: xiphos · OptiPlex i5 16 GB
-      url: http://192.168.1.203:9100/
-      icon: si:dell
-    - title: kibisis · NAS DXP2800 GT
-      url: http://192.168.1.210:9100/
-      icon: di:ugreen
-    - title: trident · VPS
-      url: http://10.8.0.1:9100/
-      icon: si:wireguard
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      sort_by_label(union(
+        label_set(max by (name, category, model, order) (gatus_results_endpoint_success{job="gatus",group="Hosts",category!=""}), "k", "ok"),
+        label_set(max by (name) (gatus_results_duration_seconds{job="gatus",group="Hosts"}) * 1000, "k", "ms")
+      ), "order")
+  template: |
+    {{ $cat := "" }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ok" }}{{ $n := .String "metric.name" }}
+    {{ if ne $cat (.String "metric.category") }}{{ $cat = .String "metric.category" }}<div class="launcher-section size-h6 color-subdue">{{ $cat }}</div>{{ end }}
+    <div class="kv size-h5 margin-top-5">
+      <span class="text-truncate"><span class="color-highlight">{{ $n }}</span> <span class="size-h6 color-subdue">{{ .String "metric.model" }}</span></span>
+      <span class="shrink-0">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ms") (eq (.String "metric.name") $n) }}<span class="color-subdue">{{ printf "%.0f" (.Float "value.1") }}ms</span>{{ end }}{{ end }}{{ if eq (.Float "value.1") 1.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● down</span>{{ end }}</span>
+    </div>
+    {{ end }}{{ end }}
