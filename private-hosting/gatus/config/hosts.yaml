@@ -15,7 +15,7 @@ endpoints:
       - "[STATUS] == 200"
   - name: harpe
     group: Hosts
-    url: "http://192.168.1.78:9100/metrics"
+    url: "http://192.168.1.207:9100/metrics"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:

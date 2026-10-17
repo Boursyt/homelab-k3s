@@ -13,7 +13,7 @@
       url: http://192.168.1.52:9100/
       icon: si:raspberrypi
     - title: harpe · Pi 4 4 GB
-      url: http://192.168.1.78:9100/
+      url: http://192.168.1.207:9100/
       icon: si:raspberrypi
     - title: kibisis · NAS DXP2800 GT
       url: http://192.168.1.210:9100/
