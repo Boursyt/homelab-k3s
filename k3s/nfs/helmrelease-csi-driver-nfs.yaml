@@ -18,5 +18,7 @@ spec:
   values:
     controller:
       replicas: 1
+      # no VolumeSnapshot CRDs here: the sidecar only logs "Failed to watch"
+      enableSnapshotter: false
     externalSnapshotter:
       enabled: false

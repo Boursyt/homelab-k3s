@@ -51,11 +51,9 @@ spec:
         authorization:
           type: Bearer
           credentials: { name: vmagent-scrape-token, key: token }
+    # kubelet endpoints were kept up to date by prometheus-operator (disabled): see vmnodescrape-kubelet*.yaml
     kubelet:
-      serviceMonitor:
-        authorization:
-          type: Bearer
-          credentials: { name: vmagent-scrape-token, key: token }
+      enabled: false
     coreDns:
       serviceMonitor:
         authorization:

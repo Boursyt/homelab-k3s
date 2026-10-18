@@ -1,0 +1,24 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+  name: kubelet
+  namespace: monitoring
+spec:
+  scheme: https
+  port: "10250"
+  path: /metrics
+  honorLabels: true
+  tlsConfig:
+    insecureSkipVerify: true
+    ca: { configMap: { name: kube-root-ca.crt, key: ca.crt } }
+  authorization:
+    type: Bearer
+    credentials: { name: vmagent-scrape-token, key: token }
+  relabelConfigs:
+    - { targetLabel: job, replacement: kubelet }
+    - { sourceLabels: [__meta_kubernetes_node_name], targetLabel: node }
+    - { sourceLabels: [__metrics_path__], targetLabel: metrics_path }
+  metricRelabelConfigs:
+    - action: drop
+      sourceLabels: [__name__, le]
+      regex: (csi_operations|storage_operation_duration)_seconds_bucket;(0.25|2.5|15|25|120|600)(\.0)?

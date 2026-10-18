@@ -1,0 +1,31 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+  name: kubelet-cadvisor
+  namespace: monitoring
+spec:
+  scheme: https
+  port: "10250"
+  path: /metrics/cadvisor
+  interval: 10s
+  honorLabels: true
+  tlsConfig:
+    insecureSkipVerify: true
+    ca: { configMap: { name: kube-root-ca.crt, key: ca.crt } }
+  authorization:
+    type: Bearer
+    credentials: { name: vmagent-scrape-token, key: token }
+  relabelConfigs:
+    - { targetLabel: job, replacement: kubelet }
+    - { sourceLabels: [__meta_kubernetes_node_name], targetLabel: node }
+    - { sourceLabels: [__metrics_path__], targetLabel: metrics_path }
+  # same drops as kube-prometheus-stack
+  metricRelabelConfigs:
+    - { action: drop, sourceLabels: [__name__], regex: "container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)" }
+    - { action: drop, sourceLabels: [__name__], regex: "container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)" }
+    - { action: drop, sourceLabels: [__name__], regex: "container_memory_(mapped_file|swap)" }
+    - { action: drop, sourceLabels: [__name__], regex: "container_(file_descriptors|tasks_state|threads_max)" }
+    - { action: drop, sourceLabels: [__name__, scope], regex: "container_memory_failures_total;hierarchy" }
+    - { action: drop, sourceLabels: [__name__, interface], regex: "container_network_.*;(cali|cilium|cni|lxc|nodelocaldns|tunl).*" }
+    - { action: drop, sourceLabels: [__name__], regex: "container_spec.*" }
+    - { action: drop, sourceLabels: [id, pod], regex: ".+;" }

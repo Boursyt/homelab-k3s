@@ -20,6 +20,9 @@ resources:
   - service-vmauth-public.yaml
   - vmagent-vmagent.yaml
   - vmalert-vmalert.yaml
+  - vmnodescrape-kubelet-cadvisor.yaml
+  - vmnodescrape-kubelet-probes.yaml
+  - vmnodescrape-kubelet.yaml
   - vmpodscrape-flux.yaml
   - vmstaticscrape-cadvisor-nas.yaml
   - vmstaticscrape-gatus-public.yaml

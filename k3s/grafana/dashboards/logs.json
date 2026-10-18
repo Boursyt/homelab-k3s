@@ -94,7 +94,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL) OR i(error) OR i(panic)) | stats count() errors",
+          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL,panic) OR (level:\"\" (\"level=error\" OR \"level=fatal\" OR \"[E]\" OR \"[F]\" OR ERROR OR FATAL OR CRITICAL OR panic OR _msg:~\"^[EF][0-9]{4} \"))) | stats count() errors",
           "queryType": "stats",
           "editorMode": "code"
         }
@@ -335,7 +335,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL) OR i(error) OR i(panic)) | stats by (kubernetes.pod_namespace) count() errors",
+          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL,panic) OR (level:\"\" (\"level=error\" OR \"level=fatal\" OR \"[E]\" OR \"[F]\" OR ERROR OR FATAL OR CRITICAL OR panic OR _msg:~\"^[EF][0-9]{4} \"))) | stats by (kubernetes.pod_namespace) count() errors",
           "queryType": "statsRange",
           "editorMode": "code",
           "legendFormat": "{{kubernetes.pod_namespace}}"
@@ -453,7 +453,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL) OR i(error) OR i(panic)) | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() errors | sort by (errors desc) | limit 15",
+          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL,panic) OR (level:\"\" (\"level=error\" OR \"level=fatal\" OR \"[E]\" OR \"[F]\" OR ERROR OR FATAL OR CRITICAL OR panic OR _msg:~\"^[EF][0-9]{4} \"))) | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() errors | sort by (errors desc) | limit 15",
           "queryType": "stats",
           "editorMode": "code"
         }
@@ -525,7 +525,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL) OR i(error) OR i(panic))",
+          "expr": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) $search (level:in(error,ERROR,err,ERR,fatal,FATAL,critical,CRITICAL,panic) OR (level:\"\" (\"level=error\" OR \"level=fatal\" OR \"[E]\" OR \"[F]\" OR ERROR OR FATAL OR CRITICAL OR panic OR _msg:~\"^[EF][0-9]{4} \")))",
           "queryType": "instant",
           "editorMode": "code"
         }
