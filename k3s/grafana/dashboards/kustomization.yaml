@@ -20,3 +20,7 @@ configMapGenerator:
     files: [flux-cluster.json]
   - name: dashboard-flux-control-plane
     files: [flux-control-plane.json]
+  - name: dashboard-logs
+    files: [logs.json]
+  - name: dashboard-traefik-access
+    files: [traefik-access.json]

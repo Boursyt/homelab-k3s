@@ -40,6 +40,12 @@ spec:
         entryPoints: ["web", "websecure"]
         matchRule: Host(`traefik.lab.theoboursy.fr`)
 
+    log:
+      format: json
+    accessLog:
+      enabled: true
+      format: json
+
     metrics:
       prometheus:
         service:

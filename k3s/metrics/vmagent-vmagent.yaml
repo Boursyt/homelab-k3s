@@ -22,6 +22,7 @@ spec:
         username: { name: victoriametrics-auth, key: username }
         password: { name: victoriametrics-auth, key: password }
   extraArgs:
+    loggerFormat: json
     remoteWrite.disableOnDiskQueue: "true"
   resources:
     requests: { cpu: 50m, memory: 256Mi }

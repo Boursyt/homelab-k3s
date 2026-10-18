@@ -16,7 +16,7 @@ spec:
       containers:
         - name: vmauth
           image: victoriametrics/vmauth:v1.153.0
-          args: [-auth.config=/config/auth.yml, -httpListenAddr=:8427, -envflag.enable]
+          args: [-auth.config=/config/auth.yml, -httpListenAddr=:8427, -envflag.enable, -loggerFormat=json]
           ports:
             - { name: http, containerPort: 8427 }
           envFrom:

@@ -1,0 +1,23 @@
+services:
+  victorialogs:
+    image: victoriametrics/victoria-logs:v1.53.0
+    container_name: victorialogs
+    restart: unless-stopped
+    user: "65534:65534"   # owner of ./data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    command:
+      - -storageDataPath=/storage
+      - -retentionPeriod=30d
+      - -httpListenAddr=:9428
+      - -httpAuth.username=%{VL_USER}
+      - -httpAuth.password=%{VL_PASSWORD}
+      - -memory.allowedPercent=10
+    environment:
+      VL_USER: ${VL_USER:?missing in .env}
+      VL_PASSWORD: ${VL_PASSWORD:?missing in .env}
+    ports:
+      - "192.168.1.210:9428:9428"
+    volumes:
+      - ./data:/storage
