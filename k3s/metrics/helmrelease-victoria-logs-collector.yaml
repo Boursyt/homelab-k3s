@@ -15,6 +15,9 @@ spec:
   values:
     remoteWrite:
       - url: http://victorialogs.monitoring.svc.cluster.local:9428
+    collector:
+      # Traefik access logs have no message field: the request path becomes _msg
+      msgField: [message, msg, log, RequestPath]
     env:
       - name: VL_remoteWrite_basicAuth_username
         valueFrom: { secretKeyRef: { name: victorialogs-auth, key: username } }

@@ -606,7 +606,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "kubernetes.container_name:traefik RequestHost:* RequestHost:in($host) $search DownstreamStatus:>=400 | stats by (RequestHost, RequestMethod, RequestPath, DownstreamStatus) count() req | sort by (req desc) | limit 20",
+          "expr": "kubernetes.container_name:traefik RequestHost:* RequestHost:in($host) $search DownstreamStatus:>=400 | format if (RequestPath:\"\") \"<_msg>\" as RequestPath | stats by (RequestHost, RequestMethod, RequestPath, DownstreamStatus) count() req | sort by (req desc) | limit 20",
           "queryType": "stats",
           "editorMode": "code"
         }
@@ -665,7 +665,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "kubernetes.container_name:traefik RequestHost:* RequestHost:in($host) $search | stats by (RequestHost, RequestMethod, RequestPath) count() req, quantile(0.95, Duration) p95 | sort by (p95 desc) | limit 20",
+          "expr": "kubernetes.container_name:traefik RequestHost:* RequestHost:in($host) $search | format if (RequestPath:\"\") \"<_msg>\" as RequestPath | stats by (RequestHost, RequestMethod, RequestPath) count() req, quantile(0.95, Duration) p95 | sort by (p95 desc) | limit 20",
           "queryType": "stats",
           "editorMode": "code"
         }
