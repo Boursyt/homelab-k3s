@@ -1,6 +1,23 @@
 theme:
+  # Catppuccin Mocha; the page follows the device: dark = default, light = default-light (script in glance.yml)
   background-color: 240 21 15
   contrast-multiplier: 1.2
   primary-color: 217 92 83
   positive-color: 115 54 76
   negative-color: 347 70 65
+  presets:
+    # replaces Glance's own grey dark theme in the list
+    default-dark:
+      background-color: 240 21 15
+      contrast-multiplier: 1.2
+      primary-color: 217 92 83
+      positive-color: 115 54 76
+      negative-color: 347 70 65
+    # Catppuccin Latte
+    default-light:
+      light: true
+      background-color: 220 23 95
+      contrast-multiplier: 1.0
+      primary-color: 220 91 54
+      positive-color: 109 58 40
+      negative-color: 347 87 44

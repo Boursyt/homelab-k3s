@@ -4,8 +4,8 @@ Glance dashboard, one file per block.
 
 | File | Content |
 |---|---|
-| `glance.yml` | server, branding, custom CSS, 30 s auto-refresh, page include |
-| `theme.yml` | Catppuccin Mocha |
+| `glance.yml` | server, branding, custom CSS (+ Latte overrides), theme following the device mode, 30 s auto-refresh, page include |
+| `theme.yml` | Catppuccin Mocha (dark) and Latte (light, `default-light`); picker hidden |
 | `homelab.yml` | page layout |
 | `hardware.yml` | machines reachability, from the Gatus `Hosts` checks grouped by their `category` label (`model`, `order` labels) |
 | `k3s.yml` | cluster usage and nodes (control plane / workers, CPU temperature of Pis and OptiPlex) |

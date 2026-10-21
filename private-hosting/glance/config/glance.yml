@@ -46,7 +46,42 @@ document:
       .page-column .widget-content:not(.widget-content-frameless) {
         background: hsl(240 21% 11% / .55); border-color: hsl(0 0% 100% / .06);
       }
+      /* theme follows the device (script below): no picker */
+      .theme-picker { display: none !important; }
+      /* Catppuccin Latte versions of the hard-coded colors above */
+      html[data-scheme=light] .header::after { background: linear-gradient(90deg, #40a02b, #179299, #1e66f5, #8839ef, #ea76cb, #fe640b, #df8e1d, #40a02b); }
+      html[data-scheme=light] .logo { color: #40a02b; }
+      html[data-scheme=light] .bar > div { background: #df8e1d; }
+      html[data-scheme=light] .bar > div.data { background: var(--color-primary); }
+      html[data-scheme=light] .bar > div.hot { background: var(--color-negative); }
+      html[data-scheme=light] .head-widgets, html[data-scheme=light] .page-column {
+        background: linear-gradient(135deg, hsl(220 91% 54% / .06), hsl(223 16% 83% / .35) 50%, hsl(266 85% 58% / .05));
+        border-color: hsl(234 16% 35% / .12);
+        box-shadow: inset 0 1px 0 hsl(0 0% 100% / .8), 0 12px 32px hsl(230 20% 40% / .14);
+      }
+      html[data-scheme=light] .head-widgets .widget-content:not(.widget-content-frameless),
+      html[data-scheme=light] .page-column .widget-content:not(.widget-content-frameless) {
+        background: hsl(220 23% 98% / .75); border-color: hsl(234 16% 35% / .10);
+      }
     </style>
+    <script>
+      // follow the device light/dark mode: Latte (default-light) or Mocha (default); the cookie makes the next load render it directly
+      (() => {
+        const mq = matchMedia('(prefers-color-scheme: light)');
+        const apply = async () => {
+          const want = mq.matches ? 'default-light' : 'default';
+          const html = document.documentElement;
+          if (html.dataset.theme === want) return;
+          const r = await fetch(`${pageData.baseURL}/api/set-theme/${want}`, { method: 'POST' });
+          if (!r.ok) return;
+          document.getElementById('theme-style').textContent = await r.text();
+          Object.assign(html.dataset, { theme: want, scheme: r.headers.get('X-Scheme') });
+          pageData.theme = want;
+        };
+        apply();
+        mq.addEventListener('change', apply);
+      })();
+    </script>
     <script>
       // every 30 s: swap the content of each titled widget (no reload)
       (() => {
