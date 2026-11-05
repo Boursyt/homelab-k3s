@@ -20,7 +20,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: tika
-          image: apache/tika:4.1.0-1-full
+          image: apache/tika:4.2.0-1-full
           ports:
             - { name: http, containerPort: 9998 }
           env:
