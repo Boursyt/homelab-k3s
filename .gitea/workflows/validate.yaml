@@ -15,8 +15,8 @@ jobs:
         with:
           args: git --no-banner --redact --log-opts=origin/${{ github.base_ref }}..HEAD .
 
-      - uses: fluxcd/flux2/action@v2.9.6
-        with: { version: 2.9.6 }   # no GitHub API call to find the latest version
+      - uses: fluxcd/flux2/action@v2.10.0
+        with: { version: 2.10.0 }   # no GitHub API call to find the latest version
 
       - name: Render every Flux Kustomization
         run: .gitea/validate.sh
