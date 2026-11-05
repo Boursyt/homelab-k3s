@@ -16,9 +16,8 @@ spec:
         spec:
           restartPolicy: Never
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 999          # postgres in the image; owns /backups/postgres on the NAS
-            runAsGroup: 999
+            runAsUser: 0            # UGOS ACLs on the backups share deny every non-root NFS client
+            runAsGroup: 0
             seccompProfile: { type: RuntimeDefault }
           containers:
             - name: pg-dump

@@ -64,6 +64,12 @@ spec:
         resources:
           requests: { cpu: 20m, memory: 48Mi }
           limits:   { memory: 128Mi }
+      # UGOS ACLs on the NAS share only allow known NAS uids (1000 = hypto)
+      podSecurityContext:
+        fsGroup: 1000
+      containerSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
 
     # rootless image: everything already runs as git (1000); made explicit, without capabilities
     podSecurityContext:
