@@ -22,7 +22,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: spoolman
-          image: ghcr.io/donkie/spoolman:0.27.0
+          image: ghcr.io/donkie/spoolman:0.27.1
           env:
             - { name: TZ, value: Europe/Paris }
             - { name: SPOOLMAN_DB_TYPE, value: postgres }
