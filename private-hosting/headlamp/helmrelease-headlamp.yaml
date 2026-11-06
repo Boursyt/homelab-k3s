@@ -39,7 +39,7 @@ spec:
     # Flux plugin (Kustomizations, HelmReleases, sources), installed by a sidecar at start
     pluginsManager:
       enabled: true
-      baseImage: node:24-alpine
+      baseImage: node:26-alpine
       version: 0.1.1
       configContent: |
         plugins:
