@@ -9,6 +9,7 @@ resources:
   - pvc-nextcloud-data.yaml
   - secret-nextcloud-admin.sops.yaml
   - secret-nextcloud-db.sops.yaml
+  - secret-nextcloud-oidc.sops.yaml
   - helmrelease-nextcloud.yaml
   - ingress-nextcloud.yaml
   - networkpolicy-nextcloud.yaml

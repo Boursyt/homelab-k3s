@@ -41,9 +41,9 @@ spec:
         - { name: PHP_MEMORY_LIMIT, value: 1G }
         - { name: PHP_UPLOAD_LIMIT, value: 16G }
         - name: OIDC_CLIENT_ID
-          valueFrom: { secretKeyRef: { name: nextcloud-oidc, key: client-id, optional: true } }
+          valueFrom: { secretKeyRef: { name: nextcloud-oidc, key: client-id } }
         - name: OIDC_CLIENT_SECRET
-          valueFrom: { secretKeyRef: { name: nextcloud-oidc, key: client-secret, optional: true } }
+          valueFrom: { secretKeyRef: { name: nextcloud-oidc, key: client-secret } }
       # mitigation for CVE-2026-115560 (PHP session RCE, no fix released yet)
       phpConfigs:
         zz-homelab.conf: |-
