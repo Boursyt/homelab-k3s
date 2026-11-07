@@ -86,6 +86,57 @@ spec:
             // UGOS ACLs show every NAS file as 0777, whatever its mode
             'check_data_directory_permissions' => false,
           );
+      # theme, loaded by the start hook into the Custom CSS app
+        catppuccin.css: |-
+          /* Catppuccin for Nextcloud: Latte (light), Mocha (dark), accent mauve. https://catppuccin.com/palette */
+          html body[data-theme-default], html body[data-theme-light] {
+            --ctp-base: #eff1f5; --ctp-base-rgb: 239,241,245; --ctp-mantle: #e6e9ef; --ctp-crust: #dce0e8; --ctp-crust-rgb: 220,224,232;
+            --ctp-text: #4c4f69; --ctp-subtext1: #5c5f77; --ctp-subtext0: #6c6f85; --ctp-overlay1: #8c8fa1; --ctp-overlay0: #9ca0b0;
+            --ctp-surface1: #bcc0cc; --ctp-surface0: #ccd0da; --ctp-hover: #e6e9ef;
+            --ctp-accent: #8839ef; --ctp-accent-hover: #7287fd; --ctp-on-accent: #eff1f5; --ctp-accent-soft: #e3d4fb; --ctp-accent-soft-hover: #d8c2fa;
+            --ctp-red: #d20f39; --ctp-green: #40a02b; --ctp-green-text: #2f7a1f; --ctp-yellow: #df8e1d; --ctp-yellow-text: #a8650a; --ctp-blue: #1e66f5;
+            --ctp-red-bg: 246,211,218; --ctp-yellow-bg: 247,230,204; --ctp-green-bg: 214,236,210; --ctp-blue-bg: 211,225,251;
+          }
+          html body[data-theme-dark] {
+            --ctp-base: #1e1e2e; --ctp-base-rgb: 30,30,46; --ctp-mantle: #181825; --ctp-crust: #11111b; --ctp-crust-rgb: 17,17,27;
+            --ctp-text: #cdd6f4; --ctp-subtext1: #bac2de; --ctp-subtext0: #a6adc8; --ctp-overlay1: #7f849c; --ctp-overlay0: #6c7086;
+            --ctp-surface1: #45475a; --ctp-surface0: #313244; --ctp-hover: #313244;
+            --ctp-accent: #cba6f7; --ctp-accent-hover: #b4befe; --ctp-on-accent: #1e1e2e; --ctp-accent-soft: #3b3150; --ctp-accent-soft-hover: #4a3d65;
+            --ctp-red: #f38ba8; --ctp-green: #a6e3a1; --ctp-green-text: #a6e3a1; --ctp-yellow: #f9e2af; --ctp-yellow-text: #f9e2af; --ctp-blue: #89b4fa;
+            --ctp-red-bg: 74,38,51; --ctp-yellow-bg: 74,63,43; --ctp-green-bg: 43,63,46; --ctp-blue-bg: 38,58,79;
+          }
+          @media (prefers-color-scheme: dark) {
+            html body[data-theme-default] {
+              --ctp-base: #1e1e2e; --ctp-base-rgb: 30,30,46; --ctp-mantle: #181825; --ctp-crust: #11111b; --ctp-crust-rgb: 17,17,27;
+              --ctp-text: #cdd6f4; --ctp-subtext1: #bac2de; --ctp-subtext0: #a6adc8; --ctp-overlay1: #7f849c; --ctp-overlay0: #6c7086;
+              --ctp-surface1: #45475a; --ctp-surface0: #313244; --ctp-hover: #313244;
+              --ctp-accent: #cba6f7; --ctp-accent-hover: #b4befe; --ctp-on-accent: #1e1e2e; --ctp-accent-soft: #3b3150; --ctp-accent-soft-hover: #4a3d65;
+              --ctp-red: #f38ba8; --ctp-green: #a6e3a1; --ctp-green-text: #a6e3a1; --ctp-yellow: #f9e2af; --ctp-yellow-text: #f9e2af; --ctp-blue: #89b4fa;
+              --ctp-red-bg: 74,38,51; --ctp-yellow-bg: 74,63,43; --ctp-green-bg: 43,63,46; --ctp-blue-bg: 38,58,79;
+            }
+          }
+          /* Nextcloud variables -> palette */
+          html body[data-theme-default], html body[data-theme-light], html body[data-theme-dark] {
+            --image-background: none;
+            --color-main-background: var(--ctp-base); --color-main-background-rgb: var(--ctp-base-rgb); --color-main-text: var(--ctp-text);
+            --color-background-hover: var(--ctp-hover); --color-background-dark: var(--ctp-hover); --color-background-darker: var(--ctp-surface0);
+            --color-background-plain: var(--ctp-crust); --color-background-plain-text: var(--ctp-text);
+            --color-placeholder-light: var(--ctp-surface0); --color-placeholder-dark: var(--ctp-surface1);
+            --color-text-maxcontrast: var(--ctp-subtext0); --color-text-maxcontrast-default: var(--ctp-subtext0); --color-text-maxcontrast-background-blur: var(--ctp-subtext1);
+            --color-border: var(--ctp-surface0); --color-border-dark: var(--ctp-surface1); --color-border-maxcontrast: var(--ctp-overlay0);
+            --color-box-shadow-rgb: var(--ctp-crust-rgb); --color-loading-light: var(--ctp-surface1); --color-loading-dark: var(--ctp-overlay1);
+            --color-primary: var(--ctp-accent); --color-primary-text: var(--ctp-on-accent); --color-primary-hover: var(--ctp-accent-hover);
+            --color-primary-element: var(--ctp-accent); --color-primary-element-hover: var(--ctp-accent-hover);
+            --color-primary-element-text: var(--ctp-on-accent); --color-primary-element-text-dark: var(--ctp-on-accent);
+            --color-primary-light: var(--ctp-accent-soft); --color-primary-light-text: var(--ctp-accent); --color-primary-light-hover: var(--ctp-accent-soft-hover);
+            --color-element-error: var(--ctp-red); --color-element-success: var(--ctp-green); --color-element-warning: var(--ctp-yellow); --color-element-info: var(--ctp-blue);
+            --color-text-error: var(--ctp-red); --color-text-success: var(--ctp-green-text); --color-favorite: var(--ctp-yellow);
+            --color-error: rgb(var(--ctp-red-bg)); --color-error-rgb: var(--ctp-red-bg); --color-error-hover: rgba(var(--ctp-red-bg), .8); --color-error-text: var(--ctp-red);
+            --color-warning: rgb(var(--ctp-yellow-bg)); --color-warning-rgb: var(--ctp-yellow-bg); --color-warning-hover: rgba(var(--ctp-yellow-bg), .8); --color-warning-text: var(--ctp-yellow-text);
+            --color-success: rgb(var(--ctp-green-bg)); --color-success-rgb: var(--ctp-green-bg); --color-success-hover: rgba(var(--ctp-green-bg), .8); --color-success-text: var(--ctp-green-text);
+            --color-info: rgb(var(--ctp-blue-bg)); --color-info-rgb: var(--ctp-blue-bg); --color-info-hover: rgba(var(--ctp-blue-bg), .8); --color-info-text: var(--ctp-blue);
+            --color-mark: rgb(var(--ctp-yellow-bg));
+          }
       hooks:
         before-starting: |-
           #!/bin/sh
@@ -99,6 +150,15 @@ spec:
           occ config:app:set files default_quota --value "50 GB"
           # https comes from nginx; a forced protocol breaks Collabora's WOPI proof (plain http inside the cluster)
           occ config:system:delete overwriteprotocol
+          # look: name, links, Catppuccin colours (configs: catppuccin.css)
+          occ theming:config name "theoboursy cloud"
+          occ theming:config url https://theoboursy.fr/cloud
+          occ theming:config privacyUrl https://theoboursy.fr/cloud/privacy
+          occ theming:config imprintUrl https://theoboursy.fr/legal.html
+          occ theming:config primary_color "#8839ef"
+          occ app:list --output=json | grep -q '"theming_customcss"' || occ app:install theming_customcss
+          occ config:app:set theming_customcss customcss --value "$(cat /var/www/html/config/catppuccin.css)"
+          occ config:app:set theming_customcss cachebuster --value "$(md5sum < /var/www/html/config/catppuccin.css | cut -c1-8)"
           # Nextcloud Office: browsers use office.lab.pub, Nextcloud and Collabora talk inside the cluster
           occ app:list --output=json | grep -q '"richdocuments"' || occ app:install richdocuments
           occ config:app:set richdocuments public_wopi_url --value https://office.lab.pub.theoboursy.fr
