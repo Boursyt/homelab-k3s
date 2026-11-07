@@ -1,0 +1,19 @@
+# the document converter is for Nextcloud (inside the cluster), not for the internet
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: collabora-convert
+  namespace: collabora
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure-pub
+    traefik.ingress.kubernetes.io/router.middlewares: collabora-deny-all@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: office.lab.pub.theoboursy.fr
+      http:
+        paths:
+          - path: /cool/convert-to
+            pathType: Prefix
+            backend:
+              service: { name: collabora-collabora-online, port: { number: 9980 } }

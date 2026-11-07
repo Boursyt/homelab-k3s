@@ -14,10 +14,12 @@ spec:
             matchLabels: { app.kubernetes.io/name: traefik }
       ports:
         - { port: 8080 }
-    # user management page (private-hosting/nextcloud-users)
+    # user management page (private-hosting/nextcloud-users), Collabora (WOPI)
     - from:
         - namespaceSelector:
             matchLabels: { kubernetes.io/metadata.name: nextcloud-users }
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: collabora }
       ports:
         - { port: 8080 }
   egress:
@@ -34,6 +36,12 @@ spec:
         - ipBlock: { cidr: 192.168.1.210/32 }
       ports:
         - { port: 5433 }
+    # Collabora: discovery, document conversion
+    - to:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: collabora }
+      ports:
+        - { port: 9980 }
     # app store, Google sign-in, link previews
     - to:
         - ipBlock:

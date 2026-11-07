@@ -82,6 +82,8 @@ spec:
             // Google rejects a "claims" parameter with a userinfo key
             'user_oidc' => array ('auto_provision' => false, 'send_userinfo_claims' => false),
             'skeletondirectory' => '',
+            // the internal name is used by Collabora (WOPI callbacks inside the cluster)
+            'trusted_domains' => array ('cloud.lab.pub.theoboursy.fr', 'nextcloud.nextcloud.svc.cluster.local'),
             // UGOS ACLs show every NAS file as 0777, whatever its mode
             'check_data_directory_permissions' => false,
           );
@@ -96,6 +98,13 @@ spec:
           occ app:list --output=json | grep -q '"user_oidc"' || occ app:install user_oidc
           occ app:update --all || true
           occ config:app:set files default_quota --value "50 GB"
+          # Nextcloud Office: browsers use office.lab.pub, Nextcloud and Collabora talk inside the cluster
+          occ app:list --output=json | grep -q '"richdocuments"' || occ app:install richdocuments
+          occ config:app:set richdocuments wopi_url --value http://collabora-collabora-online.collabora.svc.cluster.local:9980
+          occ config:app:set richdocuments public_wopi_url --value https://office.lab.pub.theoboursy.fr
+          occ config:app:set richdocuments wopi_callback_url --value http://nextcloud.nextcloud.svc.cluster.local:8080
+          occ config:app:set richdocuments wopi_allowlist --value 10.42.0.0/16
+          occ richdocuments:activate-config || echo "hook: Collabora not reachable yet"
           if [ -n "${OIDC_CLIENT_ID:-}" ]; then
             occ user_oidc:provider Google --clientid="$OIDC_CLIENT_ID" --clientsecret-env=OIDC_CLIENT_SECRET \
               --discoveryuri=https://accounts.google.com/.well-known/openid-configuration \

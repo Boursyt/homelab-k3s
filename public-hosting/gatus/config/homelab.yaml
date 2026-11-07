@@ -28,6 +28,14 @@ endpoints:
       - "[BODY].installed == true"
       - "[BODY].maintenance == false"
       - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Office
+    group: Homelab
+    url: "https://office.lab.pub.theoboursy.fr/hosting/discovery"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
   # internal name: hidden on the page
   - name: Database (PostgreSQL)
     group: Homelab
