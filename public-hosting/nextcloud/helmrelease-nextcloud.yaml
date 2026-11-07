@@ -28,9 +28,14 @@ spec:
               metadata: { name: nextcloud }
               spec:
                 template:
+                  metadata:
+                    # bump when nginx.conf changes, to roll the pods
+                    annotations: { homelab/nginx-conf: "1" }
                   spec:
                     volumes:
                       - { name: code, emptyDir: {} }
+                      # our nginx.conf (kustomization.yaml) instead of the chart's
+                      - { name: nextcloud-nginx-config, configMap: { name: nextcloud-nginx } }
                     containers:
                       - name: nextcloud
                         volumeMounts: [{ mountPath: /var/www/html, name: code, subPath: "" }]
@@ -59,7 +64,6 @@ spec:
         - { name: PGSSLCERT, value: /tmp/none.crt }
         - { name: PGSSLKEY, value: /tmp/none.key }
         - { name: TRUSTED_PROXIES, value: 10.42.0.0/16 }
-        - { name: OVERWRITEPROTOCOL, value: https }
         - { name: OVERWRITECLIURL, value: https://cloud.lab.pub.theoboursy.fr }
         - { name: PHP_MEMORY_LIMIT, value: 1G }
         - { name: PHP_UPLOAD_LIMIT, value: 16G }

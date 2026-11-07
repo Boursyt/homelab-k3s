@@ -9,6 +9,7 @@ Personal cloud (cloud.lab.pub), public. Sign-in with Google only, for pre-provis
 | `pv-nfs-nextcloud-nextcloud-data.yaml` | NFS volume on the NAS (`/volume1/nextcloud`, HDD, UGOS quota 300 GB): user files |
 | `pvc-nextcloud-html.yaml`, `pvc-nextcloud-data.yaml` | claims for the volumes above |
 | `helmrelease-nextcloud.yaml` | chart `nextcloud`: php-fpm + nginx + cron sidecar, all as uid 1000; a post-renderer moves `/var/www/html` to an emptyDir; RollingUpdate (no downtime on config changes) |
+| `nginx.conf` | the chart's nginx config with two changes: `HTTPS` follows `X-Forwarded-Proto` (Collabora signs its plain-http calls: WOPI proof), uploads streamed to PHP. Re-check it when the chart changes its own; bump `homelab/nginx-conf` in the HelmRelease to roll the pods |
 | `deployment-valkey.yaml`, `service-valkey.yaml` | Valkey shared by the Nextcloud pods: cache, file locks, sessions (memory only) |
 | `ingress-nextcloud.yaml` | `cloud.lab.pub.theoboursy.fr` (public entrypoint) |
 | `networkpolicy-nextcloud.yaml` | in: Traefik, `nextcloud-users`, Collabora; out: Collabora, DNS, NAS Postgres, internet 443 |

@@ -15,3 +15,7 @@ resources:
   - helmrelease-nextcloud.yaml
   - ingress-nextcloud.yaml
   - networkpolicy-nextcloud.yaml
+configMapGenerator:
+  - name: nextcloud-nginx
+    files: [default.conf=nginx.conf]
+    options: { disableNameSuffixHash: true }
