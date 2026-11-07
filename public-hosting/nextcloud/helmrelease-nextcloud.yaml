@@ -1,0 +1,177 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  interval: 1h
+  # first start installs Nextcloud, upgrades migrate the database
+  timeout: 15m
+  chart:
+    spec:
+      chart: nextcloud
+      version: 9.4.1
+      sourceRef: { kind: HelmRepository, name: nextcloud, namespace: flux-system }
+  # no rollback: an older image cannot run on a migrated database
+  upgrade:
+    remediation: { retries: 0 }
+  values:
+    image:
+      repository: nextcloud
+      tag: 35.0.2-fpm
+
+    nextcloud:
+      host: cloud.lab.pub.theoboursy.fr
+      trustedDomains: [cloud.lab.pub.theoboursy.fr]
+      # local break-glass admin; people sign in with Google
+      existingSecret:
+        enabled: true
+        secretName: nextcloud-admin
+        usernameKey: nextcloud-username
+        passwordKey: nextcloud-password
+      # port of the nginx sidecar (probes, Service)
+      containerPort: 8080
+      extraEnv:
+        - { name: PGSSLMODE, value: require }
+        - { name: PGSSLCERT, value: /tmp/none.crt }
+        - { name: PGSSLKEY, value: /tmp/none.key }
+        - { name: TRUSTED_PROXIES, value: 10.42.0.0/16 }
+        - { name: OVERWRITEPROTOCOL, value: https }
+        - { name: OVERWRITECLIURL, value: https://cloud.lab.pub.theoboursy.fr }
+        - { name: PHP_MEMORY_LIMIT, value: 1G }
+        - { name: PHP_UPLOAD_LIMIT, value: 16G }
+        - name: OIDC_CLIENT_ID
+          valueFrom: { secretKeyRef: { name: nextcloud-oidc, key: client-id } }
+        - name: OIDC_CLIENT_SECRET
+          valueFrom: { secretKeyRef: { name: nextcloud-oidc, key: client-secret } }
+      # mitigation for CVE-2026-115560 (PHP session RCE, no fix released yet)
+      phpConfigs:
+        zz-homelab.conf: |-
+          [www]
+          php_admin_flag[session.upload_progress.enabled] = off
+      configs:
+        homelab.config.php: |-
+          <?php
+          $CONFIG = array (
+            'default_phone_region' => 'FR',
+            'maintenance_window_start' => 1,
+            // only users pre-provisioned with .helpers/nextcloud-allow.sh may sign in
+            'user_oidc' => array ('auto_provision' => false),
+            'skeletondirectory' => '',
+            // UGOS ACLs show every NAS file as 0777, whatever its mode
+            'check_data_directory_permissions' => false,
+          );
+      hooks:
+        before-starting: |-
+          #!/bin/sh
+          set -eu
+          occ() { php /var/www/html/occ "$@"; }
+          occ status --output=json | grep -q '"installed":true' || { echo "hook: not installed, skipped"; exit 0; }
+          occ app:list --output=json | grep -q '"user_oidc"' || occ app:install user_oidc
+          occ app:update --all || true
+          occ config:app:set files default_quota --value "50 GB"
+          if [ -n "${OIDC_CLIENT_ID:-}" ]; then
+            occ user_oidc:provider Google --clientid="$OIDC_CLIENT_ID" --clientsecret-env=OIDC_CLIENT_SECRET \
+              --discoveryuri=https://accounts.google.com/.well-known/openid-configuration \
+              --scope="openid email profile" --unique-uid=0 --check-bearer=0 --bearer-provisioning=0 \
+              --mapping-uid=email --mapping-email=email --mapping-display-name=name
+            # straight to Google; local login stays at /login?direct=1
+            occ config:app:set --type=string --value=0 user_oidc allow_multiple_user_backends
+          fi
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 1000       # UGOS ACLs only let known NAS uids through NFS
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      # the entrypoint writes the Redis session config into conf.d, which only root may do
+      extraInitContainers:
+        - name: redis-session-ini
+          image: busybox:1.37
+          command: [touch, /php-session/redis-session.ini]
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] }, readOnlyRootFilesystem: true }
+          volumeMounts: [{ name: php-session, mountPath: /php-session }]
+      extraVolumes:
+        - { name: php-session, emptyDir: {} }
+      extraVolumeMounts:
+        - { name: php-session, mountPath: /usr/local/etc/php/conf.d/redis-session.ini, subPath: redis-session.ini }
+      # cache, file locks and sessions; nothing to persist
+      extraSidecarContainers:
+        - name: valkey
+          image: valkey/valkey:9.1.3-alpine
+          args: [--bind, 127.0.0.1, --save, "", --appendonly, "no", --maxmemory, 96mb, --maxmemory-policy, allkeys-lru]
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] }, readOnlyRootFilesystem: true }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 128Mi }
+
+    nginx:
+      enabled: true
+      image:
+        repository: nginxinc/nginx-unprivileged
+        tag: 1.31.7-alpine
+      containerPort: 8080
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      config:
+        headers:
+          "Strict-Transport-Security": "max-age=15768000; includeSubDomains"
+        serverBlockCustom: |
+          client_max_body_size 16G;
+          client_body_timeout 300s;
+          fastcgi_buffers 64 4K;
+          fastcgi_read_timeout 3600s;
+      resources:
+        requests: { cpu: 10m, memory: 16Mi }
+        limits: { memory: 64Mi }
+
+    # busybox crond needs root: plain loop instead
+    cronjob:
+      enabled: true
+      type: sidecar
+      sidecar:
+        command: [sh, -c, "while true; do sleep 300; php -f /var/www/html/cron.php; done"]
+        securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] } }
+        resources:
+          requests: { cpu: 10m, memory: 64Mi }
+          limits: { memory: 512Mi }
+
+    internalDatabase:
+      enabled: false
+    externalDatabase:
+      enabled: true
+      type: postgresql
+      host: postgres-public.databases.svc.cluster.local:5432
+      database: nextcloud
+      existingSecret:
+        enabled: true
+        secretName: nextcloud-db
+        usernameKey: db-username
+        passwordKey: db-password
+    externalRedis:
+      enabled: true
+      host: 127.0.0.1
+      port: "6379"
+
+    # code + config on the NVMe share, files on the HDD share
+    persistence:
+      enabled: true
+      existingClaim: nextcloud-html
+      nextcloudData:
+        enabled: true
+        existingClaim: nextcloud-data
+
+    resources:
+      requests: { cpu: 100m, memory: 512Mi }
+      limits: { memory: 2Gi }
+    startupProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 60
+    nodeSelector:
+      kubernetes.io/arch: amd64

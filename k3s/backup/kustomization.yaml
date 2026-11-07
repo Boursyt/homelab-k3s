@@ -6,8 +6,10 @@ resources:
   - cronjob-restic.yaml
   - pv-nfs-backup-backups-hdd.yaml
   - pv-nfs-backup-k3s-data-ro.yaml
+  - pv-nfs-backup-nextcloud-ro.yaml
   - pvc-backups-hdd.yaml
   - pvc-k3s-data-ro.yaml
+  - pvc-nextcloud-ro.yaml
   - secret-k3s-etcd-s3.sops.yaml
   - secret-postgres-admin.sops.yaml
   - secret-postgres-public-admin.sops.yaml
