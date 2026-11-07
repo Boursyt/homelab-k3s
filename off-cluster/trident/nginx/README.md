@@ -6,7 +6,7 @@ Public entry point of the homelab, in `~/nginx/` on trident. TLS is not terminat
 |---|---|
 | `compose.yaml` | nginx as uid 101, read-only, no capabilities, host network |
 | `nginx.conf` | `stream` (443) and `http` (80) blocks |
-| `stream.d/lab-pub.conf` | `lab.pub.theoboursy.fr` and `*.lab.pub.theoboursy.fr` → Traefik public entrypoint `192.168.1.200:8443`, everything else refused |
+| `stream.d/lab-pub.conf` | `lab.pub.theoboursy.fr` and `*.lab.pub.theoboursy.fr` → Traefik public entrypoint `192.168.1.200:8443`, everything else refused; PROXY protocol on (Traefik gets the real client IP) |
 | `conf.d/redirect.conf` | port 80: redirect `*.lab.pub` to HTTPS, drop the rest |
 
 Only the public entrypoint is reachable: a request with a public SNI but a private `Host` header finds no router there.

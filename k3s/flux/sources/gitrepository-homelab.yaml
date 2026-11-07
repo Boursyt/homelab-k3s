@@ -4,7 +4,7 @@ metadata:
   name: homelab
   namespace: flux-system
 spec:
-  # public GitHub mirror, read-only: no credentials, and works while Gitea (in the cluster) is down
-  url: https://github.com/Boursyt/homelab-k3s
+  # public GitLab mirror, read-only: no credentials, and works while Gitea (in the cluster) is down
+  url: https://gitlab.com/Boursyt/homelab-k3s.git
   ref: { branch: main }
   interval: 1m

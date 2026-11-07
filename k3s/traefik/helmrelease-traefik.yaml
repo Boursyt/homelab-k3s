@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: 41.7.1   # Traefik v3.7.13
+      version: 42.3.1   # Traefik v3.7.13
       sourceRef: { kind: HelmRepository, name: traefik, namespace: flux-system }
   install:
     crds: CreateReplace
@@ -21,7 +21,7 @@ spec:
     # k3s defaults, kept as they were
     image:
       repository: rancher/mirrored-library-traefik
-      tag: 3.7.16
+      tag: 3.7.17
     priorityClassName: system-cluster-critical
     tolerations:
       - { key: CriticalAddonsOnly, operator: Exists }
@@ -100,6 +100,9 @@ spec:
         exposedPort: 8443
         expose: { default: true }
         protocol: TCP
+        # trident sends the real client IP with PROXY protocol; it arrives through the svclb pods
+        proxyProtocol:
+          trustedIPs: [10.42.0.0/16]
         http:
           tls:
             enabled: true

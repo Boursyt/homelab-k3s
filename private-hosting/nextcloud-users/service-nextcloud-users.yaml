@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-users
+  namespace: nextcloud-users
+spec:
+  selector: { app.kubernetes.io/name: nextcloud-users }
+  ports:
+    - { name: http, port: 8080, targetPort: http }

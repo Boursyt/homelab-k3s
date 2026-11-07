@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - kustomization-gatus-public.yaml
   - kustomization-glance-public.yaml
+  - kustomization-nextcloud.yaml

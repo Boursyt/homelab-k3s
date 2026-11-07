@@ -12,4 +12,5 @@ Services reachable only from the home network and the VPN, on `*.lab.theoboursy.
 | `openwebui/` | LLM chat |
 | `spoolman/` | filament inventory |
 | `manyfold/` | 3D model library |
+| `nextcloud-users/` | who may sign in to Nextcloud (cloud.lab.pub) |
 | `headlamp/` | Kubernetes web UI |
