@@ -35,7 +35,7 @@ spec:
                 - -euc
                 - |
                   [ -f "$RESTIC_REPOSITORY/config" ] || restic init
-                  restic backup --host homelab --tag nightly --exclude '#recycle' /data/k3s /backups/postgres
+                  restic backup --host homelab --tag nightly --exclude '#recycle' --exclude '/data/nextcloud/data/appdata_*/preview' /data/k3s /data/nextcloud /backups/postgres
                   restic forget --prune --keep-daily 14 --keep-weekly 8 --keep-monthly 12
                   restic check --read-data-subset=5%
                   export RESTIC_FROM_REPOSITORY="$RESTIC_REPOSITORY" RESTIC_FROM_PASSWORD="$RESTIC_PASSWORD"
@@ -59,6 +59,7 @@ spec:
                 - { name: backups, mountPath: /backups }
                 - { name: tmp, mountPath: /tmp }
                 - { name: k3s-data, mountPath: /data/k3s, readOnly: true }
+                - { name: nextcloud, mountPath: /data/nextcloud, readOnly: true }
               resources:
                 requests: { cpu: 100m, memory: 128Mi }
                 limits:   { memory: 1Gi }
@@ -69,3 +70,5 @@ spec:
               persistentVolumeClaim: { claimName: backups-hdd }
             - name: k3s-data
               persistentVolumeClaim: { claimName: k3s-data-ro, readOnly: true }
+            - name: nextcloud
+              persistentVolumeClaim: { claimName: nextcloud-ro, readOnly: true }

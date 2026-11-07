@@ -7,6 +7,7 @@ resources:
   - kustomization-headlamp.yaml
   - kustomization-homeassistant.yaml
   - kustomization-manyfold.yaml
+  - kustomization-nextcloud-users.yaml
   - kustomization-openwebui.yaml
   - kustomization-spoolman.yaml
   - kustomization-zigbee.yaml

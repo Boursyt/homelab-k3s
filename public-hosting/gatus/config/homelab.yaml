@@ -17,6 +17,17 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Cloud
+    group: Homelab
+    extra-labels: { desc: "files, calendar, contacts", icon: "nextcloud", href: "https://cloud.lab.pub.theoboursy.fr", order: "3" }
+    url: "https://cloud.lab.pub.theoboursy.fr/status.php"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].installed == true"
+      - "[BODY].maintenance == false"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
   # internal name: hidden on the page
   - name: Database (PostgreSQL)
     group: Homelab
