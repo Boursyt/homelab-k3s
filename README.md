@@ -25,7 +25,7 @@ The NAS stores data, the Pis run compute.
 | `iac/` | Terraform for GCP: DNS records, backup bucket, service accounts |
 
 Changes go through a pull request on the self-hosted Gitea: `.gitea/workflows/validate.yaml` checks it (no secret,
-every directory builds and is valid) and merges it. Gitea mirrors `main` to GitHub, and Flux (`k3s/flux/`) applies it within a minute.
+every directory builds and is valid) and merges it. Gitea mirrors to GitLab, GitLab mirrors to GitHub, and Flux (`k3s/flux/`) applies it within a minute.
 
     git switch -c my-change && git commit -am "…" && git push -u origin my-change   # then open the PR
 

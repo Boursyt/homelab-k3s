@@ -22,7 +22,7 @@ Not managed by Flux: `k3s/nodes/` and `off-cluster/`.
 ## How to
 
 **Change something** (any app or platform file): branch, push, open a PR on Gitea. The `validate` workflow checks and merges it,
-Gitea mirrors `main` to GitHub, Flux applies within a minute.
+Gitea mirrors to GitLab, GitLab mirrors to GitHub, Flux applies within a minute.
 
     git switch -c my-change && git commit -am "…" && git push -u origin my-change
     flux reconcile kustomization <name> --with-source   # after the merge, to apply now
