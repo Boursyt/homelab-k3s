@@ -16,3 +16,4 @@ Rules:
 | `glance/` | public dashboard on `lab.pub.theoboursy.fr` |
 | `gatus/` | public status page on `status.lab.pub.theoboursy.fr` |
 | `nextcloud/` | personal cloud on `cloud.lab.pub.theoboursy.fr` |
+| `collabora/` | office suite for Nextcloud on `office.lab.pub.theoboursy.fr` |

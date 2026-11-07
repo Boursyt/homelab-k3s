@@ -10,7 +10,7 @@ Personal cloud (cloud.lab.pub), public. Sign-in with Google only, for pre-provis
 | `pvc-nextcloud-html.yaml`, `pvc-nextcloud-data.yaml` | claims for the volumes above |
 | `helmrelease-nextcloud.yaml` | chart `nextcloud`: php-fpm + nginx + Valkey + cron sidecars, all as uid 1000; a post-renderer moves `/var/www/html` to an emptyDir |
 | `ingress-nextcloud.yaml` | `cloud.lab.pub.theoboursy.fr` (public entrypoint) |
-| `networkpolicy-nextcloud.yaml` | in: Traefik, `nextcloud-users`; out: DNS, NAS Postgres, internet 443 |
+| `networkpolicy-nextcloud.yaml` | in: Traefik, `nextcloud-users`, Collabora; out: Collabora, DNS, NAS Postgres, internet 443 |
 | `secret-nextcloud-admin.sops.yaml`, `secret-nextcloud-db.sops.yaml`, `secret-nextcloud-oidc.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
 
 Users: `user_oidc` with `auto_provision` off, so only accounts created beforehand can sign in (50 GB quota each).

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: collabora
+resources:
+  - namespace.yaml
+  - secret-collabora-admin.sops.yaml
+  - secret-collabora-proof-key.sops.yaml
+  - helmrelease-collabora.yaml
+  - middleware-deny-all.yaml
+  - ingress-collabora.yaml
+  - ingress-collabora-convert.yaml
+  - networkpolicy-collabora.yaml
