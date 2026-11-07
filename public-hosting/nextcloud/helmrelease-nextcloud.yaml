@@ -97,6 +97,8 @@ spec:
           occ app:list --output=json | grep -q '"user_oidc"' || occ app:install user_oidc
           occ app:update --all || true
           occ config:app:set files default_quota --value "50 GB"
+          # https comes from nginx; a forced protocol breaks Collabora's WOPI proof (plain http inside the cluster)
+          occ config:system:delete overwriteprotocol
           # Nextcloud Office: browsers use office.lab.pub, Nextcloud and Collabora talk inside the cluster
           occ app:list --output=json | grep -q '"richdocuments"' || occ app:install richdocuments
           occ config:app:set richdocuments public_wopi_url --value https://office.lab.pub.theoboursy.fr

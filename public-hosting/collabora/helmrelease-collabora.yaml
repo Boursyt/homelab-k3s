@@ -28,11 +28,13 @@ spec:
       aliasgroups:
         - host: http://nextcloud.nextcloud.svc.cluster.local:8080
       # TLS ends at Traefik; no capabilities (Pod Security restricted): no chroot mounts;
-      # no admin console on a public host
+      # no admin console on a public host; the editor is shown in a frame of cloud.lab.pub
+      # (the alias group only has the internal callback host)
       extra_params: >-
         --o:ssl.enable=false --o:ssl.termination=true
         --o:security.capabilities=false --o:mount_jail_tree=false
         --o:admin_console.enable=false
+        --o:net.frame_ancestors=cloud.lab.pub.theoboursy.fr
       existingSecret:
         enabled: true
         secretName: collabora-admin
