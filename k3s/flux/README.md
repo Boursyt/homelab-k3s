@@ -1,6 +1,6 @@
 # Flux
 
-GitOps: Flux applies this repository to the cluster, reading the public GitHub mirror.
+GitOps: Flux applies this repository to the cluster, reading the public GitLab mirror.
 Own apps are plain Kustomize directories; third-party software is a Flux `HelmRelease` in its directory.
 
 | Path | Content |
