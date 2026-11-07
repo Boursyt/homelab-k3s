@@ -137,6 +137,16 @@ spec:
             --color-info: rgb(var(--ctp-blue-bg)); --color-info-rgb: var(--ctp-blue-bg); --color-info-hover: rgba(var(--ctp-blue-bg), .8); --color-info-text: var(--ctp-blue);
             --color-mark: rgb(var(--ctp-yellow-bg));
           }
+          /* header logo: the white SVG used as a mask, filled with the palette text colour */
+          #nextcloud .logo {
+            -webkit-mask: url(/core/img/logo/logo.svg) center / contain no-repeat;
+            mask: url(/core/img/logo/logo.svg) center / contain no-repeat;
+            background: #4c4f69 !important;
+          }
+          html body[data-theme-dark] #nextcloud .logo { background: #cdd6f4 !important; }
+          @media (prefers-color-scheme: dark) {
+            html body[data-theme-default] #nextcloud .logo { background: #cdd6f4 !important; }
+          }
       hooks:
         before-starting: |-
           #!/bin/sh
@@ -156,6 +166,10 @@ spec:
           occ theming:config privacyUrl https://theoboursy.fr/cloud/privacy
           occ theming:config imprintUrl https://theoboursy.fr/legal.html
           occ theming:config primary_color "#8839ef"
+          # let people pick light, dark or system in Settings > Appearance
+          occ theming:config disable-user-theming no
+          # no "Nextcloud Hub" welcome slideshow
+          occ app:disable firstrunwizard || true
           occ app:list --output=json | grep -q '"theming_customcss"' || occ app:install theming_customcss
           occ config:app:set theming_customcss customcss --value "$(cat /var/www/html/config/catppuccin.css)"
           occ config:app:set theming_customcss cachebuster --value "$(md5sum < /var/www/html/config/catppuccin.css | cut -c1-8)"
