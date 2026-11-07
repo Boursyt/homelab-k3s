@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valkey
+  namespace: nextcloud
+  labels: { app.kubernetes.io/name: valkey }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: valkey }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: valkey }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: valkey
+          image: valkey/valkey:9.1.3-alpine
+          # cache, file locks and sessions: nothing to persist; evict only keys with a TTL
+          args: [--save, "", --appendonly, "no", --maxmemory, 112mb, --maxmemory-policy, volatile-lru]
+          ports:
+            - { name: valkey, containerPort: 6379 }
+          readinessProbe:
+            tcpSocket: { port: valkey }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 128Mi }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      volumes:
+        - name: data
+          emptyDir: {}

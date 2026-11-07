@@ -10,6 +10,8 @@ resources:
   - secret-nextcloud-admin.sops.yaml
   - secret-nextcloud-db.sops.yaml
   - secret-nextcloud-oidc.sops.yaml
+  - deployment-valkey.yaml
+  - service-valkey.yaml
   - helmrelease-nextcloud.yaml
   - ingress-nextcloud.yaml
   - networkpolicy-nextcloud.yaml
