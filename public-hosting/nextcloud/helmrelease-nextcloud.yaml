@@ -15,6 +15,29 @@ spec:
   # no rollback: an older image cannot run on a migrated database
   upgrade:
     remediation: { retries: 0 }
+  # the chart keeps code and config on one volume: put the code (/var/www/html) on a per-pod
+  # emptyDir instead, filled from the image by the init container "code"; config, apps, themes
+  # and data stay on the NAS, so the pod can start on any node
+  postRenderers:
+    - kustomize:
+        patches:
+          - target: { kind: Deployment, name: nextcloud }
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata: { name: nextcloud }
+              spec:
+                template:
+                  spec:
+                    volumes:
+                      - { name: code, emptyDir: {} }
+                    containers:
+                      - name: nextcloud
+                        volumeMounts: [{ mountPath: /var/www/html, name: code, subPath: "" }]
+                      - name: nextcloud-nginx
+                        volumeMounts: [{ mountPath: /var/www/html, name: code, subPath: "" }]
+                      - name: nextcloud-cron
+                        volumeMounts: [{ mountPath: /var/www/html, name: code, subPath: "" }]
   values:
     image:
       repository: nextcloud
@@ -67,6 +90,8 @@ spec:
           set -eu
           occ() { php /var/www/html/occ "$@"; }
           occ status --output=json | grep -q '"installed":true' || { echo "hook: not installed, skipped"; exit 0; }
+          # installed version, restored into the per-pod code by the init container "code"
+          cp /var/www/html/version.php /var/www/html/config/.image-version
           occ app:list --output=json | grep -q '"user_oidc"' || occ app:install user_oidc
           occ app:update --all || true
           occ config:app:set files default_quota --value "50 GB"
@@ -89,6 +114,27 @@ spec:
         capabilities: { drop: [ALL] }
       # the entrypoint writes the Redis session config into conf.d, which only root may do
       extraInitContainers:
+        # code from the image (seconds on local disk) + the installed version, so the
+        # entrypoint only syncs and upgrades when the image is newer
+        - name: code
+          image: nextcloud:35.0.2-fpm
+          command:
+            - sh
+            - -ec
+            - |
+              cd /usr/src/nextcloud
+              for f in * .[!.]*; do
+                case "$f" in config|data|custom_apps|themes|version.php) ;; *) cp -a "$f" /code/ ;; esac
+              done
+              if [ -f /persist/.image-version ]; then
+                cp /persist/.image-version /code/version.php
+              elif grep -qs "'installed' => true" /persist/config.php; then
+                cp version.php /code/version.php
+              fi
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] } }
+          volumeMounts:
+            - { name: code, mountPath: /code }
+            - { name: nextcloud-main, mountPath: /persist, subPath: config }
         - name: redis-session-ini
           image: busybox:1.37
           command: [touch, /php-session/redis-session.ini]
@@ -168,7 +214,7 @@ spec:
     resources:
       requests: { cpu: 100m, memory: 512Mi }
       limits: { memory: 2Gi }
-    # install and upgrades copy ~850 MB of small files to NFS (sync export): ~25 min
+    # first install and upgrades migrate the database
     startupProbe:
       enabled: true
       initialDelaySeconds: 30
