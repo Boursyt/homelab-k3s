@@ -28,14 +28,9 @@ spec:
               metadata: { name: nextcloud }
               spec:
                 template:
-                  metadata:
-                    # bump when nginx.conf changes, to roll the pods
-                    annotations: { homelab/nginx-conf: "1" }
                   spec:
                     volumes:
                       - { name: code, emptyDir: {} }
-                      # our nginx.conf (kustomization.yaml) instead of the chart's
-                      - { name: nextcloud-nginx-config, configMap: { name: nextcloud-nginx } }
                     containers:
                       - name: nextcloud
                         volumeMounts: [{ mountPath: /var/www/html, name: code, subPath: "" }]
@@ -179,6 +174,19 @@ spec:
           client_body_timeout 300s;
           fastcgi_buffers 64 4K;
           fastcgi_read_timeout 3600s;
+          # Collabora calls these over plain http inside the cluster and signs that URL (WOPI proof):
+          # PHP must not see HTTPS=on here (the chart sets it for every .php request)
+          location ^~ /index.php/apps/richdocuments/wopi/ {
+            fastcgi_split_path_info ^(/index\.php)(/.*)$;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param PATH_INFO $fastcgi_path_info;
+            fastcgi_param HTTPS off;
+            fastcgi_param modHeadersAvailable true;
+            fastcgi_param front_controller_active true;
+            fastcgi_pass php-handler;
+            fastcgi_request_buffering off;
+          }
       resources:
         requests: { cpu: 10m, memory: 16Mi }
         limits: { memory: 64Mi }
