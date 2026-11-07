@@ -100,6 +100,9 @@ spec:
         exposedPort: 8443
         expose: { default: true }
         protocol: TCP
+        # trident sends the real client IP with PROXY protocol; it arrives through the svclb pods
+        proxyProtocol:
+          trustedIPs: [10.42.0.0/16]
         http:
           tls:
             enabled: true
