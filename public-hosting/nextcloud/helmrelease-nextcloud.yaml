@@ -78,8 +78,9 @@ spec:
           $CONFIG = array (
             'default_phone_region' => 'FR',
             'maintenance_window_start' => 1,
-            // only users pre-provisioned with .helpers/nextcloud-allow.sh may sign in
-            'user_oidc' => array ('auto_provision' => false),
+            // only users pre-provisioned with .helpers/nextcloud-allow.sh may sign in;
+            // Google rejects a "claims" parameter with a userinfo key
+            'user_oidc' => array ('auto_provision' => false, 'send_userinfo_claims' => false),
             'skeletondirectory' => '',
             // UGOS ACLs show every NAS file as 0777, whatever its mode
             'check_data_directory_permissions' => false,
