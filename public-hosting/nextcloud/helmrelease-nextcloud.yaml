@@ -108,7 +108,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000       # UGOS ACLs only let known NAS uids through NFS
         runAsGroup: 1000
-        fsGroup: 1000
+        # no fsGroup: kubelet would chown every file on the NFS volumes at each start
         seccompProfile: { type: RuntimeDefault }
       securityContext:
         allowPrivilegeEscalation: false
