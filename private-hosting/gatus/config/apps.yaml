@@ -54,6 +54,15 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Nextcloud users
+    group: Apps
+    extra-labels: { desc: "who may sign in to the cloud", section: "Apps", href: "https://users.lab.theoboursy.fr", order: "17", icon: "nextcloud" }
+    url: "https://users.lab.theoboursy.fr/healthz"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Spoolman
     group: Apps
     extra-labels: { desc: "3D printing filament inventory", section: "Apps", href: "https://spoolman.lab.theoboursy.fr", order: "14" }

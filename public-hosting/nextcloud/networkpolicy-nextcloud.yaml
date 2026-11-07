@@ -14,6 +14,12 @@ spec:
             matchLabels: { app.kubernetes.io/name: traefik }
       ports:
         - { port: 8080 }
+    # user management page (private-hosting/nextcloud-users)
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: nextcloud-users }
+      ports:
+        - { port: 8080 }
   egress:
     - to:
         - namespaceSelector:

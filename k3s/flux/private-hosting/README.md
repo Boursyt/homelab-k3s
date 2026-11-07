@@ -10,6 +10,7 @@ One Flux `Kustomization` per directory of `private-hosting/`.
 | `kustomization-headlamp.yaml` | `private-hosting/headlamp`, after cert-manager, traefik |
 | `kustomization-homeassistant.yaml` | `private-hosting/homeassistant`, after cert-manager, traefik, databases, nfs |
 | `kustomization-manyfold.yaml` | `private-hosting/manyfold`, after cert-manager, traefik, databases, nfs |
+| `kustomization-nextcloud-users.yaml` | `private-hosting/nextcloud-users`, after cert-manager, traefik, nextcloud |
 | `kustomization-openwebui.yaml` | `private-hosting/openwebui`, after cert-manager, traefik, databases, nfs |
 | `kustomization-spoolman.yaml` | `private-hosting/spoolman`, after cert-manager, traefik, databases |
 | `kustomization-zigbee.yaml` | `private-hosting/zigbee`, after cert-manager, traefik, nfs, devices |
