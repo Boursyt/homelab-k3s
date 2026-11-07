@@ -22,7 +22,17 @@ spec:
             matchLabels: { kubernetes.io/metadata.name: collabora }
       ports:
         - { port: 8080 }
+    # Valkey, shared by the Nextcloud pods
+    - from:
+        - podSelector: {}
+      ports:
+        - { port: 6379 }
   egress:
+    - to:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: valkey }
+      ports:
+        - { port: 6379 }
     - to:
         - namespaceSelector:
             matchLabels: { kubernetes.io/metadata.name: kube-system }
