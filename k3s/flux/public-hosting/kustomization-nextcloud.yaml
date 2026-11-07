@@ -8,7 +8,7 @@ spec:
   sourceRef: { kind: GitRepository, name: homelab }
   interval: 10m
   retryInterval: 2m
-  timeout: 20m
+  timeout: 50m
   prune: true
   decryption: { provider: sops, secretRef: { name: sops-age } }
   dependsOn:

@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 1h
   # first start installs Nextcloud, upgrades migrate the database
-  timeout: 15m
+  timeout: 45m
   chart:
     spec:
       chart: nextcloud
@@ -168,10 +168,11 @@ spec:
     resources:
       requests: { cpu: 100m, memory: 512Mi }
       limits: { memory: 2Gi }
+    # install and upgrades copy ~850 MB of small files to NFS (sync export): ~25 min
     startupProbe:
       enabled: true
       initialDelaySeconds: 30
       periodSeconds: 10
-      failureThreshold: 60
+      failureThreshold: 240
     nodeSelector:
       kubernetes.io/arch: amd64
