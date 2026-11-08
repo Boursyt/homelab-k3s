@@ -17,4 +17,5 @@ Personal cloud (cloud.lab.pub), public. Sign-in with Google only, for pre-provis
 Users: `user_oidc` with `auto_provision` off, so only accounts created beforehand can sign in (50 GB quota each).
 Allow someone: https://users.lab.theoboursy.fr (`private-hosting/nextcloud-users`), or `.helpers/nextcloud-allow.sh <email> [--admin]` (Mac). Local admin login: `/login?direct=1`.
 Look: Catppuccin Latte (light) / Mocha (dark), accent mauve, in the HelmRelease (`configs: catppuccin.css`), loaded by the start hook into the Custom CSS app (`theming_customcss`); name and links set with `occ theming:config`.
+Apps installed by the start hook: user_oidc, theming_customcss, richdocuments, calendar, contacts, tasks, notes, deck, forms, bookmarks, memories.
 The Google OAuth client (`secret-nextcloud-oidc`) is made by hand in the GCP console (project `homelab-pi-510022`, Google Auth Platform: app "theoboursy cloud", home page and privacy policy on theoboursy.fr/cloud).
