@@ -25,5 +25,5 @@ variable "vip" {
 
 variable "vps_ip" {
   type    = string
-  default = "92.222.85.53"
+  default = "159.195.200.238"
 }
