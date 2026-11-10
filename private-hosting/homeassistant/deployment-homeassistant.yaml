@@ -26,7 +26,7 @@ spec:
           resources: { requests: { cpu: 5m, memory: 8Mi }, limits: { memory: 32Mi } }
       containers:
         - name: homeassistant
-          image: ghcr.io/home-assistant/home-assistant:2026.11.0
+          image: ghcr.io/home-assistant/home-assistant:2026.11.1
           env:
             - { name: TZ, value: Europe/Paris }
             - { name: DB_PASSWORD, valueFrom: { secretKeyRef: { name: homeassistant-db, key: password } } }
