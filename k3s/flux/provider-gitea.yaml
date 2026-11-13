@@ -1,6 +1,6 @@
 # Commit status on Gitea: each Flux Kustomization reports whether it applied the commit.
 # Secret gitea-commit-status (key token): Gitea token of user hypto, repository read/write.
-apiVersion: notification.toolkit.fluxcd.io/v1beta3
+apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Provider
 metadata:
   name: gitea
