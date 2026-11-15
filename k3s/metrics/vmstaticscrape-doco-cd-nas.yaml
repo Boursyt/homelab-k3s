@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: doco-cd-nas
+  namespace: monitoring
+spec:
+  jobName: doco-cd
+  targetEndpoints:
+    - targets: ["192.168.1.210:9120"]
+      labels: { instance: kibisis }

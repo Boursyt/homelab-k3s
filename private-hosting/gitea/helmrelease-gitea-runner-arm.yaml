@@ -21,7 +21,7 @@ spec:
     existingSecretKey: token
     giteaRootURL: http://gitea-http.gitea.svc.cluster.local:6969
     statefulset:
-      replicas: 2
+      replicas: 1
       timezone: Europe/Paris
       # one runner on each Pi 5; Docker data stays ephemeral (SD cards, overlayfs cannot live on NFS)
       affinity:

@@ -25,6 +25,7 @@ resources:
   - vmnodescrape-kubelet.yaml
   - vmpodscrape-flux.yaml
   - vmstaticscrape-cadvisor-nas.yaml
+  - vmstaticscrape-doco-cd-nas.yaml
   - vmstaticscrape-gatus-public.yaml
   - vmstaticscrape-gatus.yaml
   - vmstaticscrape-homeassistant.yaml
