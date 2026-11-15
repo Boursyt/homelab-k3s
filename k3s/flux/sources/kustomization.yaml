@@ -5,6 +5,7 @@ resources:
   - helmrepository-collabora.yaml
   - helmrepository-csi-driver-nfs.yaml
   - helmrepository-gitea.yaml
+  - helmrepository-gitlab.yaml
   - helmrepository-grafana-community.yaml
   - helmrepository-headlamp.yaml
   - helmrepository-jetstack.yaml

@@ -6,7 +6,7 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 |---|---|
 | `namespace.yaml` | `gitlab` namespace |
 | `pv-iscsi-gitlab-gitaly.yaml` | static iSCSI PV (NAS LUN 0, ext4, no storage class provisioner) |
-| `pvc-gitlab-gitaly.yaml` | claim bound to that PV |
+| `pvc-repo-data-gitlab-gitaly-0.yaml` | claim bound to that PV, named as the Gitaly StatefulSet expects |
 | `secret-gitlab-iscsi-chap.sops.yaml` | CHAP credentials of the target (SOPS) |
 | `secret-gitlab-object-storage.sops.yaml` | Garage S3 key for GitLab (object store connection + backups s3cfg), SOPS |
 | `secret-gitlab-db.sops.yaml` | password of the `gitlab` role (NAS Postgres, database `gitlab`) |
@@ -16,3 +16,7 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 | `pvc-valkey.yaml` | claim of the Valkey data |
 | `secret-gitlab-valkey.sops.yaml` | Valkey password (SOPS) |
 | `secret-gitlab-initial-root-password.sops.yaml` | initial password of the `root` administrator (rename the account after the first login), SOPS |
+| `helmrelease-gitlab.yaml` | GitLab chart 10.5.6 (external Postgres, Valkey and S3; Traefik; OptiPlex only; SSH on the VIP, port 2223) |
+| `namespace-gitlab-runner.yaml` | `gitlab-runner` namespace (runner managers and CI job pods) |
+| `helmrelease-gitlab-runner-amd64.yaml` | amd64 runners, 6 jobs (draft, not in `kustomization.yaml` until the runner token Secret exists) |
+| `helmrelease-gitlab-runner-arm64.yaml` | arm64 runners, 4 jobs (same) |
