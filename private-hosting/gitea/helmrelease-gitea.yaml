@@ -31,10 +31,10 @@ spec:
           MAX_OPEN_CONNS: 10
           MAX_IDLE_CONNS: 2
         server:
-          DOMAIN: git.lab.theoboursy.fr
-          ROOT_URL: https://git.lab.theoboursy.fr/
-          SSH_DOMAIN: git.lab.theoboursy.fr
-          SSH_PORT: 2222
+          DOMAIN: gitea.lab.theoboursy.fr
+          ROOT_URL: https://gitea.lab.theoboursy.fr/
+          SSH_DOMAIN: gitea.lab.theoboursy.fr
+          SSH_PORT: 2223
         session:
           PROVIDER: redis
           PROVIDER_CONFIG: "network=tcp,addr=gitea-valkey-cluster.gitea.svc.cluster.local:6379,db=0,pool_size=100,idle_timeout=180"
@@ -95,13 +95,13 @@ spec:
       ssh:
         type: LoadBalancer
         clusterIP: ""
-        port: 2222
+        port: 2223
 
     ingress:
       enabled: true
       className: traefik
       hosts:
-        - host: git.lab.theoboursy.fr
+        - host: gitea.lab.theoboursy.fr
           paths:
             - path: /
 

@@ -24,10 +24,11 @@ The NAS stores data, the Pis run compute.
 | `off-cluster/` | machines outside Kubernetes: NAS stacks, VPS |
 | `iac/` | Terraform for GCP: DNS records, backup bucket, service accounts |
 
-Changes go through a pull request on the self-hosted Gitea: `.gitea/workflows/validate.yaml` checks it (no secret,
-every directory builds and is valid) and merges it. Gitea mirrors to GitLab, GitLab mirrors to GitHub, and Flux (`k3s/flux/`) applies it within a minute.
+Changes go through a merge request on the self-hosted GitLab (`git.lab`): `.gitlab-ci.yml` checks it (no secret,
+every directory builds and is valid) and merges it. The self-hosted GitLab mirrors to GitLab.com, GitLab.com mirrors to GitHub, and Flux (`k3s/flux/`) reads GitLab.com and applies it within a minute.
+Gitea (`gitea.lab`) is kept as a backup mirror.
 
-    git switch -c my-change && git commit -am "…" && git push -u origin my-change   # then open the PR
+    git switch -c my-change && git commit -am "…" && git push -u origin my-change   # then open the merge request
 
 - own apps: plain Kustomize directories, one object per file named `<kind>-<name>.yaml`
 - third-party software: a Flux `HelmRelease` (`helmrelease-*.yaml`, chart version pinned, values inline) in its directory

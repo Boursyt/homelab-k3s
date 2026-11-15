@@ -9,10 +9,19 @@ endpoints:
       - "[STATUS] == 200"
       - "[BODY].database == ok"
       - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: GitLab
+    group: Apps
+    extra-labels: { desc: "git hosting and CI, mirrored to GitLab.com and GitHub", section: "Apps", href: "https://git.lab.theoboursy.fr", order: "11" }
+    url: "https://git.lab.theoboursy.fr/-/readiness"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Gitea
     group: Apps
-    extra-labels: { desc: "git hosting, mirrored to GitHub", section: "Apps", href: "https://git.lab.theoboursy.fr", order: "11" }
-    url: "https://git.lab.theoboursy.fr/api/healthz"
+    extra-labels: { desc: "git backup (mirror of GitLab)", section: "Apps", href: "https://gitea.lab.theoboursy.fr", order: "19" }
+    url: "https://gitea.lab.theoboursy.fr/api/healthz"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:

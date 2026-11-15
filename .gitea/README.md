@@ -1,4 +1,8 @@
-# Gitea
+# Gitea (legacy) and CI helpers
+
+The CI is `.gitlab-ci.yml` at the root (self-hosted GitLab runners): `gitleaks`, `render` (`validate.sh`), `kubeconform`, then `merge` (auto-merge, squash, except `renovate/manual-*`), and a scheduled `renovate` job (config `renovate.json`).
+CI/CD variables of the project: `MERGE_TOKEN` (project access token, api, Maintainer), `RENOVATE_TOKEN` (api, write_repository), `RENOVATE_GITHUB_COM_TOKEN`; schedule: daily at 04:00 UTC.
+The Gitea workflows below only run while Gitea hosts the repository, they are kept for the backup and can be removed later. `validate.sh` and `renovate.json` are shared by both.
 
 | File | Content |
 |---|---|

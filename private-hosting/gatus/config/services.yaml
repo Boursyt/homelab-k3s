@@ -21,9 +21,16 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[CONNECTED] == true"
-  - name: Gitea SSH
+  - name: GitLab SSH
     group: Services
     url: "tcp://git.lab.theoboursy.fr:2222"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
+  - name: Gitea SSH
+    group: Services
+    url: "tcp://gitea.lab.theoboursy.fr:2223"
     interval: 1m
     alerts: [{ type: ntfy }]
     conditions:
@@ -85,3 +92,11 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[STATUS] == 200"
+  - name: Container registry (GitLab)
+    group: Services
+    url: "https://registry.lab.theoboursy.fr/v2/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 401"
+      - "[CERTIFICATE_EXPIRATION] > 336h"

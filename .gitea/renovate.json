@@ -47,7 +47,7 @@
       "enabled": false
     },
     {
-      "matchDepNames": ["fluxcd/flux2", "fluxcd/flux2/action"],
+      "matchDepNames": ["fluxcd/flux2", "fluxcd/flux2/action", "ghcr.io/fluxcd/flux-cli"],
       "groupName": "flux"
     },
     {

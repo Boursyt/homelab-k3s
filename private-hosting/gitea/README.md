@@ -1,6 +1,6 @@
 # Gitea
 
-Git server (git.lab) with Actions runners. Repositories and Valkey data on the NAS (NFS); runners and their caches on the OptiPlex local disks.
+Git server (gitea.lab, backup of GitLab; SSH on the VIP port 2223) with Actions runners. Repositories and Valkey data on the NAS (NFS); runners and their caches on the OptiPlex local disks.
 
 | File | Content |
 |---|---|

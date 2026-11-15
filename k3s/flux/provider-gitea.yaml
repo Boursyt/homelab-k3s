@@ -7,5 +7,5 @@ metadata:
   namespace: flux-system
 spec:
   type: gitea
-  address: https://git.lab.theoboursy.fr/hypto/homelab-k3s
+  address: https://gitea.lab.theoboursy.fr/hypto/homelab-k3s
   secretRef: { name: gitea-commit-status }

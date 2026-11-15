@@ -21,6 +21,7 @@ spec:
       hosts:
         domain: lab.theoboursy.fr
         https: true
+        gitlab: { name: git.lab.theoboursy.fr }
       # Traefik Ingress instead of the Gateway API / Envoy of chart 10
       gatewayApi:
         { enabled: false, installEnvoy: false, configureCertmanager: false }
@@ -44,12 +45,14 @@ spec:
         auth: { enabled: true, secret: gitlab-valkey, key: password }
       # NAS Garage S3 (path style, endpoint in the connection secret)
       minio: { enabled: false }
-      registry: { enabled: false }
+      registry:
+        enabled: true
+        bucket: gitlab-registry
       kas: { enabled: false }
       # OptiPlex only (amd64); the scheduler spreads the pods over the 3 of them
       nodeSelector: { kubernetes.io/arch: amd64 }
-      # SSH on the VIP, temporary port while Gitea still owns 2222
-      shell: { port: 2223 }
+      # SSH on the VIP, port 2222 (Gitea moved to 2223)
+      shell: { port: 2222 }
       appConfig:
         object_store:
           enabled: true
@@ -75,6 +78,8 @@ spec:
       toolbox:
         extraEnv: { BYPASS_SCHEMA_VERSION: true }
         backups:
+          # daily 01:00 Paris: repositories and database, to the bucket gitlab-backups (registry and uploads are already object storage)
+          cron: { enabled: true, schedule: "0 0 * * *", extraArgs: "--skip registry" }
           objectStorage:
             config: { secret: gitlab-object-storage, key: backups-s3cfg }
       webservice:
@@ -111,4 +116,15 @@ spec:
     nginx-ingress: { enabled: false }
     prometheus: { install: false }
     gitlab-runner: { install: false }
-    registry: { enabled: false }
+    registry:
+      enabled: true
+      hpa: { minReplicas: 1, maxReplicas: 1 }
+      storage:
+        secret: gitlab-registry-storage
+        key: config
+        redirect: { disable: true }
+      deployment:
+        strategy:
+          type: RollingUpdate
+          rollingUpdate: { maxSurge: "10%", maxUnavailable: 0 }
+        terminationGracePeriodSeconds: 60

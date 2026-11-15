@@ -14,9 +14,10 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 | `service-valkey.yaml` | Valkey Service |
 | `pv-nfs-gitlab-valkey.yaml` | static NFS PV (`/volume2/k3s/gitlab/valkey`) |
 | `pvc-valkey.yaml` | claim of the Valkey data |
+| `secret-gitlab-registry-storage.sops.yaml` | S3 storage config of the container registry (Garage bucket `gitlab-registry`), SOPS |
 | `secret-gitlab-valkey.sops.yaml` | Valkey password (SOPS) |
 | `secret-gitlab-initial-root-password.sops.yaml` | initial password of the `root` administrator (rename the account after the first login), SOPS |
-| `helmrelease-gitlab.yaml` | GitLab chart 10.5.6 (external Postgres, Valkey and S3; Traefik; OptiPlex only; SSH on the VIP, port 2223) |
+| `helmrelease-gitlab.yaml` | GitLab chart 10.5.6 (external Postgres, Valkey and S3; Traefik; OptiPlex only; `git.lab`; SSH on the VIP, port 2222) |
 | `namespace-gitlab-runner.yaml` | `gitlab-runner` namespace (runner managers and CI job pods) |
 | `helmrelease-gitlab-runner-amd64.yaml` | amd64 runners, 6 jobs (draft, not in `kustomization.yaml` until the runner token Secret exists) |
 | `helmrelease-gitlab-runner-arm64.yaml` | arm64 runners, 4 jobs (same) |
