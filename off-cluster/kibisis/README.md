@@ -1,6 +1,6 @@
 # kibisis
 
-Docker Compose stacks of the NAS, in `/volume2/stacks/<stack>/`. Secrets are in a `.env` next to each compose file, not committed.
+Docker Compose stacks of the NAS, deployed by doco-cd from `.doco-cd.nas.yml` (stacks not listed there are still by hand, in `/volume2/stacks/<stack>/`). Secrets: SOPS-encrypted `secrets.env` next to the compose file (stacks managed by doco-cd) or a plain `.env`, never committed.
 
 | File | Content |
 |---|---|

@@ -1,2 +1,10 @@
 name: node-exporter
 working_dir: off-cluster/kibisis/node-exporter
+---
+name: cadvisor
+working_dir: off-cluster/kibisis/cadvisor
+---
+name: speedtest
+working_dir: off-cluster/kibisis/speedtest
+env_files:
+  - secrets.env
