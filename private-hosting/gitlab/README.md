@@ -19,8 +19,8 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 | `secret-gitlab-initial-root-password.sops.yaml` | initial password of the `root` administrator (rename the account after the first login), SOPS |
 | `helmrelease-gitlab.yaml` | GitLab chart 10.5.6 (external Postgres, Valkey and S3; Traefik; OptiPlex only; `git.lab`; SSH on the VIP, port 2222) |
 | `namespace-gitlab-runner.yaml` | `gitlab-runner` namespace (runner managers and CI job pods) |
-| `helmrelease-gitlab-runner-amd64.yaml` | amd64 runners, 6 jobs (draft, not in `kustomization.yaml` until the runner token Secret exists) |
-| `helmrelease-gitlab-runner-arm64.yaml` | arm64 runners, 4 jobs (same) |
+| `helmrelease-gitlab-runner-amd64.yaml` | amd64 runners, 6 jobs (runner token Secret in `secret-gitlab-runner-amd64.sops.yaml`) |
+| `helmrelease-gitlab-runner-arm64.yaml` | arm64 runners, 4 jobs (token in `secret-gitlab-runner-arm64.sops.yaml`) |
 
 ## Deployment process note
 
