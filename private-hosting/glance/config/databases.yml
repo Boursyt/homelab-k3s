@@ -7,43 +7,27 @@
   parameters:
     query: |
       union(
-        label_set(max(up{job="postgres",stack="private",role="primary"}) or vector(0), "k", "pup"),
-        label_set(max(up{job="postgres",stack="private",role="replica"}) or vector(0), "k", "rup"),
-        label_set(max(pgbouncer_up{stack="private"}) or vector(0), "k", "bup"),
-        label_set(max(pg_replication_lag_seconds{stack="private",role="replica"}) or vector(0), "k", "lag"),
-        label_set(sum(pg_stat_database_numbackends{stack="private",role="primary"}), "k", "conns"),
-        label_set(max(pg_settings_max_connections{stack="private",role="primary"}), "k", "maxc"),
-        label_set(sum(rate(pg_stat_database_xact_commit{stack="private",role="primary"}[5m])), "k", "tps"),
-        label_set(100 * sum(rate(pg_stat_database_blks_hit{stack="private",role="primary"}[5m])) / (sum(rate(pg_stat_database_blks_hit{stack="private",role="primary"}[5m])) + sum(rate(pg_stat_database_blks_read{stack="private",role="primary"}[5m]))) or vector(100), "k", "hit"),
-        label_set(sum(rate(pgbouncer_stats_totals_queries_pooled_total{stack="private"}[5m])), "k", "qps"),
-        label_set(1000 * sum(rate(pgbouncer_stats_totals_queries_duration_seconds_total{stack="private"}[5m])) / sum(rate(pgbouncer_stats_totals_queries_pooled_total{stack="private"}[5m])) or vector(0), "k", "qms"),
-        label_set(sum(pgbouncer_pools_client_active_connections{stack="private",database!="pgbouncer"}), "k", "cla"),
-        label_set(sum(pgbouncer_pools_client_waiting_connections{stack="private",database!="pgbouncer"}) or vector(0), "k", "clw"),
-        label_set(sum(pgbouncer_pools_server_active_connections{stack="private",database!="pgbouncer"}) + sum(pgbouncer_pools_server_idle_connections{stack="private",database!="pgbouncer"}), "k", "sv"),
-        label_set(pg_database_size_bytes{stack="private",role="primary",datname!~"template.*|postgres"} / 1e6, "k", "size")
+        label_set(max by (stack) (up{job="postgres",role="primary"}) or vector(0), "k", "pup"),
+        label_set(max by (stack) (up{job="postgres",role="replica"}), "k", "rup"),
+        label_set(max by (stack) (pgbouncer_up), "k", "bup"),
+        label_set(max by (stack) (pg_replication_lag_seconds{role="replica"}), "k", "lag"),
+        label_set(100 * sum by (stack) (pg_stat_database_numbackends{role="primary"}) / max by (stack) (pg_settings_max_connections{role="primary"}), "k", "cp"),
+        label_set(sum by (stack) (pgbouncer_pools_client_waiting_connections{database!="pgbouncer"}), "k", "clw")
       )
   template: |
-    {{ $pup := 0.0 }}{{ $rup := 0.0 }}{{ $bup := 0.0 }}{{ $lag := 0.0 }}{{ $conns := 0.0 }}{{ $maxc := 0.0 }}{{ $tps := 0.0 }}{{ $hit := 0.0 }}{{ $qps := 0.0 }}{{ $qms := 0.0 }}{{ $cla := 0.0 }}{{ $clw := 0.0 }}{{ $sv := 0.0 }}
-    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "pup" }}{{ $pup = $x }}{{ end }}{{ if eq $k "rup" }}{{ $rup = $x }}{{ end }}{{ if eq $k "bup" }}{{ $bup = $x }}{{ end }}{{ if eq $k "lag" }}{{ $lag = $x }}{{ end }}{{ if eq $k "conns" }}{{ $conns = $x }}{{ end }}{{ if eq $k "maxc" }}{{ $maxc = $x }}{{ end }}{{ if eq $k "tps" }}{{ $tps = $x }}{{ end }}{{ if eq $k "hit" }}{{ $hit = $x }}{{ end }}{{ if eq $k "qps" }}{{ $qps = $x }}{{ end }}{{ if eq $k "qms" }}{{ $qms = $x }}{{ end }}{{ if eq $k "cla" }}{{ $cla = $x }}{{ end }}{{ if eq $k "clw" }}{{ $clw = $x }}{{ end }}{{ if eq $k "sv" }}{{ $sv = $x }}{{ end }}{{ end }}
-    <ul class="list list-gap-10">
-      <li class="kv"><span class="color-highlight text-truncate">Postgres primary</span><span class="shrink-0">{{ if eq $pup 1.0 }}<span class="color-positive">●</span>{{ else }}<span class="color-negative">● down</span>{{ end }}</span></li>
-      <li class="kv"><span class="color-highlight text-truncate">Postgres replica</span><span class="shrink-0"><span class="color-subdue">lag {{ printf "%.0f" $lag }}s</span>{{ if eq $rup 1.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● down</span>{{ end }}</span></li>
-      <li class="kv"><span class="color-highlight text-truncate">PgBouncer</span><span class="shrink-0"><span class="color-subdue">{{ printf "%.0f" $sv }} pg conns</span>{{ if eq $bup 1.0 }}<span class="color-positive">&nbsp;●</span>{{ else }}<span class="color-negative">&nbsp;● down</span>{{ end }}</span></li>
+    {{ $worst := 0 }}
+    {{ $puppv := 0.0 }}{{ $ruppv := 0.0 }}{{ $buppv := 0.0 }}{{ $lagpv := 0.0 }}{{ $cppv := 0.0 }}{{ $clwpv := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.stack") "private" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "pup" }}{{ $puppv = $x }}{{ end }}{{ if eq $k "rup" }}{{ $ruppv = $x }}{{ end }}{{ if eq $k "bup" }}{{ $buppv = $x }}{{ end }}{{ if eq $k "lag" }}{{ $lagpv = $x }}{{ end }}{{ if eq $k "cp" }}{{ $cppv = $x }}{{ end }}{{ if eq $k "clw" }}{{ $clwpv = $x }}{{ end }}{{ end }}{{ end }}
+    {{ $stpv := 0 }}{{ if or (ne $puppv 1.0) (ne $buppv 1.0) }}{{ $stpv = 2 }}{{ else if or (ne $ruppv 1.0) (gt $lagpv 30.0) (gt $cppv 85.0) (gt $clwpv 0.0) }}{{ $stpv = 1 }}{{ end }}{{ if gt $stpv $worst }}{{ $worst = $stpv }}{{ end }}
+    {{ $puppb := 0.0 }}{{ $ruppb := 0.0 }}{{ $buppb := 0.0 }}{{ $lagpb := 0.0 }}{{ $cppb := 0.0 }}{{ $clwpb := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.stack") "public" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "pup" }}{{ $puppb = $x }}{{ end }}{{ if eq $k "rup" }}{{ $ruppb = $x }}{{ end }}{{ if eq $k "bup" }}{{ $buppb = $x }}{{ end }}{{ if eq $k "lag" }}{{ $lagpb = $x }}{{ end }}{{ if eq $k "cp" }}{{ $cppb = $x }}{{ end }}{{ if eq $k "clw" }}{{ $clwpb = $x }}{{ end }}{{ end }}{{ end }}
+    {{ $stpb := 0 }}{{ if or (ne $puppb 1.0) (ne $buppb 1.0) }}{{ $stpb = 2 }}{{ else if or (ne $ruppb 1.0) (gt $lagpb 30.0) (gt $cppb 85.0) (gt $clwpb 0.0) }}{{ $stpb = 1 }}{{ end }}{{ if gt $stpb $worst }}{{ $worst = $stpb }}{{ end }}
+    {{ $pupgl := 0.0 }}{{ $rupgl := 0.0 }}{{ $bupgl := 0.0 }}{{ $laggl := 0.0 }}{{ $cpgl := 0.0 }}{{ $clwgl := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.stack") "gitlab" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "pup" }}{{ $pupgl = $x }}{{ end }}{{ if eq $k "rup" }}{{ $rupgl = $x }}{{ end }}{{ if eq $k "bup" }}{{ $bupgl = $x }}{{ end }}{{ if eq $k "lag" }}{{ $laggl = $x }}{{ end }}{{ if eq $k "cp" }}{{ $cpgl = $x }}{{ end }}{{ if eq $k "clw" }}{{ $clwgl = $x }}{{ end }}{{ end }}{{ end }}
+    {{ $stgl := 0 }}{{ if or (ne $pupgl 1.0) (ne $bupgl 1.0) }}{{ $stgl = 2 }}{{ else if or (gt $laggl 30.0) (gt $cpgl 85.0) (gt $clwgl 0.0) }}{{ $stgl = 1 }}{{ end }}{{ if gt $stgl $worst }}{{ $worst = $stgl }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">ALL DATABASES</span><span class="pill {{ if eq $worst 0 }}ok">● HEALTHY{{ else if eq $worst 1 }}warn">● DEGRADED{{ else }}bad">● DOWN{{ end }}</span></div>
+    <ul class="list list-gap-10 margin-top-15">
+      <li class="kv"><span class="color-highlight text-truncate">Private</span><span class="shrink-0"><span class="color-subdue">{{ if eq $stpv 0 }}healthy{{ else }}{{ if ne $puppv 1.0 }}primary down {{ end }}{{ if ne $buppv 1.0 }}pgbouncer down {{ end }}{{ if ne $ruppv 1.0 }}replica down {{ end }}{{ if gt $lagpv 30.0 }}lag {{ printf "%.0f" $lagpv }}s {{ end }}{{ if gt $cppv 85.0 }}conns {{ printf "%.0f" $cppv }}% {{ end }}{{ if gt $clwpv 0.0 }}{{ printf "%.0f" $clwpv }} waiting {{ end }}{{ end }}</span> {{ if eq $stpv 0 }}<span class="color-positive">●</span>{{ else if eq $stpv 1 }}<span class="color-warn">●</span>{{ else }}<span class="color-negative">●</span>{{ end }}</span></li>
+      <li class="kv"><span class="color-highlight text-truncate">Public</span><span class="shrink-0"><span class="color-subdue">{{ if eq $stpb 0 }}healthy{{ else }}{{ if ne $puppb 1.0 }}primary down {{ end }}{{ if ne $buppb 1.0 }}pgbouncer down {{ end }}{{ if ne $ruppb 1.0 }}replica down {{ end }}{{ if gt $lagpb 30.0 }}lag {{ printf "%.0f" $lagpb }}s {{ end }}{{ if gt $cppb 85.0 }}conns {{ printf "%.0f" $cppb }}% {{ end }}{{ if gt $clwpb 0.0 }}{{ printf "%.0f" $clwpb }} waiting {{ end }}{{ end }}</span> {{ if eq $stpb 0 }}<span class="color-positive">●</span>{{ else if eq $stpb 1 }}<span class="color-warn">●</span>{{ else }}<span class="color-negative">●</span>{{ end }}</span></li>
+      <li class="kv"><span class="color-highlight text-truncate">GitLab</span><span class="shrink-0"><span class="color-subdue">{{ if eq $stgl 0 }}healthy{{ else }}{{ if ne $pupgl 1.0 }}primary down {{ end }}{{ if ne $bupgl 1.0 }}pgbouncer down {{ end }}{{ if gt $cpgl 85.0 }}conns {{ printf "%.0f" $cpgl }}% {{ end }}{{ if gt $clwgl 0.0 }}{{ printf "%.0f" $clwgl }} waiting {{ end }}{{ end }}</span> {{ if eq $stgl 0 }}<span class="color-positive">●</span>{{ else if eq $stgl 1 }}<span class="color-warn">●</span>{{ else }}<span class="color-negative">●</span>{{ end }}</span></li>
     </ul>
-    {{ $cp := mul (div $conns $maxc) 100 }}
-    <div class="kv margin-top-15"><span class="size-h5 color-highlight">CONNECTIONS</span><span class="color-highlight">{{ printf "%.0f" $conns }}/{{ printf "%.0f" $maxc }}</span></div>
-    <div class="bar"><div class="{{ if ge $cp 85.0 }} hot{{ end }}" style="width: {{ $cp }}%"></div></div>
-    <div class="stat-row">
-      <div><div class="color-highlight size-h4">{{ printf "%.1f" $tps }}</div><div class="size-h6">tx/s</div></div>
-      <div><div class="color-highlight size-h4">{{ printf "%.1f" $qps }}</div><div class="size-h6">queries/s</div></div>
-      <div><div class="color-highlight size-h4">{{ printf "%.1f" $qms }}</div><div class="size-h6">ms/query</div></div>
-    </div>
-    <div class="stat-row">
-      <div><div class="color-highlight size-h4">{{ printf "%.0f" $hit }}%</div><div class="size-h6">cache hit</div></div>
-      <div><div class="color-highlight size-h4">{{ printf "%.0f" $cla }}</div><div class="size-h6">clients</div></div>
-      <div><div class="{{ if gt $clw 0.0 }}color-negative{{ else }}color-highlight{{ end }} size-h4">{{ printf "%.0f" $clw }}</div><div class="size-h6">waiting</div></div>
-    </div>
-    <div class="size-h5 color-highlight margin-top-15">SIZE</div>
-    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "size" }}
-    <div class="kv size-h6 margin-top-5"><span class="color-subdue">{{ .String "metric.datname" }}</span><span>{{ printf "%.1f" (.Float "value.1") }} MB</span></div>
-    {{ end }}{{ end }}

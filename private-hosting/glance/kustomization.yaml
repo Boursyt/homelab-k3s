@@ -7,6 +7,7 @@ resources:
   - ingress-glance.yaml
   - pdb-glance.yaml
   - secret-homeassistant-token.sops.yaml
+  - secret-gitlab-token.sops.yaml
   - secret-llm-keys.sops.yaml
   - secret-victoriametrics-auth.sops.yaml
   - service-glance.yaml
@@ -28,3 +29,17 @@ configMapGenerator:
       - config/backups.yml
       - config/ingress.yml
       - config/status.yml
+      - config/page-db.yml
+      - config/page-network.yml
+      - config/page-git.yml
+      - config/page-apps.yml
+      - config/db-private.yml
+      - config/db-public.yml
+      - config/db-gitlab.yml
+      - config/backups-detail.yml
+      - config/git-mrs.yml
+      - config/git-pipelines.yml
+      - config/git-main.yml
+      - config/apps-namespaces.yml
+      - config/apps-traffic.yml
+      - config/traffic.yml

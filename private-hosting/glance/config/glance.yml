@@ -30,6 +30,11 @@ document:
       .bar > div { height: 100%; border-radius: 4px; background: hsl(45 90% 62%); }
       .bar > div.data { background: var(--color-primary); }
       .bar > div.hot { background: var(--color-negative); }
+      .color-warn { color: hsl(45 90% 62%); }
+      .pill { padding: 1px 9px; border-radius: 10px; font-weight: 700; font-size: .85em; }
+      .pill.ok { background: hsl(115 54% 76% / .16); color: var(--color-positive); }
+      .pill.warn { background: hsl(45 90% 62% / .16); color: hsl(45 90% 62%); }
+      .pill.bad { background: hsl(343 81% 75% / .16); color: var(--color-negative); }
       .stat-row { display: flex; justify-content: space-between; text-align: center; margin-top: 10px; }
       .stat-row > div { flex: 1; min-width: 0; }
       .stat-row .size-h6 { text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
@@ -54,6 +59,8 @@ document:
       html[data-scheme=light] .bar > div { background: #df8e1d; }
       html[data-scheme=light] .bar > div.data { background: var(--color-primary); }
       html[data-scheme=light] .bar > div.hot { background: var(--color-negative); }
+      html[data-scheme=light] .color-warn { color: #df8e1d; }
+      html[data-scheme=light] .pill.warn { background: #df8e1d22; color: #df8e1d; }
       html[data-scheme=light] .head-widgets, html[data-scheme=light] .page-column {
         background: linear-gradient(135deg, hsl(220 91% 54% / .06), hsl(223 16% 83% / .35) 50%, hsl(266 85% 58% / .05));
         border-color: hsl(234 16% 35% / .12);
@@ -121,3 +128,7 @@ $include: theme.yml
 
 pages:
   - $include: homelab.yml
+  - $include: page-db.yml
+  - $include: page-network.yml
+  - $include: page-git.yml
+  - $include: page-apps.yml
