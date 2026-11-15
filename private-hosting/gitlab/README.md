@@ -9,3 +9,4 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 | `pvc-gitlab-gitaly.yaml` | claim bound to that PV |
 | `secret-gitlab-iscsi-chap.sops.yaml` | CHAP credentials of the target (SOPS) |
 | `secret-gitlab-object-storage.sops.yaml` | Garage S3 key for GitLab (object store connection + backups s3cfg), SOPS |
+| `secret-gitlab-db.sops.yaml` | password of the `gitlab` role (NAS Postgres, database `gitlab`) |
