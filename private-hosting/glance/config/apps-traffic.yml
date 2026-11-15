@@ -7,22 +7,23 @@
   parameters:
     query: |
       WITH (
-        svc = label_replace(label_replace(sum by (service) (rate(traefik_service_requests_total[5m])), "name", "$1", "service", "(.*)@kubernetes"), "name", "$1", "name", "(.*)-[0-9]+"),
-        top = topk(10, svc)
+        nm(x) = label_replace(label_replace(x, "name", "$1", "service", "(.*)@kubernetes"), "name", "$1", "name", "(.*)-[0-9]+"),
+        top = topk(12, nm(sum by (service) (rate(traefik_service_requests_total[5m]))))
       )
       union(
         label_set(top, "k", "rps"),
-        label_set((label_replace(label_replace(sum by (service) (rate(traefik_service_requests_total{code=~"5.."}[5m])), "name", "$1", "service", "(.*)@kubernetes"), "name", "$1", "name", "(.*)-[0-9]+")) and on (name) top, "k", "e5"),
-        label_set(1000 * (label_replace(label_replace(histogram_quantile(0.95, sum by (le, service) (rate(traefik_service_request_duration_seconds_bucket[5m]))), "name", "$1", "service", "(.*)@kubernetes"), "name", "$1", "name", "(.*)-[0-9]+")) and on (name) top, "k", "p95")
+        label_set(nm(sum by (service) (rate(traefik_service_requests_total{code=~"5.."}[5m]))) and on (name) top, "k", "e5"),
+        label_set(1000 * nm(histogram_quantile(0.95, sum by (le, service) (rate(traefik_service_request_duration_seconds_bucket[5m])))) and on (name) top, "k", "p95")
       )
   template: |
-    <div class="kv size-h6 color-subdue"><span>service</span><span>req/s · p95 · 5xx/s</span></div>
-    <ul class="list list-gap-10 margin-top-10">
+    <div class="tbl" style="--c: 2.6fr .7fr .8fr .6fr">
+      <div class="tr th"><span>service</span><span class="n">req/s</span><span class="n">p95</span><span class="n">5xx/s</span></div>
     {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "rps" }}{{ $n := .String "metric.name" }}
-      <li class="kv size-h6"><span class="color-highlight text-truncate">{{ $n }}</span><span class="shrink-0">
-        <span class="color-highlight">{{ printf "%.2f" (.Float "value.1") }}</span>
-        {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "p95") (eq (.String "metric.name") $n) }}<span class="color-subdue"> · {{ printf "%.0f" (.Float "value.1") }} ms</span>{{ end }}{{ end }}
-        {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "e5") (eq (.String "metric.name") $n) }}<span class="{{ if gt (.Float "value.1") 0.0 }}color-negative{{ else }}color-subdue{{ end }}"> · {{ printf "%.2f" (.Float "value.1") }}</span>{{ end }}{{ end }}
-      </span></li>
+      <div class="tr">
+        <span class="color-highlight">{{ $n }}</span>
+        <span class="n color-highlight">{{ printf "%.2f" (.Float "value.1") }}</span>
+        {{ $p := 0.0 }}{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "p95") (eq (.String "metric.name") $n) }}{{ $p = .Float "value.1" }}{{ end }}{{ end }}<span class="n dim">{{ if gt $p 0.0 }}{{ printf "%.0f" $p }} ms{{ else }}–{{ end }}</span>
+        {{ $e := 0.0 }}{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "e5") (eq (.String "metric.name") $n) }}{{ $e = .Float "value.1" }}{{ end }}{{ end }}<span class="n {{ if gt $e 0.0 }}color-negative{{ else }}dim{{ end }}">{{ printf "%.2f" $e }}</span>
+      </div>
     {{ end }}{{ end }}
-    </ul>
+    </div>

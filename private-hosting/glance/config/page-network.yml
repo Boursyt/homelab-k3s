@@ -1,10 +1,13 @@
 - name: Network
   width: wide
-  columns:
-    - size: small
+  head-widgets:
+    - type: split-column
+      max-columns: 3
       widgets:
         - $include: network.yml
         - $include: speedtest.yml
+        - $include: net-dns.yml
+  columns:
     - size: full
       widgets:
         - type: split-column
@@ -12,3 +15,8 @@
           widgets:
             - $include: ingress.yml
             - $include: traffic.yml
+        - type: split-column
+          max-columns: 2
+          widgets:
+            - $include: net-certs.yml
+            - $include: net-latency.yml

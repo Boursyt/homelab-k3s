@@ -4,23 +4,17 @@ Glance dashboard, one file per block.
 
 | File | Content |
 |---|---|
-| `glance.yml` | server, branding, custom CSS (+ Latte overrides), theme following the device mode, 30 s auto-refresh, page include |
-| `theme.yml` | Catppuccin Mocha (dark) and Latte (light, `default-light`); picker hidden |
-| `homelab.yml` | page Homelab (global states, kept light) |
-| `page-db.yml`, `page-network.yml`, `page-git.yml`, `page-apps.yml` | pages DB, Network, Git, Apps (listed in `glance.yml`) |
-| `hardware.yml` | machines reachability, from the Gatus `Hosts` checks grouped by their `category` label (`model`, `order` labels) |
-| `k3s.yml` | cluster usage and nodes (control plane / workers, CPU temperature of Pis and OptiPlex) |
-| `nas.yml` | NAS usage |
-| `printer.yml` | 3D printer, AMS and low stock spools (Home Assistant, Spoolman) |
-| `apps.yml` | launcher: every private Gatus check with an `href` label, grouped by its `section` label, sorted by `order` (2 digits, first = section) |
-| `public.yml` | public services (lab.pub), from the public Gatus |
-| `status.yml` | Gatus summary |
-| `backups.yml` | global backup state (green / orange when some are older than 26 h / red when half or more are) |
-| `backups-detail.yml` | every backup: age, size, restic snapshots (page DB) |
+| `glance.yml` | server, branding, custom CSS (readable text, brighter secondary colour, `.tbl` grid tables, status pills, Latte overrides), theme following the device mode, 30 s auto-refresh, page includes |
+| `theme.yml` | Catppuccin Mocha (dark, contrast 1.45) and Latte (light, `default-light`); picker hidden |
+| `homelab.yml` | page Homelab, kept light: machines, k3s, NAS, printer, launcher and global states |
+| `page-storage.yml`, `page-network.yml`, `page-git.yml`, `page-apps.yml` | the other four pages |
+| `hardware.yml`, `k3s.yml`, `nas.yml`, `printer.yml`, `apps.yml`, `public.yml`, `status.yml`, `speedtest.yml` | Homelab blocks (launcher: every private Gatus check with an `href` label, grouped by `section`, sorted by `order`) |
+| `backups.yml` | global backup state: green, orange when some are older than 26 h (or never ran), red when half or more are |
 | `databases.yml` | global state of the 3 Postgres stacks (primary, replica, PgBouncer, lag, connections) |
-| `db-private.yml`, `db-public.yml`, `db-gitlab.yml` | detail of each stack: connections, tx/s, queries/s, cache hit, sizes (generated from one template, same query with another `stack` label) |
-| `git-mrs.yml`, `git-pipelines.yml`, `git-main.yml` | open merge requests (`renovate/manual-*` highlighted), last pipelines, last commits and gitlab.com / GitHub mirror sync. Read-only GitLab token `GITLAB_TOKEN` (Secret `gitlab-token`, project token `glance (read only)`, Reporter, `read_api`, expires ~2027-11) |
-| `apps-namespaces.yml`, `apps-traffic.yml`, `traffic.yml` | memory / CPU / restarts per namespace, Traefik traffic per service (req/s, p95, 5xx), network traffic per node |
-| `network.yml` | latency probes |
-| `speedtest.yml` | internet speed (NAS and cluster) |
-| `ingress.yml` | Traefik traffic |
+| `network-mini.yml` | compact probes for Homelab |
+| `backups-detail.yml`, `valkey.yml`, `pvc.yml` | Storage: every backup, the 4 Valkey caches, PVC usage |
+| `db-private.yml`, `db-public.yml`, `db-gitlab.yml` | Storage: detail of each Postgres stack, same query with another `stack` label |
+| `garage.yml` | Storage: Garage S3 (admin API with `GARAGE_ADMIN_TOKEN`, Secret `garage-admin`): status, free space, objects and size of each of the 12 buckets |
+| `network.yml`, `net-dns.yml`, `net-certs.yml`, `net-latency.yml`, `ingress.yml`, `traffic.yml` | Network: probes, CoreDNS, certificate expiry, slowest checks, Traefik (private / public entrypoints), traffic and errors per node |
+| `git-mrs.yml`, `git-merged.yml`, `git-pipelines.yml`, `git-mirrors.yml`, `git-gitlab.yml`, `git-gitops.yml` | Git: open and merged MRs (`renovate/manual-*` highlighted), pipelines and Renovate last run, gitlab.com / GitHub mirror check, GitLab pods and Gitaly volume, Flux objects. Read-only GitLab token `GITLAB_TOKEN` (Secret `gitlab-token`, project token `glance (read only)`, Reporter, `read_api`, expires ~2027-11) |
+| `apps-namespaces.yml`, `apps-nodes.yml`, `apps-problems.yml`, `apps-traffic.yml` | Apps: memory / CPU / restarts and nodes per namespace, what runs on each node, cluster problems, Traefik traffic per service |

@@ -1,0 +1,15 @@
+- type: custom-api
+  title: Slowest services
+  cache: 1m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      topk(10, max by (name, group, job) (gatus_results_duration_seconds{group!~"Network|Hosts"}) * 1000)
+  template: |
+    <div class="tbl" style="--c: 2fr .9fr .9fr">
+      <div class="tr th"><span>check</span><span class="n">response</span><span class="n">where</span></div>
+    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}
+      <div class="tr"><span class="color-highlight">{{ .String "metric.name" }}</span><span class="n {{ if gt (.Float "value.1") 500.0 }}color-warn{{ else }}color-highlight{{ end }}">{{ printf "%.0f" (.Float "value.1") }} ms</span><span class="n dim">{{ if eq (.String "metric.job") "gatus-public" }}public{{ else }}private{{ end }}</span></div>
+    {{ end }}
+    </div>

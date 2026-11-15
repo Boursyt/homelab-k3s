@@ -1,13 +1,17 @@
 - name: Apps
   width: wide
-  columns:
-    - size: small
+  head-widgets:
+    - type: split-column
+      max-columns: 2
       widgets:
         - $include: k3s.yml
+        - $include: apps-problems.yml
+  columns:
     - size: full
       widgets:
+        - $include: apps-namespaces.yml
         - type: split-column
           max-columns: 2
           widgets:
-            - $include: apps-namespaces.yml
+            - $include: apps-nodes.yml
             - $include: apps-traffic.yml

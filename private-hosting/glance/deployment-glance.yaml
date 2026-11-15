@@ -36,6 +36,7 @@ spec:
             - { name: VM_USER, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: username } } }
             - { name: VM_PASSWORD, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: password } } }
             - { name: OPENROUTER_API_KEY, valueFrom: { secretKeyRef: { name: llm-keys, key: OPENROUTER_API_KEY } } }
+            - { name: GARAGE_ADMIN_TOKEN, valueFrom: { secretKeyRef: { name: garage-admin, key: token } } }
             - { name: GITLAB_TOKEN, valueFrom: { secretKeyRef: { name: gitlab-token, key: token } } }
             - { name: HA_TOKEN, valueFrom: { secretKeyRef: { name: homeassistant-token, key: token } } }
           volumeMounts:

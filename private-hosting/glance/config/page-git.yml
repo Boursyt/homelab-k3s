@@ -1,13 +1,18 @@
 - name: Git
   width: wide
-  columns:
-    - size: small
+  head-widgets:
+    - type: split-column
+      max-columns: 3
       widgets:
         - $include: git-mrs.yml
+        - $include: git-pipelines.yml
+        - $include: git-mirrors.yml
+  columns:
     - size: full
       widgets:
         - type: split-column
           max-columns: 2
           widgets:
-            - $include: git-pipelines.yml
-            - $include: git-main.yml
+            - $include: git-merged.yml
+            - $include: git-gitops.yml
+        - $include: git-gitlab.yml

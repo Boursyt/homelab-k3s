@@ -1,0 +1,29 @@
+- type: custom-api
+  title: GitOps · Flux
+  title-url: https://flux.lab.theoboursy.fr
+  cache: 1m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(count by (customresource_kind) (gotk_resource_info), "k", "tot"),
+        label_set(count by (customresource_kind) (gotk_resource_info{ready="True"}), "k", "ok"),
+        label_set(count by (customresource_kind) (gotk_resource_info{suspended="true"}) or vector(0), "k", "sus"),
+        label_set(gotk_resource_info{ready!="True"}, "k", "bad")
+      )
+  template: |
+    {{ $nb := 0 }}{{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "bad" }}{{ $nb = add $nb 1 }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">RECONCILIATION</span><span class="pill {{ if eq $nb 0 }}ok">● everything in sync{{ else }}bad">● {{ $nb }} not ready{{ end }}</span></div>
+    <div class="tbl" style="--c: 1.6fr .7fr .7fr">
+      <div class="tr th"><span>object</span><span class="n">ready</span><span class="n">suspended</span></div>
+    {{ range .JSON.Array "data.result" | sortByString "metric.customresource_kind" "asc" }}{{ if eq (.String "metric.k") "tot" }}{{ $kd := .String "metric.customresource_kind" }}{{ $t := .Float "value.1" }}
+      <div class="tr">
+        <span class="color-highlight">{{ $kd }}</span>
+        <span class="n">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ok") (eq (.String "metric.customresource_kind") $kd) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }} / {{ printf "%.0f" $t }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "sus") (eq (.String "metric.customresource_kind") $kd) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }}</span>
+      </div>
+    {{ end }}{{ end }}
+    </div>
+    {{ if gt $nb 0 }}<div class="sect">Not ready</div><div class="tbl" style="--c: 1fr 2fr">{{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "bad" }}<div class="tr"><span class="dim">{{ .String "metric.customresource_kind" }}</span><span class="color-negative">{{ .String "metric.name" }}</span></div>{{ end }}{{ end }}</div>{{ end }}
+    <div class="size-h6 color-subdue margin-top-10">Flux reads the gitlab.com mirror of main and applies it within about a minute</div>
