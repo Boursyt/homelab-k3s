@@ -6,6 +6,13 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[CONNECTED] == true"
+  - name: Postgres GitLab (kibisis, PgBouncer)
+    group: Services
+    url: "tcp://192.168.1.210:5435"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[CONNECTED] == true"
   - name: VictoriaMetrics (kibisis)
     group: Services
     extra-labels: { section: "Monitoring", href: "https://grafana.lab.theoboursy.fr/explore", order: "23" }
