@@ -20,3 +20,11 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 | `namespace-gitlab-runner.yaml` | `gitlab-runner` namespace (runner managers and CI job pods) |
 | `helmrelease-gitlab-runner-amd64.yaml` | amd64 runners, 6 jobs (draft, not in `kustomization.yaml` until the runner token Secret exists) |
 | `helmrelease-gitlab-runner-arm64.yaml` | arm64 runners, 4 jobs (same) |
+
+## Deployment process note
+
+# zero downtine upgrade
+https://docs.gitlab.com/charts/installation/
+https://docs.gitlab.com/charts/installation/#zero-downtime-upgrades
+https://docs.gitlab.com/charts/installation/upgrade/#recommended-deployment-settings
+
