@@ -18,8 +18,6 @@ spec:
     remediation: { retries: 3 }
   values:
     global:
-      extraEnv:
-        BYPASS_SCHEMA_VERSION: true
       hosts:
         domain: lab.theoboursy.fr
         https: true
@@ -67,19 +65,27 @@ spec:
         dependencyProxy: { enabled: true, bucket: gitlab-dependency-proxy }
         backups: { bucket: gitlab-backups, tmpBucket: gitlab-tmp }
     gitlab:
+      # BYPASS_SCHEMA_VERSION on every component but migrations: the chart already sets it
+      # on the migrations Job and a duplicate entry is refused by server-side apply
       gitaly:
+        extraEnv: { BYPASS_SCHEMA_VERSION: true }
         persistence: { enabled: true, size: 120Gi, storageClass: iscsi }
+      gitlab-exporter:
+        extraEnv: { BYPASS_SCHEMA_VERSION: true }
       toolbox:
+        extraEnv: { BYPASS_SCHEMA_VERSION: true }
         backups:
           objectStorage:
             config: { secret: gitlab-object-storage, key: backups-s3cfg }
       webservice:
+        extraEnv: { BYPASS_SCHEMA_VERSION: true }
         deployment:
           strategy:
             type: RollingUpdate
             rollingUpdate: { maxSurge: "10%", maxUnavailable: 0 }
           terminationGracePeriodSeconds: 60
       sidekiq:
+        extraEnv: { BYPASS_SCHEMA_VERSION: true }
         timeout: 570
         deployment:
           strategy:
@@ -87,6 +93,7 @@ spec:
             rollingUpdate: { maxSurge: "10%", maxUnavailable: 0 }
           terminationGracePeriodSeconds: 600
       gitlab-shell:
+        extraEnv: { BYPASS_SCHEMA_VERSION: true }
         service: { type: LoadBalancer }
         deployment:
           strategy:
