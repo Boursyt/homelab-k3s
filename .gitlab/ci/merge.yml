@@ -1,7 +1,7 @@
 merge:
   stage: merge
   needs: [gitleaks, render, kubeconform]
-  image: curlimages/curl:8.11.1
+  image: curlimages/curl:8.23.0
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME !~ /^renovate\/manual-/
   script:
