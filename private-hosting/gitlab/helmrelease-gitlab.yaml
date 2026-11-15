@@ -33,9 +33,9 @@ spec:
         tls: { enabled: false }
       initialRootPassword:
         { secret: gitlab-initial-root-password, key: password }
-      # NAS Postgres through PgBouncer (session mode, TLS required)
+      # dedicated NAS Postgres through PgBouncer (session mode, TLS required)
       psql:
-        host: postgres.databases.svc.cluster.local
+        host: postgres-gitlab.databases.svc.cluster.local
         port: 5432
         password: { secret: gitlab-db, key: password }
         main: { database: gitlab, username: gitlab }
