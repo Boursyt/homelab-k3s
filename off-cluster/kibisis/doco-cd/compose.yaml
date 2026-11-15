@@ -1,0 +1,17 @@
+services:
+  doco-cd:
+    image: ghcr.io/kimdre/doco-cd:0.134.0
+    container_name: doco-cd
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Paris
+      SOPS_AGE_KEY_FILE: /run/secrets/age.agekey
+      POLL_CONFIG: |
+        - url: https://gitlab.com/Boursyt/homelab-k3s.git
+          reference: main
+          interval: 3m
+          target: nas
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /volume2/stacks/doco-cd/data:/data
+      - /volume2/stacks/doco-cd/age.agekey:/run/secrets/age.agekey:ro
