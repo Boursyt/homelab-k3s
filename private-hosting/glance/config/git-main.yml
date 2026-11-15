@@ -1,0 +1,24 @@
+- type: custom-api
+  title: Main branch
+  title-url: https://git.lab.theoboursy.fr/boursyt/homelab-k3s/-/commits/main
+  cache: 2m
+  url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/repository/commits?ref_name=main&per_page=6
+  headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  subrequests:
+    com:
+      url: https://gitlab.com/api/v4/projects/Boursyt%2Fhomelab-k3s/repository/commits?ref_name=main&per_page=1
+    gh:
+      url: https://api.github.com/repos/Boursyt/homelab-k3s/commits?sha=main&per_page=1
+  template: |
+    {{ $head := .JSON.String "0.id" }}
+    {{ $com := .Subrequest "com" }}{{ $gh := .Subrequest "gh" }}
+    <ul class="list list-gap-10">
+      <li class="kv"><span class="color-highlight">gitlab.com mirror</span><span class="shrink-0">{{ if ne $com.Response.StatusCode 200 }}<span class="color-warn">● unreachable</span>{{ else if eq ($com.JSON.String "0.id") $head }}<span class="color-subdue">in sync</span> <span class="color-positive">●</span>{{ else }}<span class="color-subdue">behind</span> <span class="color-warn">●</span>{{ end }}</span></li>
+      <li class="kv"><span class="color-highlight">GitHub mirror</span><span class="shrink-0">{{ if ne $gh.Response.StatusCode 200 }}<span class="color-warn">● unreachable</span>{{ else if eq ($gh.JSON.String "0.sha") $head }}<span class="color-subdue">in sync</span> <span class="color-positive">●</span>{{ else }}<span class="color-subdue">behind</span> <span class="color-warn">●</span>{{ end }}</span></li>
+    </ul>
+    <div class="size-h5 color-highlight margin-top-15">LAST COMMITS</div>
+    <ul class="list list-gap-10 margin-top-10">
+    {{ range .JSON.Array "" }}
+      <li class="kv size-h6"><span class="color-highlight text-truncate">{{ .String "title" }}</span><span class="shrink-0 color-subdue" {{ .String "committed_date" | parseTime "rfc3339" | toRelativeTime }}></span></li>
+    {{ end }}
+    </ul>
