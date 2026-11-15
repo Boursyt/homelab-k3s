@@ -8,6 +8,7 @@ resources:
   - pvc-gitlab-gitaly.yaml
   - pvc-valkey.yaml
   - secret-gitlab-db.sops.yaml
+  - secret-gitlab-initial-root-password.sops.yaml
   - secret-gitlab-iscsi-chap.sops.yaml
   - secret-gitlab-object-storage.sops.yaml
   - secret-gitlab-valkey.sops.yaml

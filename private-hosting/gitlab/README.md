@@ -15,3 +15,4 @@ Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a l
 | `pv-nfs-gitlab-valkey.yaml` | static NFS PV (`/volume2/k3s/gitlab/valkey`) |
 | `pvc-valkey.yaml` | claim of the Valkey data |
 | `secret-gitlab-valkey.sops.yaml` | Valkey password (SOPS) |
+| `secret-gitlab-initial-root-password.sops.yaml` | initial password of the `root` administrator (rename the account after the first login), SOPS |
