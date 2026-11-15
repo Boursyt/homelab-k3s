@@ -6,10 +6,10 @@ resources:
   - fluxinstance-flux.yaml
   - clusterrolebinding-flux-web-admin.yaml
   - ingress-flux-web.yaml
-  - provider-gitea.yaml
-  - alert-gitea-commit-status.yaml
+  - provider-gitlab.yaml
+  - alert-gitlab-commit-status.yaml
   - sources
   - k3s
   - private-hosting
   - public-hosting
-  - secret-gitea-commit-status.sops.yaml
+  - secret-gitlab-commit-status.sops.yaml

@@ -1,10 +1,10 @@
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Alert
 metadata:
-  name: gitea-commit-status
+  name: gitlab-commit-status
   namespace: flux-system
 spec:
-  providerRef: { name: gitea }
+  providerRef: { name: gitlab }
   eventSeverity: info
   eventSources:
     - { kind: Kustomization, name: "*" }

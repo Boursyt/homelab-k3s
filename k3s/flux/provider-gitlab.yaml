@@ -1,0 +1,11 @@
+# Commit status on GitLab: each Flux Kustomization reports whether it applied the commit.
+# Secret gitlab-commit-status (key token): project access token ci flux-commit-status (api, Developer).
+apiVersion: notification.toolkit.fluxcd.io/v1
+kind: Provider
+metadata:
+  name: gitlab
+  namespace: flux-system
+spec:
+  type: gitlab
+  address: https://git.lab.theoboursy.fr/boursyt/homelab-k3s
+  secretRef: { name: gitlab-commit-status }

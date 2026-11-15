@@ -12,11 +12,19 @@ resources:
   - pvc-repo-data-gitlab-gitaly-0.yaml
   - pvc-valkey.yaml
   - secret-gitlab-db.sops.yaml
+  - secret-gitlab-gitaly-secret.sops.yaml
+  - secret-gitlab-gitlab-shell-host-keys.sops.yaml
+  - secret-gitlab-gitlab-shell-secret.sops.yaml
+  - secret-gitlab-gitlab-workhorse-secret.sops.yaml
   - secret-gitlab-initial-root-password.sops.yaml
-  - secret-gitlab-runner-amd64.sops.yaml
-  - secret-gitlab-runner-arm64.sops.yaml
   - secret-gitlab-iscsi-chap.sops.yaml
   - secret-gitlab-object-storage.sops.yaml
+  - secret-gitlab-rails-secret.sops.yaml
+  - secret-gitlab-registry-httpsecret.sops.yaml
+  - secret-gitlab-registry-notification.sops.yaml
+  - secret-gitlab-registry-secret.sops.yaml
   - secret-gitlab-registry-storage.sops.yaml
+  - secret-gitlab-runner-amd64.sops.yaml
+  - secret-gitlab-runner-arm64.sops.yaml
   - secret-gitlab-valkey.sops.yaml
   - service-valkey.yaml
