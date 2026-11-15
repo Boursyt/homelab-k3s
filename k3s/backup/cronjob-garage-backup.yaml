@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: garage-backup
+  namespace: backup
+spec:
+  schedule: "0 3 * * *"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            seccompProfile: { type: RuntimeDefault }
+          # Garage buckets (registry, artifacts, uploads, packages…) copied through the S3 API, then added to the restic repository
+          initContainers:
+            - name: sync
+              image: rclone/rclone:1.76.0
+              args: [sync, "garage:", /data, --transfers, "8", --checkers, "8", --stats-one-line, -v, --cache-dir, /tmp/rclone, --config, /dev/null]
+              env:
+                - { name: RCLONE_CONFIG_GARAGE_TYPE, value: s3 }
+                - { name: RCLONE_CONFIG_GARAGE_PROVIDER, value: Other }
+                - { name: RCLONE_CONFIG_GARAGE_ENDPOINT, value: "http://192.168.1.210:3900" }
+                - { name: RCLONE_CONFIG_GARAGE_REGION, value: garage }
+                - { name: RCLONE_CONFIG_GARAGE_FORCE_PATH_STYLE, value: "true" }
+                - { name: RCLONE_CONFIG_GARAGE_ACCESS_KEY_ID, valueFrom: { secretKeyRef: { name: garage-backup, key: access-key } } }
+                - { name: RCLONE_CONFIG_GARAGE_SECRET_ACCESS_KEY, valueFrom: { secretKeyRef: { name: garage-backup, key: secret-key } } }
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: [ALL] }
+              volumeMounts:
+                - { name: data, mountPath: /data }
+                - { name: tmp, mountPath: /tmp }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits: { memory: 512Mi }
+          containers:
+            - name: restic
+              image: restic/restic:0.19.1
+              envFrom:
+                - secretRef: { name: restic }
+              env:
+                - { name: TZ, value: Europe/Paris }
+                - { name: RESTIC_REPOSITORY, value: /backups/restic }
+                - { name: RESTIC_CACHE_DIR, value: /backups/.restic-cache }
+              command:
+                - sh
+                - -ec
+                - |
+                  restic backup --host homelab --tag garage /data
+                  restic snapshots --tag garage --latest 1
+              # root: the share `backups` only accepts root (UGOS ACLs); nothing else is needed
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: [ALL] }
+              volumeMounts:
+                - { name: backups, mountPath: /backups }
+                - { name: tmp, mountPath: /tmp }
+                - { name: data, mountPath: /data, readOnly: true }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits: { memory: 1Gi }
+          volumes:
+            - name: tmp
+              emptyDir: { sizeLimit: 256Mi }
+            - name: data
+              emptyDir: { sizeLimit: 20Gi }
+            - name: backups
+              persistentVolumeClaim: { claimName: backups-hdd }
