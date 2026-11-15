@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valkey
+  namespace: gitlab
+  labels: { app.kubernetes.io/name: valkey }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: valkey }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: valkey }
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: valkey
+          image: valkey/valkey:9.1.3-alpine
+          # Sidekiq queues and sessions live here: AOF on the NAS, never evict
+          args: [--requirepass, $(VALKEY_PASSWORD), --appendonly, "yes", --appendfsync, everysec, --save, "", --maxmemory, 384mb, --maxmemory-policy, noeviction]
+          env:
+            - { name: VALKEY_PASSWORD, valueFrom: { secretKeyRef: { name: gitlab-valkey, key: password } } }
+          ports:
+            - { name: valkey, containerPort: 6379 }
+          readinessProbe:
+            tcpSocket: { port: valkey }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 512Mi }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: valkey }
