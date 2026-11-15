@@ -9,15 +9,6 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Flux CLI version given to the flux2 action in CI",
-      "managerFilePatterns": ["/^\\.gitea/workflows/.+\\.yaml$/"],
-      "matchStrings": ["with: \\{ version: (?<currentValue>[0-9.]+) \\}"],
-      "depNameTemplate": "fluxcd/flux2",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.+)$"
-    },
-    {
-      "customType": "regex",
       "description": "Image set as repository + tag in HelmRelease values",
       "managerFilePatterns": ["/helmrelease-[^/]+\\.yaml$/"],
       "matchStrings": ["repository: (?<depName>[^\\s]+)\\n\\s+tag: \"?(?<currentValue>[^\\s\"]+)\"?"],
@@ -43,8 +34,19 @@
   "packageRules": [
     {
       "description": "Files copied to machines by hand, not applied by Flux",
-      "matchFileNames": ["off-cluster/**", "k3s/nodes/**"],
+      "matchFileNames": ["off-cluster/trident/**", "off-cluster/dns/**", "k3s/nodes/**"],
       "enabled": false
+    },
+    {
+      "description": "NAS stacks (deployed by doco-cd): pin and follow the image digests, so rebuilt tags (security fixes) arrive as updates too",
+      "matchFileNames": ["off-cluster/kibisis/**"],
+      "pinDigests": true
+    },
+    {
+      "description": "NAS PostgreSQL and PgBouncer: never merged automatically (a restart cuts every application connection), whatever the update type",
+      "matchFileNames": ["off-cluster/kibisis/**"],
+      "matchPackageNames": ["pgvector/pgvector", "edoburu/pgbouncer"],
+      "additionalBranchPrefix": "manual-"
     },
     {
       "matchDepNames": ["fluxcd/flux2", "fluxcd/flux2/action", "ghcr.io/fluxcd/flux-cli"],
