@@ -5,3 +5,4 @@ resources:
   - pv-iscsi-gitlab-gitaly.yaml
   - pvc-gitlab-gitaly.yaml
   - secret-gitlab-iscsi-chap.sops.yaml
+  - secret-gitlab-object-storage.sops.yaml
