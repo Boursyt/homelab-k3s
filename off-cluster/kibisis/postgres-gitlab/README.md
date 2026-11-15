@@ -9,5 +9,5 @@ Dedicated instance for the self-hosted GitLab (its own connections, memory and u
 | `init/10-roles.sh` | first start: monitoring and PgBouncer roles |
 | `pgbouncer/pgbouncer.ini` | session pooling, TLS to clients and to the primary |
 
-Not committed, on the NAS only (`/volume2/stacks/postgres-gitlab/`): `.env` (`POSTGRES_PASSWORD`, `MONITORING_PASSWORD`, `PGBOUNCER_PASSWORD`), `tls/` and `pgbouncer/tls/` (self-signed certificate), `pgbouncer/userlist.txt`, `data/`.
+Secrets in `secrets.env` (SOPS). Not committed, on the NAS only (`/volume2/stacks/postgres-gitlab/`): `tls/` and `pgbouncer/tls/` (self-signed certificate), `pgbouncer/userlist.txt`, `data/`.
 The role and database `gitlab` are created by hand (extensions `pg_trgm` and `btree_gist` are created by the restore, they are trusted).
