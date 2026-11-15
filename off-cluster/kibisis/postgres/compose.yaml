@@ -61,7 +61,7 @@ services:
       postgres-primary: { condition: service_healthy }
 
   postgres-exporter-primary:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
     container_name: postgres-exporter-primary
     restart: unless-stopped
     environment: &pgexp
@@ -74,7 +74,7 @@ services:
       postgres-primary: { condition: service_healthy }
 
   postgres-exporter-replica:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
     container_name: postgres-exporter-replica
     restart: unless-stopped
     environment:
@@ -86,7 +86,7 @@ services:
       postgres-replica: { condition: service_healthy }
 
   pgbouncer-exporter:
-    image: quay.io/prometheuscommunity/pgbouncer-exporter:v0.12.1
+    image: quay.io/prometheuscommunity/pgbouncer-exporter:v0.12.1@sha256:30f31b6c2efdad3647f8182cc7c1a3a19e42bae5d17387694989f969371c230d
     container_name: pgbouncer-exporter
     restart: unless-stopped
     environment:
