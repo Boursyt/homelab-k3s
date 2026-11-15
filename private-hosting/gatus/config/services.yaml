@@ -69,3 +69,19 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[STATUS] == 200"
+  - name: Garage UI
+    group: Services
+    extra-labels: { section: "Infrastructure", href: "https://s3.lab.theoboursy.fr", order: "36" }
+    url: "https://s3.lab.theoboursy.fr/"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Garage S3 (kibisis)
+    group: Services
+    url: "http://192.168.1.210:3903/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"

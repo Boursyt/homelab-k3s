@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: garage-ui
+  namespace: garage-ui
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: s3.lab.theoboursy.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: garage-ui
+                port: { number: 3909 }
