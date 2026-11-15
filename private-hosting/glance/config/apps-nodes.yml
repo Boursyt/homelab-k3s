@@ -1,0 +1,27 @@
+- type: custom-api
+  title: Apps · placement by node
+  title-url: https://headlamp.lab.theoboursy.fr
+  cache: 1m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(count by (node) (kube_pod_info), "k", "pods"),
+        label_set(100 * (1 - avg by (node) (label_replace(rate(node_cpu_seconds_total{mode="idle"}[5m]), "node", "$1", "instance", "(.*)"))), "k", "cpu"),
+        label_set(100 * (1 - label_replace(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes, "node", "$1", "instance", "(.*)")), "k", "ram"),
+        label_set(sum by (node, namespace) (kube_pod_info), "k", "nsn")
+      )
+  template: |
+    <div class="tbl" style="--c: .9fr .5fr .55fr .55fr 3fr">
+      <div class="tr th"><span>node</span><span class="n">pods</span><span class="n">cpu</span><span class="n">ram</span><span>what runs there</span></div>
+    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "pods" }}{{ $nd := .String "metric.node" }}
+      <div class="tr">
+        <span class="color-highlight">{{ $nd }}</span>
+        <span class="n color-highlight">{{ printf "%.0f" (.Float "value.1") }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "cpu") (eq (.String "metric.node") $nd) }}{{ printf "%.0f" (.Float "value.1") }}%{{ end }}{{ end }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ram") (eq (.String "metric.node") $nd) }}{{ printf "%.0f" (.Float "value.1") }}%{{ end }}{{ end }}</span>
+        <span class="dim nodes">{{ $cnt := 0 }}{{ range $.JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if and (eq (.String "metric.k") "nsn") (eq (.String "metric.node") $nd) (lt $cnt 5) }}<span style="margin-right:12px">{{ .String "metric.namespace" }}<span class="color-subdue"> ×{{ printf "%.0f" (.Float "value.1") }}</span></span>{{ $cnt = add $cnt 1 }}{{ end }}{{ end }}</span>
+      </div>
+    {{ end }}{{ end }}
+    </div>
