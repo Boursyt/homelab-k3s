@@ -6,8 +6,8 @@ Git server (gitea.lab, kept as a backup of the repositories; SSH on the VIP port
 |---|---|
 | `namespace.yaml` | `gitea` namespace |
 | `helmrelease-gitea.yaml` | Gitea chart (1 replica, Recreate, Valkey cache) |
-| `helmrelease-gitea-runner.yaml` | Gitea Actions runners: 3 (one per OptiPlex), 2 jobs each, persistent Docker + Actions cache; labels `ubuntu-latest`, `amd64` (all current workflows) |
-| `helmrelease-gitea-runner-arm.yaml` | 2 arm64 runners (aegis, keraunos), 1 job each, label `arm64` only, ephemeral Docker data |
+| `helmrelease-gitea-runner.yaml` | Gitea Actions runner: 1 on an OptiPlex, 1 job at a time, persistent Docker + Actions cache; labels `ubuntu-latest`, `amd64` |
+| `helmrelease-gitea-runner-arm.yaml` | 1 arm64 runner (aegis or keraunos), 1 job at a time, label `arm64` only, ephemeral Docker data |
 | `pv-nfs-gitea-gitea-shared-storage.yaml` | NFS volume of the repositories (`nocto`: single writer only) |
 | `pvc-gitea-shared-storage.yaml` | claim for the volume above |
 | `pv-nfs-gitea-valkey-data-gitea-valkey-cluster-0.yaml` | NFS volume of Valkey |
