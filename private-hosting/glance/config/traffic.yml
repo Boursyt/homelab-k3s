@@ -1,0 +1,20 @@
+- type: custom-api
+  title: Traffic · nodes
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(sum by (instance) (rate(node_network_receive_bytes_total{device!~"lo|veth.*|flannel.*|cni.*|wg.*|docker.*|br-.*|cali.*"}[5m])) / 1e6, "k", "rx"),
+        label_set(sum by (instance) (rate(node_network_transmit_bytes_total{device!~"lo|veth.*|flannel.*|cni.*|wg.*|docker.*|br-.*|cali.*"}[5m])) / 1e6, "k", "tx")
+      )
+  template: |
+    <div class="kv size-h6 color-subdue"><span>node</span><span>↓ rx · ↑ tx (MB/s)</span></div>
+    <ul class="list list-gap-10 margin-top-10">
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "rx" }}{{ $i := .String "metric.instance" }}
+      <li class="kv size-h6"><span class="color-highlight text-truncate">{{ $i }}</span><span class="shrink-0"><span class="color-highlight">{{ printf "%.2f" (.Float "value.1") }}</span>
+        {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "tx") (eq (.String "metric.instance") $i) }}<span class="color-subdue"> · {{ printf "%.2f" (.Float "value.1") }}</span>{{ end }}{{ end }}
+      </span></li>
+    {{ end }}{{ end }}
+    </ul>

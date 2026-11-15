@@ -1,0 +1,14 @@
+- name: Network
+  width: wide
+  columns:
+    - size: small
+      widgets:
+        - $include: network.yml
+        - $include: speedtest.yml
+    - size: full
+      widgets:
+        - type: split-column
+          max-columns: 2
+          widgets:
+            - $include: ingress.yml
+            - $include: traffic.yml

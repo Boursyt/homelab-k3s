@@ -22,4 +22,3 @@
       widgets:
         - $include: network.yml
         - $include: speedtest.yml
-        - $include: ingress.yml
