@@ -8,4 +8,4 @@ Bind mounts of data and secrets use absolute `/volume2/stacks/<stack>/...` paths
 
 | File | Content |
 |---|---|
-| `compose.yaml` | doco-cd container (Docker socket, data folder, age key). Update by hand: `docker compose up -d` in `/volume2/stacks/doco-cd` |
+| `compose.yaml` | doco-cd container (Docker socket, data folder, age key, health on 192.168.1.210:9180). Update by hand: `docker compose up -d` in `/volume2/stacks/doco-cd` |

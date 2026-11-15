@@ -99,6 +99,13 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[STATUS] == 200"
+  - name: doco-cd (kibisis)
+    group: Services
+    url: "http://192.168.1.210:9180/v1/health"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
   - name: Container registry (GitLab)
     group: Services
     url: "https://registry.lab.theoboursy.fr/v2/"
