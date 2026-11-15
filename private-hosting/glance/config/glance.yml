@@ -35,6 +35,25 @@ document:
       .pill.ok { background: hsl(115 54% 76% / .16); color: var(--color-positive); }
       .pill.warn { background: hsl(45 90% 62% / .16); color: hsl(45 90% 62%); }
       .pill.bad { background: hsl(343 81% 75% / .16); color: var(--color-negative); }
+      /* readability: bigger text, brighter secondary text, real tables */
+      .widget-content { font-size: 15.5px; }
+      .widget .size-h6 { font-size: 13.5px; }
+      .widget .size-h5 { font-size: 15px; }
+      .widget .color-subdue { color: #b4bbd6; }
+      html[data-scheme=light] .widget .color-subdue { color: #4c4f69; }
+      .tbl { margin-top: 6px; }
+      .tr { display: grid; grid-template-columns: var(--c); column-gap: 16px; align-items: center; padding: 8px 2px; border-bottom: 1px solid hsl(0 0% 100% / .07); }
+      .tr:last-child { border-bottom: none; }
+      .tr.th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: #b4bbd6; padding-bottom: 6px; border-bottom: 1px solid hsl(0 0% 100% / .16); }
+      .tr > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .tr > .n { text-align: right; font-variant-numeric: tabular-nums; }
+      .tr > .c { text-align: center; }
+      .tr .dim { color: #b4bbd6; }
+      .tr .nodes { white-space: normal; line-height: 1.35; }
+      .sect { margin: 18px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #b4bbd6; font-weight: 700; }
+      .big { font-size: 26px; font-weight: 700; line-height: 1.1; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+      .chip { padding: 3px 11px; border-radius: 12px; background: hsl(0 0% 100% / .07); font-size: 13.5px; }
       .stat-row { display: flex; justify-content: space-between; text-align: center; margin-top: 10px; }
       .stat-row > div { flex: 1; min-width: 0; }
       .stat-row .size-h6 { text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
@@ -61,6 +80,9 @@ document:
       html[data-scheme=light] .bar > div.hot { background: var(--color-negative); }
       html[data-scheme=light] .color-warn { color: #df8e1d; }
       html[data-scheme=light] .pill.warn { background: #df8e1d22; color: #df8e1d; }
+      html[data-scheme=light] .tr { border-bottom-color: hsl(234 16% 35% / .14); }
+      html[data-scheme=light] .tr.th, html[data-scheme=light] .tr .dim, html[data-scheme=light] .sect { color: #4c4f69; }
+      html[data-scheme=light] .chip { background: hsl(234 16% 35% / .09); }
       html[data-scheme=light] .head-widgets, html[data-scheme=light] .page-column {
         background: linear-gradient(135deg, hsl(220 91% 54% / .06), hsl(223 16% 83% / .35) 50%, hsl(266 85% 58% / .05));
         border-color: hsl(234 16% 35% / .12);
@@ -128,7 +150,7 @@ $include: theme.yml
 
 pages:
   - $include: homelab.yml
-  - $include: page-db.yml
+  - $include: page-storage.yml
   - $include: page-network.yml
   - $include: page-git.yml
   - $include: page-apps.yml

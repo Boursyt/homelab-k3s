@@ -1,0 +1,17 @@
+- type: custom-api
+  title: Recently merged
+  title-url: https://git.lab.theoboursy.fr/boursyt/homelab-k3s/-/merge_requests?state=merged
+  cache: 2m
+  url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/merge_requests?state=merged&order_by=updated_at&per_page=10
+  headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  template: |
+    <div class="tbl" style="--c: 3fr .8fr .8fr">
+      <div class="tr th"><span>merge request</span><span class="n">by</span><span class="n">merged</span></div>
+    {{ range .JSON.Array "" }}
+      <div class="tr">
+        <span><a class="color-highlight" href="{{ .String "web_url" }}" target="_blank" rel="noreferrer">!{{ .Int "iid" }} {{ .String "title" }}</a></span>
+        <span class="n dim">{{ if findMatch "^renovate" (.String "source_branch") }}renovate{{ else }}you{{ end }}</span>
+        <span class="n dim" {{ .String "merged_at" | parseTime "rfc3339" | toRelativeTime }}></span>
+      </div>
+    {{ end }}
+    </div>

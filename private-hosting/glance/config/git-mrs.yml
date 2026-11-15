@@ -1,5 +1,5 @@
 - type: custom-api
-  title: Merge requests
+  title: Merge requests · open
   title-url: https://git.lab.theoboursy.fr/boursyt/homelab-k3s/-/merge_requests
   cache: 1m
   url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/merge_requests?state=opened&order_by=created_at&per_page=10
@@ -7,12 +7,13 @@
   template: |
     {{ $n := 0 }}{{ $manual := 0 }}
     {{ range .JSON.Array "" }}{{ $n = add $n 1 }}{{ if findMatch "^renovate/manual-" (.String "source_branch") }}{{ $manual = add $manual 1 }}{{ end }}{{ end }}
-    <div class="kv"><span class="size-h5 color-highlight">OPEN</span><span class="pill {{ if eq $n 0 }}ok">● none{{ else if gt $manual 0 }}warn">● {{ $n }} · {{ $manual }} to review{{ else }}ok">● {{ $n }} · auto{{ end }}</span></div>
-    <ul class="list list-gap-10 margin-top-15">
+    <div class="kv"><span class="size-h5 color-highlight">TO REVIEW</span><span class="pill {{ if eq $n 0 }}ok">● nothing waiting{{ else if gt $manual 0 }}warn">● {{ $manual }} manual · {{ sub $n $manual }} auto{{ else }}ok">● {{ $n }} auto{{ end }}</span></div>
+    {{ if eq $n 0 }}<div class="color-subdue margin-top-15">No open merge request. Renovate runs every night at 04:00 UTC.</div>{{ end }}
+    <div class="tbl" style="--c: 2.6fr .8fr">
     {{ range .JSON.Array "" }}
-      <li>
-        <div class="kv"><a class="color-highlight text-truncate" href="{{ .String "web_url" }}" target="_blank" rel="noreferrer">!{{ .Int "iid" }} {{ .String "title" }}</a><span class="shrink-0 size-h6 color-subdue" {{ .String "created_at" | parseTime "rfc3339" | toRelativeTime }}></span></div>
-        <div class="size-h6 {{ if findMatch "^renovate/manual-" (.String "source_branch") }}color-warn{{ else }}color-subdue{{ end }} text-truncate">{{ .String "source_branch" }}{{ if findMatch "^renovate/manual-" (.String "source_branch") }} · merge by hand{{ else if findMatch "^renovate/" (.String "source_branch") }} · auto-merge{{ end }}</div>
-      </li>
+      <div class="tr">
+        <span><a class="color-highlight" href="{{ .String "web_url" }}" target="_blank" rel="noreferrer">!{{ .Int "iid" }} {{ .String "title" }}</a><br><span class="{{ if findMatch "^renovate/manual-" (.String "source_branch") }}color-warn{{ else }}dim{{ end }} size-h6">{{ .String "source_branch" }}{{ if findMatch "^renovate/manual-" (.String "source_branch") }} · merge by hand{{ else if findMatch "^renovate/" (.String "source_branch") }} · auto-merge{{ end }}</span></span>
+        <span class="n dim" {{ .String "created_at" | parseTime "rfc3339" | toRelativeTime }}></span>
+      </div>
     {{ end }}
-    </ul>
+    </div>

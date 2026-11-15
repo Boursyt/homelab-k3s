@@ -1,10 +1,13 @@
-- name: DB
+- name: Storage
   width: wide
-  columns:
-    - size: small
+  head-widgets:
+    - type: split-column
+      max-columns: 3
       widgets:
-        - $include: databases.yml
         - $include: backups-detail.yml
+        - $include: valkey.yml
+        - $include: nas.yml
+  columns:
     - size: full
       widgets:
         - type: split-column
@@ -13,3 +16,8 @@
             - $include: db-private.yml
             - $include: db-public.yml
             - $include: db-gitlab.yml
+        - type: split-column
+          max-columns: 2
+          widgets:
+            - $include: garage.yml
+            - $include: pvc.yml
