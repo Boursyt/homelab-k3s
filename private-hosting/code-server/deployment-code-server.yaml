@@ -24,7 +24,7 @@ spec:
       initContainers:
         # extensions from Open VSX (the registry the GitLab Web IDE also uses); already installed ones are skipped
         - name: extensions
-          image: codercom/code-server:4.145.2
+          image: registry.lab.theoboursy.fr/boursyt/code-server:e4f47915
           command: [sh, -c, 'while read -r e; do [ -n "$e" ] && code-server --install-extension "$e" || true; done < /config/extensions.txt']
           env: [{ name: HOME, value: /home/coder }]
           securityContext:
@@ -37,7 +37,7 @@ spec:
             - { name: extensions, mountPath: /config }
       containers:
         - name: code-server
-          image: codercom/code-server:4.145.2
+          image: registry.lab.theoboursy.fr/boursyt/code-server:e4f47915
           args: [--auth, password, --bind-addr, "0.0.0.0:8080", --disable-telemetry, --disable-update-check, /home/coder/projects]
           env:
             - { name: HOME, value: /home/coder }
