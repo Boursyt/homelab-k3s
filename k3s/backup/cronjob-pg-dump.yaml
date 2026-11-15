@@ -32,6 +32,9 @@ spec:
                 - { name: PUBLIC_HOST, value: postgres-public.databases.svc.cluster.local }
                 - { name: PUBLIC_USER, valueFrom: { secretKeyRef: { name: postgres-public-admin, key: username } } }
                 - { name: PUBLIC_PASSWORD, valueFrom: { secretKeyRef: { name: postgres-public-admin, key: password } } }
+                - { name: GITLAB_HOST, value: postgres-gitlab.databases.svc.cluster.local }
+                - { name: GITLAB_USER, valueFrom: { secretKeyRef: { name: postgres-gitlab-admin, key: username } } }
+                - { name: GITLAB_PASSWORD, valueFrom: { secretKeyRef: { name: postgres-gitlab-admin, key: password } } }
                 - { name: VM_USER, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: username } } }
                 - { name: VM_PASSWORD, valueFrom: { secretKeyRef: { name: victoriametrics-auth, key: password } } }
               command:
@@ -53,11 +56,14 @@ spec:
                   }
                   dump "$d"
                   PGHOST=$PUBLIC_HOST PGUSER=$PUBLIC_USER PGPASSWORD=$PUBLIC_PASSWORD dump "$d/public"
+                  PGHOST=$GITLAB_HOST PGUSER=$GITLAB_USER PGPASSWORD=$GITLAB_PASSWORD dump "$d/gitlab"
                   find /backups/postgres -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
                   echo "backup_last_success_timestamp_seconds{job=\"pg-dump\"} $(date +%s)" > /tmp/m.txt
-                  echo "backup_size_bytes{job=\"pg-dump\"} $(du -sb --exclude=public "$d" | cut -f1)" >> /tmp/m.txt
+                  echo "backup_size_bytes{job=\"pg-dump\"} $(du -sb --exclude=public --exclude=gitlab "$d" | cut -f1)" >> /tmp/m.txt
                   echo "backup_last_success_timestamp_seconds{job=\"pg-dump-public\"} $(date +%s)" >> /tmp/m.txt
                   echo "backup_size_bytes{job=\"pg-dump-public\"} $(du -sb "$d/public" | cut -f1)" >> /tmp/m.txt
+                  echo "backup_last_success_timestamp_seconds{job=\"pg-dump-gitlab\"} $(date +%s)" >> /tmp/m.txt
+                  echo "backup_size_bytes{job=\"pg-dump-gitlab\"} $(du -sb "$d/gitlab" | cut -f1)" >> /tmp/m.txt
                   # no curl in the postgres image: push with bash /dev/tcp
                   body=$(cat /tmp/m.txt); auth=$(printf '%s:%s' "$VM_USER" "$VM_PASSWORD" | base64 -w0)
                   exec 3<>/dev/tcp/victoriametrics.monitoring.svc.cluster.local/8428
