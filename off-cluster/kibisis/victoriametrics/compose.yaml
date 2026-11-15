@@ -21,4 +21,4 @@ services:
     ports:
       - "192.168.1.210:8428:8428"
     volumes:
-      - ./data:/storage
+      - /volume2/stacks/victoriametrics/data:/storage

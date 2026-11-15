@@ -8,3 +8,5 @@ Shared database of the cluster apps.
 | `init/10-replication-pgbouncer.sh` | first start: replication user and slot, PgBouncer auth function |
 | `replica-entrypoint.sh` | clones the primary on first start |
 | `pgbouncer/pgbouncer.ini` | session pooling, TLS required, TCP keepalive |
+
+Secrets in `secrets.env` (SOPS). Not committed, on the NAS only (absolute paths in `/volume2/stacks/postgres/`): `data/`, `pgbouncer/userlist.txt`, `pgbouncer/tls/`.
