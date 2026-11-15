@@ -9,7 +9,7 @@ Own apps are plain Kustomize directories; third-party software is a Flux `HelmRe
 | `helm-flux-operator.yaml` | Flux Operator and the Flux Web UI, installed by the k3s Helm controller (with Traefik, the only charts k3s installs) |
 | `fluxinstance-flux.yaml` | Flux itself (version, controllers, resources), installed and upgraded by the Flux Operator |
 | `ingress-flux-web.yaml`, `clusterrolebinding-flux-web-admin.yaml` | Web UI on https://flux.lab.theoboursy.fr, no login, with actions (reconcile, suspend, resume) |
-| `provider-gitlab.yaml`, `alert-gitlab-commit-status.yaml` | Flux posts a commit status on GitLab per Kustomization (applied or failed). Secret `gitea-commit-status` (SOPS) |
+| `provider-gitlab.yaml`, `alert-gitlab-commit-status.yaml` | Flux posts a commit status on GitLab per Kustomization (applied or failed). Secret `gitlab-commit-status` (SOPS, project token with Maintainer role) |
 | `sources/` | this repository and the chart repositories |
 | `k3s/`, `private-hosting/`, `public-hosting/` | one Flux `Kustomization` per directory of the same area, with its dependencies |
 | `bootstrap.sh` | rebuilds the cluster contents from git on a fresh k3s (see the root README) |
