@@ -5,6 +5,7 @@ Services reachable only from the home network and the VPN, on `*.lab.theoboursy.
 | Path | Content |
 |---|---|
 | `gitea/` | Git server and Actions runner |
+| `gitlab/` | self-hosted GitLab (storage only for now) |
 | `homeassistant/` | home automation |
 | `zigbee/` | Zigbee2MQTT + Mosquitto |
 | `glance/` | private homelab dashboard |

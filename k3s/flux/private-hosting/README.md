@@ -6,6 +6,7 @@ One Flux `Kustomization` per directory of `private-hosting/`.
 |---|---|
 | `kustomization-gatus.yaml` | `private-hosting/gatus`, after cert-manager, traefik, databases, metrics |
 | `kustomization-gitea.yaml` | `private-hosting/gitea`, after cert-manager, traefik, databases, nfs |
+| `kustomization-gitlab.yaml` | `private-hosting/gitlab`, no dependency (storage only for now) |
 | `kustomization-glance.yaml` | `private-hosting/glance`, after cert-manager, traefik |
 | `kustomization-headlamp.yaml` | `private-hosting/headlamp`, after cert-manager, traefik |
 | `kustomization-homeassistant.yaml` | `private-hosting/homeassistant`, after cert-manager, traefik, databases, nfs |

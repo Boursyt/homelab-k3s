@@ -1,0 +1,10 @@
+# GitLab
+
+Self-hosted GitLab (planned). Only the storage is here for now: Gitaly needs a local-semantics disk, so it uses an iSCSI LUN of the NAS (target `gitlab`, CHAP, one session at a time).
+
+| File | Content |
+|---|---|
+| `namespace.yaml` | `gitlab` namespace |
+| `pv-iscsi-gitlab-gitaly.yaml` | static iSCSI PV (NAS LUN 0, ext4, no storage class provisioner) |
+| `pvc-gitlab-gitaly.yaml` | claim bound to that PV |
+| `secret-gitlab-iscsi-chap.sops.yaml` | CHAP credentials of the target (SOPS) |

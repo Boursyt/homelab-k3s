@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - kustomization-gatus.yaml
   - kustomization-gitea.yaml
+  - kustomization-gitlab.yaml
   - kustomization-glance.yaml
   - kustomization-headlamp.yaml
   - kustomization-homeassistant.yaml
