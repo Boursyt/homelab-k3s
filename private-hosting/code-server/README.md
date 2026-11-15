@@ -13,6 +13,6 @@ Extensions of the Mac that are not there: not on Open VSX (Pylance, cpptools, Re
 | `configmap-extensions.yaml` | extensions to install |
 | `pv-nfs-code-server-code-server.yaml`, `pvc-code-server.yaml` | NFS volume of the home |
 | `secret-code-server.sops.yaml` | login password (SOPS) |
-| `image/` | `Dockerfile` + `install-tools.sh`: code-server with Python (uv), Go, Terraform, kubectl, Helm, Flux, SOPS, age. To build and push to the GitLab registry (`registry.lab.theoboursy.fr`); the Deployment still uses the stock image until then |
+| `image/` | `Dockerfile` + `install-tools.sh`: code-server with Python (uv), Go, Terraform, kubectl, Helm, Flux, SOPS, age. Built by the CI of the GitLab project `boursyt/code-server` and pushed to `registry.lab.theoboursy.fr`; the Deployment pins the tag |
 
 The image is built by the GitLab CI of the project `boursyt/code-server` (copy `image/` there: Dockerfile, install-tools.sh, `.gitlab-ci.yml`, kaniko without privileges) and pushed to `registry.lab.theoboursy.fr/boursyt/code-server`.
