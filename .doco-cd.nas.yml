@@ -1,0 +1,2 @@
+name: node-exporter
+working_dir: off-cluster/kibisis/node-exporter
