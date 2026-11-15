@@ -84,7 +84,7 @@ spec:
             config: { secret: gitlab-object-storage, key: backups-s3cfg }
       webservice:
         extraEnv: { BYPASS_SCHEMA_VERSION: true }
-        minReplicas: 2
+        minReplicas: 1
         maxReplicas: 2
         deployment:
           strategy:
