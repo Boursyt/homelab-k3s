@@ -2,14 +2,36 @@
   title: Pipelines
   title-url: https://git.lab.theoboursy.fr/boursyt/homelab-k3s/-/pipelines
   cache: 1m
-  url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/pipelines?per_page=8
+  url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/pipelines?per_page=30
   headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  subrequests:
+    rn:
+      url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/pipelines?source=schedule&per_page=1
+      headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
   template: |
-    {{ $failed := 0 }}{{ $running := 0 }}
-    {{ range .JSON.Array "" }}{{ if eq (.String "status") "failed" }}{{ $failed = add $failed 1 }}{{ end }}{{ if or (eq (.String "status") "running") (eq (.String "status") "pending") }}{{ $running = add $running 1 }}{{ end }}{{ end }}
-    <div class="kv"><span class="size-h5 color-highlight">LAST 8</span><span class="pill {{ if gt $failed 0 }}bad">● {{ $failed }} failed{{ else if gt $running 0 }}warn">● {{ $running }} running{{ else }}ok">● all green{{ end }}</span></div>
-    <ul class="list list-gap-10 margin-top-15">
-    {{ range .JSON.Array "" }}{{ $s := .String "status" }}
-      <li class="kv size-h6"><span class="text-truncate"><span class="{{ if eq $s "success" }}color-positive{{ else if eq $s "failed" }}color-negative{{ else if eq $s "running" }}color-primary{{ else }}color-warn{{ end }}">●</span> <a class="color-highlight" href="{{ .String "web_url" }}" target="_blank" rel="noreferrer">#{{ .Int "id" }}</a> <span class="color-subdue">{{ .String "ref" | replaceAll "refs/merge-requests/" "MR !" | replaceAll "/head" "" }} · {{ .String "source" }}</span></span><span class="shrink-0 color-subdue" {{ .String "created_at" | parseTime "rfc3339" | toRelativeTime }}></span></li>
+    {{ $ok := 0 }}{{ $ko := 0 }}{{ $run := 0 }}
+    {{ range .JSON.Array "" }}{{ $s := .String "status" }}{{ if eq $s "success" }}{{ $ok = add $ok 1 }}{{ else if eq $s "failed" }}{{ $ko = add $ko 1 }}{{ else if or (eq $s "running") (eq $s "pending") }}{{ $run = add $run 1 }}{{ end }}{{ end }}
+    {{ $rn := .Subrequest "rn" }}
+    <div class="kv"><span class="size-h5 color-highlight">LAST 30 RUNS</span><span class="pill {{ if gt $ko 0 }}warn">● {{ $ko }} failed{{ else if gt $run 0 }}warn">● {{ $run }} running{{ else }}ok">● all green{{ end }}</span></div>
+    <div class="stat-row">
+      <div><div class="color-positive size-h3">{{ $ok }}</div><div class="size-h6">passed</div></div>
+      <div><div class="{{ if gt $ko 0 }}color-negative{{ else }}color-highlight{{ end }} size-h3">{{ $ko }}</div><div class="size-h6">failed</div></div>
+      <div><div class="color-highlight size-h3">{{ $run }}</div><div class="size-h6">running</div></div>
+    </div>
+    <div class="sect">Renovate · nightly 04:00 UTC</div>
+    <div class="tbl" style="--c: 1.4fr 1fr .3fr">
+    {{ range $rn.JSON.Array "" }}
+      <div class="tr"><span class="color-highlight">last run #{{ .Int "id" }}</span><span class="n dim" {{ .String "created_at" | parseTime "rfc3339" | toRelativeTime }}></span><span class="c">{{ if eq (.String "status") "success" }}<span class="color-positive">●</span>{{ else if eq (.String "status") "failed" }}<span class="color-negative">●</span>{{ else }}<span class="color-warn">●</span>{{ end }}</span></div>
     {{ end }}
-    </ul>
+    </div>
+    <div class="sect">Latest</div>
+    <div class="tbl" style="--c: 1.5fr 1.2fr .8fr .3fr">
+    {{ $i := 0 }}{{ range .JSON.Array "" }}{{ if lt $i 8 }}{{ $i = add $i 1 }}
+      <div class="tr">
+        <span><a class="color-highlight" href="{{ .String "web_url" }}" target="_blank" rel="noreferrer">#{{ .Int "id" }}</a> <span class="dim">{{ .String "ref" | replaceAll "refs/merge-requests/" "MR !" | replaceAll "/head" "" }}</span></span>
+        <span class="dim">{{ .String "source" | replaceAll "merge_request_event" "merge request" }}</span>
+        <span class="n dim" {{ .String "created_at" | parseTime "rfc3339" | toRelativeTime }}></span>
+        <span class="c">{{ if eq (.String "status") "success" }}<span class="color-positive">●</span>{{ else if eq (.String "status") "failed" }}<span class="color-negative">●</span>{{ else if eq (.String "status") "running" }}<span class="color-primary">●</span>{{ else }}<span class="color-warn">●</span>{{ end }}</span>
+      </div>
+    {{ end }}{{ end }}
+    </div>

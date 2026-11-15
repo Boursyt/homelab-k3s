@@ -1,0 +1,22 @@
+- type: custom-api
+  title: TLS certificates
+  cache: 5m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(min(gatus_results_certificate_expiration_seconds{job="gatus"}) / 86400, "k", "priv"),
+        label_set(min(gatus_results_certificate_expiration_seconds{job="gatus-public"}) / 86400, "k", "pub"),
+        label_set(count(gatus_results_certificate_expiration_seconds{job="gatus"}), "k", "npriv"),
+        label_set(count(gatus_results_certificate_expiration_seconds{job="gatus-public"}), "k", "npub")
+      )
+  template: |
+    {{ $priv := 0.0 }}{{ $pub := 0.0 }}{{ $np := 0.0 }}{{ $nb := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "priv" }}{{ $priv = $x }}{{ end }}{{ if eq $k "pub" }}{{ $pub = $x }}{{ end }}{{ if eq $k "npriv" }}{{ $np = $x }}{{ end }}{{ if eq $k "npub" }}{{ $nb = $x }}{{ end }}{{ end }}
+    <div class="tbl" style="--c: 1.8fr .9fr .9fr">
+      <div class="tr th"><span>certificate</span><span class="n">expires in</span><span class="n">checked on</span></div>
+      <div class="tr"><span class="color-highlight">*.lab.theoboursy.fr <span class="dim">private</span></span><span class="n {{ if lt $priv 14.0 }}color-negative{{ else if lt $priv 30.0 }}color-warn{{ else }}color-highlight{{ end }}">{{ printf "%.0f" $priv }} days</span><span class="n dim">{{ printf "%.0f" $np }} services</span></div>
+      <div class="tr"><span class="color-highlight">*.lab.pub.theoboursy.fr <span class="dim">public</span></span><span class="n {{ if lt $pub 14.0 }}color-negative{{ else if lt $pub 30.0 }}color-warn{{ else }}color-highlight{{ end }}">{{ printf "%.0f" $pub }} days</span><span class="n dim">{{ printf "%.0f" $nb }} services</span></div>
+    </div>
+    <div class="size-h6 color-subdue margin-top-10">cert-manager + Let's Encrypt (DNS-01), renewed automatically 30 days before expiry</div>

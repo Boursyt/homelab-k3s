@@ -20,5 +20,5 @@
         - $include: public.yml
     - size: small
       widgets:
-        - $include: network.yml
+        - $include: network-mini.yml
         - $include: speedtest.yml

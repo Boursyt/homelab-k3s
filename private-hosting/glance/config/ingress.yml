@@ -9,21 +9,33 @@
       union(
         label_set(sum(rate(traefik_entrypoint_requests_total[5m])), "k", "rps"),
         label_set(sum(rate(traefik_service_requests_total{code=~"2.."}[5m])) or vector(0), "k", "e2"),
-      label_set(sum(rate(traefik_service_requests_total{code=~"3.."}[5m])) or vector(0), "k", "e3"),
-      label_set(sum(rate(traefik_service_requests_total{code=~"4.."}[5m])) or vector(0), "k", "e4"),
+        label_set(sum(rate(traefik_service_requests_total{code=~"3.."}[5m])) or vector(0), "k", "e3"),
+        label_set(sum(rate(traefik_service_requests_total{code=~"4.."}[5m])) or vector(0), "k", "e4"),
         label_set(sum(rate(traefik_service_requests_total{code=~"5.."}[5m])) or vector(0), "k", "e5"),
-        label_set(topk(4, label_replace(sum by (service) (rate(traefik_service_requests_total[5m])), "service", "$1", "service", "(.*)@kubernetes")), "k", "svc")
+        label_set(sum by (entrypoint) (rate(traefik_entrypoint_requests_total[5m])), "k", "ep"),
+        label_set(sum by (entrypoint) (increase(traefik_entrypoint_requests_total[24h])), "k", "epd"),
+        label_set(sum by (entrypoint) (rate(traefik_entrypoint_requests_total{code=~"[45].."}[5m])) or vector(0), "k", "epe"),
+        label_set(sum(traefik_open_connections) or vector(0), "k", "conn")
       )
   template: |
-    {{ $rps := 0.0 }}{{ $e2 := 0.0 }}{{ $e3 := 0.0 }}{{ $e4 := 0.0 }}{{ $e5 := 0.0 }}
-    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "rps" }}{{ $rps = $x }}{{ end }} {{ if eq $k "e2" }}{{ $e2 = $x }}{{ end }} {{ if eq $k "e3" }}{{ $e3 = $x }}{{ end }} {{ if eq $k "e4" }}{{ $e4 = $x }}{{ end }} {{ if eq $k "e5" }}{{ $e5 = $x }}{{ end }}{{ end }}
-    <div class="kv"><span class="size-h5 color-highlight">REQUESTS</span><span class="color-highlight">{{ printf "%.2f" $rps }} req/s</span></div>
+    {{ $rps := 0.0 }}{{ $e2 := 0.0 }}{{ $e3 := 0.0 }}{{ $e4 := 0.0 }}{{ $e5 := 0.0 }}{{ $conn := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "rps" }}{{ $rps = $x }}{{ end }}{{ if eq $k "e2" }}{{ $e2 = $x }}{{ end }}{{ if eq $k "e3" }}{{ $e3 = $x }}{{ end }}{{ if eq $k "e4" }}{{ $e4 = $x }}{{ end }}{{ if eq $k "e5" }}{{ $e5 = $x }}{{ end }}{{ if eq $k "conn" }}{{ $conn = $x }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">REQUESTS</span><span class="pill {{ if gt $e5 0.0 }}bad">● {{ printf "%.2f" $e5 }} 5xx/s{{ else }}ok">● no server errors{{ end }}</span></div>
     <div class="stat-row">
+      <div><div class="color-highlight size-h3">{{ printf "%.2f" $rps }}</div><div class="size-h6">req/s</div></div>
       <div><div class="color-positive size-h3">{{ printf "%.2f" $e2 }}</div><div class="size-h6">2xx/s</div></div>
       <div><div class="color-highlight size-h3">{{ printf "%.2f" $e3 }}</div><div class="size-h6">3xx/s</div></div>
-      <div><div class="color-highlight size-h3">{{ printf "%.2f" $e4 }}</div><div class="size-h6">4xx/s</div></div>
-      <div><div class="{{ if gt $e5 0.0 }}color-negative{{ else }}color-highlight{{ end }} size-h3">{{ printf "%.2f" $e5 }}</div><div class="size-h6">5xx/s</div></div>
+      <div><div class="{{ if gt $e4 0.1 }}color-warn{{ else }}color-highlight{{ end }} size-h3">{{ printf "%.2f" $e4 }}</div><div class="size-h6">4xx/s</div></div>
     </div>
-    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "svc" }}
-    <div class="kv size-h6 margin-top-5"><span class="color-subdue text-truncate">{{ .String "metric.service" }}</span><span>{{ printf "%.2f" (.Float "value.1") }}/s</span></div>
+    <div class="sect">Entrypoints</div>
+    <div class="tbl" style="--c: 1.8fr .7fr .9fr .7fr">
+      <div class="tr th"><span>entrypoint</span><span class="n">req/s</span><span class="n">24 h</span><span class="n">4xx+5xx/s</span></div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ep" }}{{ $e := .String "metric.entrypoint" }}
+      <div class="tr">
+        <span class="color-highlight">{{ if eq $e "websecure-pub" }}public <span class="dim">:8443 via trident</span>{{ else }}private <span class="dim">:443 LAN</span>{{ end }}</span>
+        <span class="n">{{ printf "%.2f" (.Float "value.1") }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "epd") (eq (.String "metric.entrypoint") $e) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "epe") (eq (.String "metric.entrypoint") $e) }}{{ printf "%.2f" (.Float "value.1") }}{{ end }}{{ end }}</span>
+      </div>
     {{ end }}{{ end }}
+    </div>

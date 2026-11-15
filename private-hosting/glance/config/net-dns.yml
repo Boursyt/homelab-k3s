@@ -1,0 +1,28 @@
+- type: custom-api
+  title: DNS · CoreDNS
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(sum(rate(coredns_dns_requests_total[5m])), "k", "req"),
+        label_set(100 * sum(rate(coredns_cache_hits_total[5m])) / sum(rate(coredns_dns_requests_total[5m])) or vector(0), "k", "hit"),
+        label_set(sum by (rcode) (rate(coredns_dns_responses_total[5m])), "k", "rc"),
+        label_set(sum(increase(coredns_dns_requests_total[24h])), "k", "day")
+      )
+  template: |
+    {{ $req := 0.0 }}{{ $hit := 0.0 }}{{ $day := 0.0 }}{{ $sf := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ if eq $k "req" }}{{ $req = .Float "value.1" }}{{ end }}{{ if eq $k "hit" }}{{ $hit = .Float "value.1" }}{{ end }}{{ if eq $k "day" }}{{ $day = .Float "value.1" }}{{ end }}{{ if and (eq $k "rc") (eq (.String "metric.rcode") "SERVFAIL") }}{{ $sf = .Float "value.1" }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">QUERIES</span><span class="pill {{ if gt $sf 0.0 }}bad">● {{ printf "%.2f" $sf }} SERVFAIL/s{{ else }}ok">● no failures{{ end }}</span></div>
+    <div class="stat-row">
+      <div><div class="color-highlight size-h4">{{ printf "%.1f" $req }}</div><div class="size-h6">queries/s</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $hit }}%</div><div class="size-h6">cache hit</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" (div $day 1000.0) }} k</div><div class="size-h6">last 24 h</div></div>
+    </div>
+    <div class="sect">Answers per second</div>
+    <div class="tbl" style="--c: 1.4fr .8fr">
+    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "rc" }}
+      <div class="tr"><span class="color-highlight">{{ .String "metric.rcode" }}</span><span class="n {{ if and (gt (.Float "value.1") 0.0) (eq (.String "metric.rcode") "SERVFAIL") }}color-negative{{ else }}dim{{ end }}">{{ printf "%.2f" (.Float "value.1") }}</span></div>
+    {{ end }}{{ end }}
+    </div>

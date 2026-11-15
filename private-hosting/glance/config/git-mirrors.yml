@@ -1,0 +1,30 @@
+- type: custom-api
+  title: Repository · mirrors
+  title-url: https://git.lab.theoboursy.fr/boursyt/homelab-k3s
+  cache: 2m
+  url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/repository/commits?ref_name=main&per_page=8
+  headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  subrequests:
+    com:
+      url: https://gitlab.com/api/v4/projects/Boursyt%2Fhomelab-k3s/repository/commits?ref_name=main&per_page=1
+    gh:
+      url: https://api.github.com/repos/Boursyt/homelab-k3s/commits?sha=main&per_page=1
+    br:
+      url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/repository/branches?per_page=100
+      headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  template: |
+    {{ $head := .JSON.String "0.id" }}{{ $com := .Subrequest "com" }}{{ $gh := .Subrequest "gh" }}{{ $br := .Subrequest "br" }}
+    {{ $nbr := len ($br.JSON.Array "") }}
+    <div class="kv"><span class="size-h5 color-highlight">main <span class="dim">{{ slice $head 0 8 }}</span></span><span class="pill ok">● source of truth</span></div>
+    <div class="color-subdue size-h6 margin-top-5">git.lab → gitlab.com → GitHub (push mirrors)</div>
+    <div class="tbl margin-top-10" style="--c: 1.3fr 1.6fr .3fr">
+      <div class="tr"><span class="color-highlight">gitlab.com</span><span class="dim">{{ if ne $com.Response.StatusCode 200 }}unreachable{{ else if eq ($com.JSON.String "0.id") $head }}identical commit{{ else }}behind: has {{ slice ($com.JSON.String "0.id") 0 8 }}{{ end }}</span><span class="c">{{ if ne $com.Response.StatusCode 200 }}<span class="color-warn">●</span>{{ else if eq ($com.JSON.String "0.id") $head }}<span class="color-positive">●</span>{{ else }}<span class="color-warn">●</span>{{ end }}</span></div>
+      <div class="tr"><span class="color-highlight">GitHub</span><span class="dim">{{ if ne $gh.Response.StatusCode 200 }}unreachable{{ else if eq ($gh.JSON.String "0.sha") $head }}identical commit{{ else }}behind: has {{ slice ($gh.JSON.String "0.sha") 0 8 }}{{ end }}</span><span class="c">{{ if ne $gh.Response.StatusCode 200 }}<span class="color-warn">●</span>{{ else if eq ($gh.JSON.String "0.sha") $head }}<span class="color-positive">●</span>{{ else }}<span class="color-warn">●</span>{{ end }}</span></div>
+      <div class="tr"><span class="color-highlight">branches</span><span class="dim">{{ $nbr }} on git.lab{{ if gt $nbr 3 }} · stale ones to clean?{{ end }}</span><span class="c">{{ if gt $nbr 6 }}<span class="color-warn">●</span>{{ else }}<span class="color-positive">●</span>{{ end }}</span></div>
+    </div>
+    <div class="sect">Last commits on main</div>
+    <div class="tbl" style="--c: 3fr .8fr">
+    {{ range .JSON.Array "" }}
+      <div class="tr"><span class="color-highlight">{{ .String "title" | replaceAll "Merge branch " "" | replaceAll " into 'main'" "" | replaceAll "'" "" }}</span><span class="n dim" {{ .String "committed_date" | parseTime "rfc3339" | toRelativeTime }}></span></div>
+    {{ end }}
+    </div>
