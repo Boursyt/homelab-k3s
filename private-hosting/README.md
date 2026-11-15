@@ -4,8 +4,8 @@ Services reachable only from the home network and the VPN, on `*.lab.theoboursy.
 
 | Path | Content |
 |---|---|
-| `gitea/` | Git server and Actions runner |
-| `gitlab/` | self-hosted GitLab (storage only for now) |
+| `gitlab/` | self-hosted GitLab (source of truth), its Valkey cache and storage |
+| `gitea/` | old Git server, kept as a backup, with its Actions runners |
 | `code-server/` | VS Code in the browser (code.lab) |
 | `garage-ui/` | web UI of the NAS Garage S3 storage |
 | `homeassistant/` | home automation |

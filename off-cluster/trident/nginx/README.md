@@ -1,6 +1,6 @@
 # nginx
 
-Public entry point of the homelab, in `~/nginx/` on trident. TLS is not terminated here: nginx reads the SNI and forwards the raw TLS stream to Traefik through WireGuard.
+Public entry point of the homelab. Deployed by doco-cd from this folder (`.doco-cd.trident.yml`): merging a change to `main` applies it within about 3 minutes, no copy to the VPS. TLS is not terminated here: nginx reads the SNI and forwards the raw TLS stream to Traefik through WireGuard.
 
 | File | Content |
 |---|---|
@@ -16,4 +16,4 @@ Host prerequisite (non-root process on ports 80/443):
     echo 'net.ipv4.ip_unprivileged_port_start = 80' | sudo tee /etc/sysctl.d/60-unprivileged-ports.conf
     sudo sysctl --system
 
-    cd ~/nginx && docker compose up -d
+The old manual copy in `~/nginx/` is no longer used.

@@ -1,0 +1,30 @@
+- type: custom-api
+  title: GitOps · doco-cd
+  cache: 1m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(max(up{job="doco-cd"}) or vector(0), "k", "up"),
+        label_set(sum(increase(doco_cd_polls_total[10m])) or vector(0), "k", "recent"),
+        label_set(sum(doco_cd_polls_total), "k", "polls"),
+        label_set(1000 * sum(doco_cd_poll_duration_seconds_sum) / sum(doco_cd_poll_duration_seconds_count), "k", "poll"),
+        label_set(sum(doco_cd_deployment_stage_duration_seconds_count{stage="init",outcome="success"}), "k", "runs"),
+        label_set(sum(doco_cd_deployment_stage_duration_seconds_count{outcome="failure"}) or vector(0), "k", "fail"),
+        label_set(max(doco_cd_info), "k", "ver")
+      )
+  template: |
+    {{ $up := 0.0 }}{{ $rec := 0.0 }}{{ $polls := 0.0 }}{{ $poll := 0.0 }}{{ $runs := 0.0 }}{{ $fail := 0.0 }}{{ $ver := "" }}
+    {{ range .JSON.Array "data.result" }}{{ $k := .String "metric.k" }}{{ $x := .Float "value.1" }}{{ if eq $k "up" }}{{ $up = $x }}{{ end }}{{ if eq $k "recent" }}{{ $rec = $x }}{{ end }}{{ if eq $k "polls" }}{{ $polls = $x }}{{ end }}{{ if eq $k "poll" }}{{ $poll = $x }}{{ end }}{{ if eq $k "runs" }}{{ $runs = $x }}{{ end }}{{ if eq $k "fail" }}{{ $fail = $x }}{{ end }}{{ if eq $k "ver" }}{{ $ver = .String "metric.version" }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">doco-cd {{ $ver }}</span><span class="pill {{ if ne $up 1.0 }}bad">● down{{ else if gt $fail 0.0 }}warn">● {{ printf "%.0f" $fail }} failed{{ else if lt $rec 1.0 }}warn">● no poll for 10 min{{ else }}ok">● polling{{ end }}</span></div>
+    <div class="stat-row">
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $polls }}</div><div class="size-h6">polls</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $poll }} ms</div><div class="size-h6">per poll</div></div>
+      <div><div class="color-highlight size-h4">{{ printf "%.0f" $runs }}</div><div class="size-h6">deploy runs</div></div>
+    </div>
+    <div class="tbl" style="--c: 1.4fr 1.6fr .3fr">
+      <div class="tr"><span class="color-highlight">NAS stacks</span><span class="dim">9 from git, every 3 min</span><span class="c">{{ if eq $up 1.0 }}<span class="color-positive">●</span>{{ else }}<span class="color-negative">●</span>{{ end }}</span></div>
+      <div class="tr"><span class="color-highlight">trident</span><span class="dim">nginx stack, own doco-cd instance</span><span class="c"><span class="dim">–</span></span></div>
+    </div>
+    <div class="size-h6 color-subdue margin-top-10">Reads main of the gitlab.com mirror; counters restart when doco-cd restarts</div>
