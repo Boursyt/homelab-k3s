@@ -11,6 +11,8 @@ services:
           reference: main
           interval: 3m
           target: nas
+    ports:
+      - "192.168.1.210:9180:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /volume2/stacks/doco-cd/data:/data
