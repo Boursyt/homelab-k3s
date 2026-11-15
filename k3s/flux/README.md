@@ -9,11 +9,11 @@ Own apps are plain Kustomize directories; third-party software is a Flux `HelmRe
 | `helm-flux-operator.yaml` | Flux Operator and the Flux Web UI, installed by the k3s Helm controller (with Traefik, the only charts k3s installs) |
 | `fluxinstance-flux.yaml` | Flux itself (version, controllers, resources), installed and upgraded by the Flux Operator |
 | `ingress-flux-web.yaml`, `clusterrolebinding-flux-web-admin.yaml` | Web UI on https://flux.lab.theoboursy.fr, no login, with actions (reconcile, suspend, resume) |
-| `provider-gitea.yaml`, `alert-gitea-commit-status.yaml` | Flux posts a commit status on Gitea per Kustomization (applied or failed). Secret `gitea-commit-status` (SOPS) |
+| `provider-gitlab.yaml`, `alert-gitlab-commit-status.yaml` | Flux posts a commit status on GitLab per Kustomization (applied or failed). Secret `gitea-commit-status` (SOPS) |
 | `sources/` | this repository and the chart repositories |
 | `k3s/`, `private-hosting/`, `public-hosting/` | one Flux `Kustomization` per directory of the same area, with its dependencies |
 | `bootstrap.sh` | rebuilds the cluster contents from git on a fresh k3s (see the root README) |
-| `secret-gitea-commit-status.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
+| `secret-gitlab-commit-status.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
 
 A new directory gets a `kustomization-<name>.yaml` in the matching folder. Every Kustomization has `prune: true`.
 Namespaces, PVCs, the FluxInstance and the Flux Operator HelmChart carry `kustomize.toolkit.fluxcd.io/prune: disabled`: Flux never deletes them.
@@ -21,8 +21,8 @@ Not managed by Flux: `k3s/nodes/` and `off-cluster/`.
 
 ## How to
 
-**Change something** (any app or platform file): branch, push, open a PR on Gitea. The `validate` workflow checks and merges it,
-Gitea mirrors to GitLab, GitLab mirrors to GitHub, Flux applies within a minute.
+**Change something** (any app or platform file): branch, push, open a merge request on the self-hosted GitLab. The pipeline (`.gitlab-ci.yml`) checks and merges it,
+The self-hosted GitLab mirrors to GitLab.com (a few minutes), GitLab.com mirrors to GitHub, Flux reads GitLab.com.
 
     git switch -c my-change && git commit -am "…" && git push -u origin my-change
     flux reconcile kustomization <name> --with-source   # after the merge, to apply now
