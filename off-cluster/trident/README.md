@@ -12,5 +12,6 @@ WireGuard routes a prefix to one peer only, so `wg-lan-failover` moves 192.168.1
 | Path | Content |
 |---|---|
 | `wg-lan-failover.*` | moves the home LAN route to the WireGuard gateway that answers |
-| `nginx/` | public reverse proxy (TLS passthrough) |
+| `nginx/` | public reverse proxy (TLS passthrough), deployed by doco-cd |
+| `doco-cd/` | doco-cd: applies `.doco-cd.trident.yml` (the nginx stack) from git |
 | `firewall/` | inbound filter: 22, 80, 443, WireGuard |

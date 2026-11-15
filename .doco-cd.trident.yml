@@ -1,0 +1,2 @@
+name: nginx
+working_dir: off-cluster/trident/nginx

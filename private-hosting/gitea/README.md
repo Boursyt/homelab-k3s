@@ -1,6 +1,6 @@
 # Gitea
 
-Git server (gitea.lab, backup of GitLab; SSH on the VIP port 2223) with Actions runners. Repositories and Valkey data on the NAS (NFS); runners and their caches on the OptiPlex local disks.
+Git server (gitea.lab, kept as a backup of the repositories; SSH on the VIP port 2223) with Actions runners. The CI now runs on GitLab: no workflow uses these runners any more. Repositories and Valkey data on the NAS (NFS); runners and their caches on the OptiPlex local disks.
 
 | File | Content |
 |---|---|
@@ -12,5 +12,4 @@ Git server (gitea.lab, backup of GitLab; SSH on the VIP port 2223) with Actions 
 | `pvc-gitea-shared-storage.yaml` | claim for the volume above |
 | `pv-nfs-gitea-valkey-data-gitea-valkey-cluster-0.yaml` | NFS volume of Valkey |
 | `pvc-valkey-data-gitea-valkey-cluster-0.yaml` | claim for the volume above |
-| `pvc-data-act-runner-gitea-runner-actions-act-runner-0.yaml` | claim for the volume above |
 | `secret-gitea-admin-secret.sops.yaml`, `secret-gitea-db.sops.yaml`, `secret-gitea-runner-secret.sops.yaml` | Secrets encrypted with SOPS (see the root README) |
