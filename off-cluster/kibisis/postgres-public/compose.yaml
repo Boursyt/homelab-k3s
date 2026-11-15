@@ -40,10 +40,10 @@ services:
     container_name: postgres-public-primary
     command: *postgres-args
     volumes:
-      - ./data/primary:/var/lib/postgresql/data
+      - /volume2/stacks/postgres-public/data/primary:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d:ro
       - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ./tls:/etc/postgresql/tls:ro
+      - /volume2/stacks/postgres-public/tls:/etc/postgresql/tls:ro
 
   postgres-public-replica:
     <<: *postgres
@@ -51,10 +51,10 @@ services:
     entrypoint: ["/replica-entrypoint.sh"]
     command: *postgres-args
     volumes:
-      - ./data/replica:/var/lib/postgresql/data
+      - /volume2/stacks/postgres-public/data/replica:/var/lib/postgresql/data
       - ./replica-entrypoint.sh:/replica-entrypoint.sh:ro
       - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ./tls:/etc/postgresql/tls:ro
+      - /volume2/stacks/postgres-public/tls:/etc/postgresql/tls:ro
     depends_on:
       postgres-public-primary: { condition: service_healthy }
 
@@ -66,8 +66,8 @@ services:
       - "192.168.1.210:5433:5432"
     volumes:
       - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
-      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
-      - ./pgbouncer/tls:/etc/pgbouncer/tls:ro
+      - /volume2/stacks/postgres-public/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+      - /volume2/stacks/postgres-public/pgbouncer/tls:/etc/pgbouncer/tls:ro
     depends_on:
       postgres-public-primary: { condition: service_healthy }
 

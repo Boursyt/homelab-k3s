@@ -10,4 +10,4 @@ Separate instance for public services, isolated from the private one. TLS requir
 | `init/10-roles.sh` | first start: monitoring, replication and PgBouncer roles |
 | `pgbouncer/pgbouncer.ini` | session pooling, TLS to clients and to the primary |
 
-Not committed, on the NAS only: `.env` (`POSTGRES_PASSWORD`, `MONITORING_PASSWORD`, `REPLICATION_PASSWORD`, `PGBOUNCER_PASSWORD`), `tls/` and `pgbouncer/tls/` (self-signed certificate), `pgbouncer/userlist.txt`, `data/`.
+Secrets in `secrets.env` (SOPS). Not committed, on the NAS only (absolute paths in `/volume2/stacks/postgres-public/`): `tls/` and `pgbouncer/tls/` (self-signed certificate), `pgbouncer/userlist.txt`, `data/`.
