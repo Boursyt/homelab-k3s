@@ -21,7 +21,7 @@ spec:
     existingSecretKey: token
     giteaRootURL: http://gitea-http.gitea.svc.cluster.local:6969
     statefulset:
-      replicas: 3
+      replicas: 1
       timezone: Europe/Paris
       # one runner per OptiPlex (amd64); its volume (local-path on /data) also holds the Docker cache
       nodeSelector: { kubernetes.io/arch: amd64 }
@@ -51,7 +51,7 @@ spec:
           log:
             level: info
           runner:
-            capacity: 2
+            capacity: 1
             labels:
               - "ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest"
               - "amd64:docker://docker.gitea.com/runner-images:ubuntu-latest"

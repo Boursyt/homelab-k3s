@@ -29,6 +29,7 @@ configMapGenerator:
       - config/db-gitlab.yml
       - config/db-private.yml
       - config/db-public.yml
+      - config/doco-cd.yml
       - config/garage.yml
       - config/git-gitlab.yml
       - config/git-gitops.yml

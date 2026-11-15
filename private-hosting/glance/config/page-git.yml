@@ -14,5 +14,9 @@
           max-columns: 2
           widgets:
             - $include: git-merged.yml
+            - $include: git-gitlab.yml
+        - type: split-column
+          max-columns: 2
+          widgets:
             - $include: git-gitops.yml
-        - $include: git-gitlab.yml
+            - $include: doco-cd.yml
