@@ -6,6 +6,7 @@ Services reachable only from the home network and the VPN, on `*.lab.theoboursy.
 |---|---|
 | `gitea/` | Git server and Actions runner |
 | `gitlab/` | self-hosted GitLab (storage only for now) |
+| `garage-ui/` | web UI of the NAS Garage S3 storage |
 | `homeassistant/` | home automation |
 | `zigbee/` | Zigbee2MQTT + Mosquitto |
 | `glance/` | private homelab dashboard |

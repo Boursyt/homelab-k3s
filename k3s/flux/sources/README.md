@@ -8,6 +8,7 @@ Where Flux reads from: this repository (GitLab mirror) and the chart repositorie
 | `helmrepository-collabora.yaml` | https://collaboraonline.github.io/online/ |
 | `helmrepository-csi-driver-nfs.yaml` | https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts |
 | `helmrepository-gitea.yaml` | https://dl.gitea.com/charts/ |
+| `helmrepository-gitlab.yaml` | https://charts.gitlab.io |
 | `helmrepository-grafana-community.yaml` | https://grafana-community.github.io/helm-charts |
 | `helmrepository-headlamp.yaml` | https://kubernetes-sigs.github.io/headlamp/ |
 | `helmrepository-jetstack.yaml` | https://charts.jetstack.io |

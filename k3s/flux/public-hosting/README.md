@@ -8,3 +8,4 @@ One Flux `Kustomization` per directory of `public-hosting/`.
 | `kustomization-gatus-public.yaml` | `public-hosting/gatus`, after cert-manager, traefik, databases |
 | `kustomization-glance-public.yaml` | `public-hosting/glance`, after cert-manager, traefik, metrics |
 | `kustomization-nextcloud.yaml` | `public-hosting/nextcloud`, after cert-manager, traefik, databases, nfs |
+| `kustomization-gitlab-managed.yaml` | `public-hosting/gitlab-managed` (runners of gitlab.com), no dependency |

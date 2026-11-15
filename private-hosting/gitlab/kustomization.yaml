@@ -1,7 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - deployment-valkey.yaml
+  - helmrelease-gitlab.yaml
   - namespace.yaml
   - pv-iscsi-gitlab-gitaly.yaml
-  - pvc-gitlab-gitaly.yaml
+  - pv-nfs-gitlab-valkey.yaml
+  - pvc-repo-data-gitlab-gitaly-0.yaml
+  - pvc-valkey.yaml
+  - secret-gitlab-db.sops.yaml
+  - secret-gitlab-initial-root-password.sops.yaml
   - secret-gitlab-iscsi-chap.sops.yaml
+  - secret-gitlab-object-storage.sops.yaml
+  - secret-gitlab-valkey.sops.yaml
+  - service-valkey.yaml

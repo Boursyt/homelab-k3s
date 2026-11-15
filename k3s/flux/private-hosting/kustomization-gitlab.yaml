@@ -11,3 +11,8 @@ spec:
   timeout: 5m
   prune: true
   decryption: { provider: sops, secretRef: { name: sops-age } }
+  dependsOn:
+    - { name: cert-manager }
+    - { name: traefik }
+    - { name: databases }
+    - { name: nfs }

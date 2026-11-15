@@ -13,6 +13,7 @@ Rules:
 
 | Path | Content |
 |---|---|
+| `gitlab-managed/` | amd64 and arm64 runners for the gitlab.com projects (outbound only, not exposed) |
 | `glance/` | public dashboard on `lab.pub.theoboursy.fr` |
 | `gatus/` | public status page on `status.lab.pub.theoboursy.fr` |
 | `nextcloud/` | personal cloud on `cloud.lab.pub.theoboursy.fr` |
