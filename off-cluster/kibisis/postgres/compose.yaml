@@ -1,5 +1,5 @@
 x-postgres: &postgres
-  image: pgvector/pgvector:0.8.7-pg17-bookworm
+  image: pgvector/pgvector:0.8.7-pg17-bookworm@sha256:b513c48566e4777cd3370451400000c78eda6a08131d68f4c31d4a76f27bd8fd
   restart: unless-stopped
   shm_size: 256mb
   environment:
@@ -48,7 +48,7 @@ services:
       postgres-primary: { condition: service_healthy }
 
   pgbouncer:
-    image: edoburu/pgbouncer:v1.26.0-p0
+    image: edoburu/pgbouncer:v1.26.0-p0@sha256:b17551c776ef7e5769ef80b956d20f85e2fd25dd8912d31d58f782aad495b711
     container_name: pgbouncer
     restart: unless-stopped
     ports:
