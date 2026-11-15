@@ -90,3 +90,12 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[CERTIFICATE_EXPIRATION] > 336h"
+  - name: Code Server
+    group: Apps
+    extra-labels: { desc: "VS Code in the browser", section: "Apps", href: "https://code.lab.theoboursy.fr", order: "18" }
+    url: "https://code.lab.theoboursy.fr/healthz"
+    interval: 1m
+    alerts: [{ type: ntfy }]
+    conditions:
+      - "[STATUS] == 200"
+      - "[CERTIFICATE_EXPIRATION] > 336h"

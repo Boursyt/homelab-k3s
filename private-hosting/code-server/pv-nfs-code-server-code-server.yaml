@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-code-server-code-server
+spec:
+  capacity: { storage: 20Gi }
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-ssd
+  mountOptions: [nfsvers=3, hard, noatime]
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 192.168.1.210/volume2/k3s/code-server
+    volumeAttributes: { server: 192.168.1.210, share: /volume2/k3s, subDir: code-server }
+  claimRef: { namespace: code-server, name: code-server }

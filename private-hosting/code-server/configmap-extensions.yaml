@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extensions
+  namespace: code-server
+data:
+  extensions.txt: |
+    GitLab.gitlab-workflow
+    eamodio.gitlens
+    anthropic.claude-code
+    openai.chatgpt
+    github.vscode-github-actions
+    esbenp.prettier-vscode
+    davidanson.vscode-markdownlint
+    redhat.vscode-yaml
+    mechatroner.rainbow-csv
+    usernamehw.errorlens
+    oderwat.indent-rainbow
+    fill-labs.dependi
+    hashicorp.terraform
+    hashicorp.hcl
+    mads-hartmann.bash-ide-vscode
+    bbenoist.nix
+    ms-kubernetes-tools.vscode-kubernetes-tools
+    golang.go
+    rust-lang.rust-analyzer
+    ms-python.python
+    ms-python.debugpy
+    ms-python.vscode-python-envs
+    detachhead.basedpyright
+    charliermarsh.ruff
+    catppuccin.catppuccin-vsc
+    pkief.material-icon-theme
+    enkia.tokyo-night
+    akamud.vscode-theme-onedark
+    github.github-vscode-theme
