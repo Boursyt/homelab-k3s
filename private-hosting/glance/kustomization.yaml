@@ -7,6 +7,7 @@ resources:
   - ingress-glance.yaml
   - pdb-glance.yaml
   - secret-homeassistant-token.sops.yaml
+  - secret-garage-admin.sops.yaml
   - secret-gitlab-token.sops.yaml
   - secret-llm-keys.sops.yaml
   - secret-victoriametrics-auth.sops.yaml
@@ -17,29 +18,41 @@ configMapGenerator:
       - config/glance.yml
       - config/theme.yml
       - config/homelab.yml
-      - config/hardware.yml
-      - config/k3s.yml
-      - config/nas.yml
+      - config/apps-namespaces.yml
+      - config/apps-nodes.yml
+      - config/apps-problems.yml
+      - config/apps-traffic.yml
       - config/apps.yml
-      - config/printer.yml
-      - config/public.yml
-      - config/network.yml
-      - config/speedtest.yml
-      - config/databases.yml
+      - config/backups-detail.yml
       - config/backups.yml
-      - config/ingress.yml
-      - config/status.yml
-      - config/page-db.yml
-      - config/page-network.yml
-      - config/page-git.yml
-      - config/page-apps.yml
+      - config/databases.yml
+      - config/db-gitlab.yml
       - config/db-private.yml
       - config/db-public.yml
-      - config/db-gitlab.yml
-      - config/backups-detail.yml
+      - config/garage.yml
+      - config/git-gitlab.yml
+      - config/git-gitops.yml
+      - config/git-merged.yml
+      - config/git-mirrors.yml
       - config/git-mrs.yml
       - config/git-pipelines.yml
-      - config/git-main.yml
-      - config/apps-namespaces.yml
-      - config/apps-traffic.yml
+      - config/hardware.yml
+      - config/ingress.yml
+      - config/k3s.yml
+      - config/nas.yml
+      - config/net-certs.yml
+      - config/net-dns.yml
+      - config/net-latency.yml
+      - config/network-mini.yml
+      - config/network.yml
+      - config/page-apps.yml
+      - config/page-git.yml
+      - config/page-network.yml
+      - config/page-storage.yml
+      - config/printer.yml
+      - config/public.yml
+      - config/pvc.yml
+      - config/speedtest.yml
+      - config/status.yml
       - config/traffic.yml
+      - config/valkey.yml

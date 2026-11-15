@@ -1,0 +1,27 @@
+- type: custom-api
+  title: Volumes · PVC usage
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      WITH (
+        pct = max by (ns, persistentvolumeclaim) (label_replace(100 * kubelet_volume_stats_used_bytes{exported_namespace!=""} / kubelet_volume_stats_capacity_bytes{exported_namespace!=""}, "ns", "$1", "exported_namespace", "(.*)") or label_replace(100 * kubelet_volume_stats_used_bytes{exported_namespace=""} / kubelet_volume_stats_capacity_bytes{exported_namespace=""}, "ns", "$1", "namespace", "(.*)")),
+        top = topk(12, pct)
+      )
+      union(
+        label_set(top, "k", "pct"),
+        label_set((max by (ns, persistentvolumeclaim) (label_replace(kubelet_volume_stats_used_bytes{exported_namespace!=""}, "ns", "$1", "exported_namespace", "(.*)") or label_replace(kubelet_volume_stats_used_bytes{exported_namespace=""}, "ns", "$1", "namespace", "(.*)")) / 1e9) and on (ns, persistentvolumeclaim) top, "k", "used"),
+        label_set((max by (ns, persistentvolumeclaim) (label_replace(kubelet_volume_stats_capacity_bytes{exported_namespace!=""}, "ns", "$1", "exported_namespace", "(.*)") or label_replace(kubelet_volume_stats_capacity_bytes{exported_namespace=""}, "ns", "$1", "namespace", "(.*)")) / 1e9) and on (ns, persistentvolumeclaim) top, "k", "cap")
+      )
+  template: |
+    <div class="tbl" style="--c: 1.9fr 1.2fr .7fr">
+      <div class="tr th"><span>volume</span><span class="n">used / size</span><span class="n">full</span></div>
+    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "pct" }}{{ $ns := .String "metric.ns" }}{{ $p := .String "metric.persistentvolumeclaim" }}{{ $v := .Float "value.1" }}
+      <div class="tr">
+        <span class="color-highlight">{{ $p }} <span class="dim">{{ $ns }}</span></span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "used") (eq (.String "metric.ns") $ns) (eq (.String "metric.persistentvolumeclaim") $p) }}{{ printf "%.1f" (.Float "value.1") }}{{ end }}{{ end }} / {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "cap") (eq (.String "metric.ns") $ns) (eq (.String "metric.persistentvolumeclaim") $p) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }} GB</span>
+        <span class="n {{ if ge $v 85.0 }}color-negative{{ else if ge $v 70.0 }}color-warn{{ else }}color-highlight{{ end }}">{{ printf "%.0f" $v }}%</span>
+      </div>
+    {{ end }}{{ end }}
+    </div>

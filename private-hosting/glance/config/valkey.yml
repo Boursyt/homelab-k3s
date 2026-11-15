@@ -1,0 +1,29 @@
+- type: custom-api
+  title: Valkey
+  cache: 30s
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(max by (namespace, pod) (kube_pod_status_ready{condition="true",pod=~".*valkey.*"}), "k", "ready"),
+        label_set(sum by (namespace) (container_memory_working_set_bytes{pod=~".*valkey.*",container!=""}) / 1e6, "k", "mem"),
+        label_set(sum by (namespace) (kube_pod_container_status_restarts_total{pod=~".*valkey.*"}), "k", "rst"),
+        label_set((time() - max by (namespace) (kube_pod_start_time{pod=~".*valkey.*"})) / 86400, "k", "age"),
+        label_set(max by (namespace, node) (kube_pod_info{pod=~".*valkey.*"}), "k", "nd")
+      )
+  template: |
+    <div class="tbl" style="--c: 1.1fr 1fr .8fr .6fr .4fr .3fr">
+      <div class="tr th"><span>cache of</span><span>node</span><span class="n">memory</span><span class="n">up</span><span class="n">⟲</span><span class="c"></span></div>
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "ready" }}{{ $ns := .String "metric.namespace" }}{{ $ok := .Float "value.1" }}
+      <div class="tr">
+        <span class="color-highlight">{{ $ns }}</span>
+        <span class="dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "nd") (eq (.String "metric.namespace") $ns) }}{{ .String "metric.node" }}{{ end }}{{ end }}</span>
+        <span class="n">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "mem") (eq (.String "metric.namespace") $ns) }}{{ printf "%.0f" (.Float "value.1") }} MB{{ end }}{{ end }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "age") (eq (.String "metric.namespace") $ns) }}{{ printf "%.0f" (.Float "value.1") }} d{{ end }}{{ end }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "rst") (eq (.String "metric.namespace") $ns) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }}</span>
+        <span class="c">{{ if eq $ok 1.0 }}<span class="color-positive">●</span>{{ else }}<span class="color-negative">●</span>{{ end }}</span>
+      </div>
+    {{ end }}{{ end }}
+    </div>
+    <div class="size-h6 color-subdue margin-top-10">Gitea (cluster mode), GitLab, Manyfold and Nextcloud caches; no metrics endpoint, state from the pods</div>

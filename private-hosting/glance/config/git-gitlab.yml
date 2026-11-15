@@ -1,0 +1,37 @@
+- type: custom-api
+  title: GitLab · components
+  title-url: https://git.lab.theoboursy.fr
+  cache: 1m
+  url: http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/query
+  basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
+  parameters:
+    query: |
+      union(
+        label_set(max by (pod) (kube_pod_status_ready{namespace="gitlab",condition="true"}), "k", "ready"),
+        label_set(sum by (pod) (container_memory_working_set_bytes{namespace="gitlab",container!=""}) / 1e6, "k", "mem"),
+        label_set(sum by (pod) (increase(kube_pod_container_status_restarts_total{namespace="gitlab"}[24h])), "k", "rst"),
+        label_set(max by (pod, node) (kube_pod_info{namespace="gitlab"}), "k", "nd"),
+        label_set(max(100 * kubelet_volume_stats_used_bytes{exported_namespace="gitlab",persistentvolumeclaim=~"repo-data.*"} / kubelet_volume_stats_capacity_bytes{exported_namespace="gitlab",persistentvolumeclaim=~"repo-data.*"}), "k", "gvol")
+      )
+  subrequests:
+    ver:
+      url: https://git.lab.theoboursy.fr/api/v4/version
+      headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  template: |
+    {{ $v := .Subrequest "ver" }}{{ $g := 0.0 }}
+    {{ range .JSON.Array "data.result" }}{{ if eq (.String "metric.k") "gvol" }}{{ $g = .Float "value.1" }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">GitLab {{ $v.JSON.String "version" }}</span><span class="pill ok">● self-hosted</span></div>
+    <div class="kv margin-top-10"><span class="color-highlight">Gitaly volume <span class="dim">(repositories, iSCSI LUN)</span></span><span class="{{ if ge $g 80.0 }}color-negative{{ else }}color-highlight{{ end }}">{{ printf "%.2f" $g }}%</span></div>
+    <div class="bar"><div class="data {{ if ge $g 80.0 }}hot{{ end }}" style="width: {{ $g }}%"></div></div>
+    <div class="tbl" style="--c: 2.6fr .9fr .9fr .6fr .3fr">
+      <div class="tr th"><span>pod</span><span>node</span><span class="n">memory</span><span class="n">⟲ 24 h</span><span class="c"></span></div>
+    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "mem" }}{{ $p := .String "metric.pod" }}
+      <div class="tr">
+        <span class="color-highlight">{{ $p }}</span>
+        <span class="dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "nd") (eq (.String "metric.pod") $p) }}{{ .String "metric.node" }}{{ end }}{{ end }}</span>
+        <span class="n">{{ printf "%.0f" (.Float "value.1") }} MB</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "rst") (eq (.String "metric.pod") $p) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }}</span>
+        <span class="c">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "ready") (eq (.String "metric.pod") $p) }}{{ if eq (.Float "value.1") 1.0 }}<span class="color-positive">●</span>{{ else }}<span class="color-negative">●</span>{{ end }}{{ end }}{{ end }}</span>
+      </div>
+    {{ end }}{{ end }}
+    </div>

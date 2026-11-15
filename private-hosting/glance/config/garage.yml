@@ -1,0 +1,69 @@
+- type: custom-api
+  title: Garage · S3 buckets
+  title-url: https://s3.lab.theoboursy.fr
+  cache: 2m
+  url: http://192.168.1.210:3903/v2/GetClusterStatistics
+  headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+  subrequests:
+    st:
+      url: http://192.168.1.210:3903/v2/GetClusterStatus
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b0:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-artifacts
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b1:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-lfs
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b2:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-uploads
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b3:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-packages
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b4:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-external-diffs
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b5:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-terraform-state
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b6:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-ci-secure-files
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b7:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-dependency-proxy
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b8:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-pages
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b9:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-tmp
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b10:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-registry
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+    b11:
+      url: http://192.168.1.210:3903/v2/GetBucketInfo?globalAlias=gitlab-backups
+      headers: { Authorization: "Bearer ${GARAGE_ADMIN_TOKEN}" }
+  template: |
+    {{ $st := .Subrequest "st" }}
+    {{ $free := .JSON.Float "dataAvail" }}{{ $nd := index ($st.JSON.Array "nodes") 0 }}
+    {{ $tot := $nd.Float "dataPartition.total" }}{{ $avl := $nd.Float "dataPartition.available" }}{{ $up := $nd.Bool "isUp" }}
+    <div class="kv"><span class="size-h5 color-highlight">GARAGE {{ $nd.String "garageVersion" }}</span><span class="pill {{ if $up }}ok">● online{{ else }}bad">● down{{ end }}</span></div>
+    <div class="stat-row"><div><div class="color-highlight size-h4">{{ .JSON.Int "bucketCount" }}</div><div class="size-h6">buckets</div></div><div><div class="color-highlight size-h4">{{ .JSON.Int "totalObjectCount" }}</div><div class="size-h6">objects</div></div><div><div class="color-highlight size-h4">{{ printf "%.0f" (div (.JSON.Float "totalObjectBytes") 1000000.0) }} MB</div><div class="size-h6">stored</div></div></div>
+    <div class="kv margin-top-15"><span class="size-h5 color-highlight">DATA DISK <span class="color-subdue">(/volume1)</span></span><span class="color-highlight">{{ printf "%.1f" (div (sub $tot $avl) 1000000000000.0) }} / {{ printf "%.1f" (div $tot 1000000000000.0) }} TB</span></div>
+    <div class="bar"><div class="data" style="width: {{ mul (div (sub $tot $avl) $tot) 100 }}%"></div></div>
+    <div class="tbl" style="--c: 2fr .7fr .9fr">
+      <div class="tr th"><span>bucket</span><span class="n">objects</span><span class="n">size</span></div>
+      {{ $b0 := .Subrequest "b0" }}<div class="tr"><span class="color-highlight">gitlab-artifacts</span><span class="n dim">{{ $b0.JSON.Int "objects" }}</span><span class="n">{{ $z := $b0.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b1 := .Subrequest "b1" }}<div class="tr"><span class="color-highlight">gitlab-lfs</span><span class="n dim">{{ $b1.JSON.Int "objects" }}</span><span class="n">{{ $z := $b1.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b2 := .Subrequest "b2" }}<div class="tr"><span class="color-highlight">gitlab-uploads</span><span class="n dim">{{ $b2.JSON.Int "objects" }}</span><span class="n">{{ $z := $b2.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b3 := .Subrequest "b3" }}<div class="tr"><span class="color-highlight">gitlab-packages</span><span class="n dim">{{ $b3.JSON.Int "objects" }}</span><span class="n">{{ $z := $b3.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b4 := .Subrequest "b4" }}<div class="tr"><span class="color-highlight">gitlab-external-diffs</span><span class="n dim">{{ $b4.JSON.Int "objects" }}</span><span class="n">{{ $z := $b4.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b5 := .Subrequest "b5" }}<div class="tr"><span class="color-highlight">gitlab-terraform-state</span><span class="n dim">{{ $b5.JSON.Int "objects" }}</span><span class="n">{{ $z := $b5.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b6 := .Subrequest "b6" }}<div class="tr"><span class="color-highlight">gitlab-ci-secure-files</span><span class="n dim">{{ $b6.JSON.Int "objects" }}</span><span class="n">{{ $z := $b6.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b7 := .Subrequest "b7" }}<div class="tr"><span class="color-highlight">gitlab-dependency-proxy</span><span class="n dim">{{ $b7.JSON.Int "objects" }}</span><span class="n">{{ $z := $b7.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b8 := .Subrequest "b8" }}<div class="tr"><span class="color-highlight">gitlab-pages</span><span class="n dim">{{ $b8.JSON.Int "objects" }}</span><span class="n">{{ $z := $b8.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b9 := .Subrequest "b9" }}<div class="tr"><span class="color-highlight">gitlab-tmp</span><span class="n dim">{{ $b9.JSON.Int "objects" }}</span><span class="n">{{ $z := $b9.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b10 := .Subrequest "b10" }}<div class="tr"><span class="color-highlight">gitlab-registry</span><span class="n dim">{{ $b10.JSON.Int "objects" }}</span><span class="n">{{ $z := $b10.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+      {{ $b11 := .Subrequest "b11" }}<div class="tr"><span class="color-highlight">gitlab-backups</span><span class="n dim">{{ $b11.JSON.Int "objects" }}</span><span class="n">{{ $z := $b11.JSON.Float "bytes" }}{{ if ge $z 1000000000.0 }}{{ printf "%.2f" (div $z 1000000000.0) }} GB{{ else if ge $z 1000000.0 }}{{ printf "%.0f" (div $z 1000000.0) }} MB{{ else if gt $z 0.0 }}{{ printf "%.0f" (div $z 1000.0) }} kB{{ else }}<span class="dim">empty</span>{{ end }}</span></div>
+    </div>

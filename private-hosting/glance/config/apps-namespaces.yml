@@ -6,22 +6,25 @@
   basic-auth: { username: "${VM_USER}", password: "${VM_PASSWORD}" }
   parameters:
     query: |
-      WITH (top = topk(12, sum by (namespace) (container_memory_working_set_bytes{container!=""})))
+      WITH (top = topk(14, sum by (namespace) (container_memory_working_set_bytes{container!=""})))
       union(
         label_set(top / 1e6, "k", "mem"),
         label_set((sum by (namespace) (rate(container_cpu_usage_seconds_total{container!=""}[5m])) * 1000) and on (namespace) top, "k", "cpu"),
-        label_set((sum by (namespace) (increase(kube_pod_container_status_restarts_total[24h]))) and on (namespace) top, "k", "rst")
+        label_set((sum by (namespace) (increase(kube_pod_container_status_restarts_total[24h]))) and on (namespace) top, "k", "rst"),
+        label_set((sum by (namespace) (kube_pod_status_phase{phase="Running"})) and on (namespace) top, "k", "pods"),
+        label_set((sum by (namespace, node) (kube_pod_info)) and on (namespace) top, "k", "nd")
       )
   template: |
-    <div class="kv size-h6 color-subdue"><span>namespace</span><span>memory · cpu · restarts 24 h</span></div>
-    <ul class="list list-gap-10 margin-top-10">
-    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "mem" }}{{ $ns := .String "metric.namespace" }}
-      <li>
-        <div class="kv"><span class="color-highlight text-truncate">{{ $ns }}</span><span class="shrink-0 size-h6">
-          <span class="color-highlight">{{ printf "%.0f" (.Float "value.1") }} MB</span>
-          {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "cpu") (eq (.String "metric.namespace") $ns) }}<span class="color-subdue"> · {{ printf "%.0f" (.Float "value.1") }} m</span>{{ end }}{{ end }}
-          {{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "rst") (eq (.String "metric.namespace") $ns) }}<span class="{{ if gt (.Float "value.1") 3.0 }}color-negative{{ else if gt (.Float "value.1") 0.0 }}color-warn{{ else }}color-subdue{{ end }}"> · ⟲ {{ printf "%.0f" (.Float "value.1") }}</span>{{ end }}{{ end }}
-        </span></div>
-      </li>
+    <div class="tbl" style="--c: 1.3fr .55fr 2.3fr .95fr .85fr .65fr">
+      <div class="tr th"><span>namespace</span><span class="n">pods</span><span>nodes</span><span class="n">memory</span><span class="n">cpu</span><span class="n">⟲ 24 h</span></div>
+    {{ range .JSON.Array "data.result" | sortByFloat "value.1" "desc" }}{{ if eq (.String "metric.k") "mem" }}{{ $ns := .String "metric.namespace" }}{{ $m := .Float "value.1" }}
+      <div class="tr">
+        <span class="color-highlight">{{ $ns }}</span>
+        <span class="n">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "pods") (eq (.String "metric.namespace") $ns) }}{{ printf "%.0f" (.Float "value.1") }}{{ end }}{{ end }}</span>
+        <span class="dim nodes">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "nd") (eq (.String "metric.namespace") $ns) }}<span style="margin-right:12px">{{ .String "metric.node" }}{{ if gt (.Float "value.1") 1.0 }}<span class="color-subdue"> ×{{ printf "%.0f" (.Float "value.1") }}</span>{{ end }}</span>{{ end }}{{ end }}</span>
+        <span class="n color-highlight">{{ if ge $m 1000.0 }}{{ printf "%.1f" (div $m 1000.0) }} GB{{ else }}{{ printf "%.0f" $m }} MB{{ end }}</span>
+        <span class="n dim">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "cpu") (eq (.String "metric.namespace") $ns) }}{{ printf "%.0f" (.Float "value.1") }} m{{ end }}{{ end }}</span>
+        <span class="n">{{ range $.JSON.Array "data.result" }}{{ if and (eq (.String "metric.k") "rst") (eq (.String "metric.namespace") $ns) }}<span class="{{ if gt (.Float "value.1") 3.0 }}color-negative{{ else if gt (.Float "value.1") 0.0 }}color-warn{{ else }}dim{{ end }}">{{ printf "%.0f" (.Float "value.1") }}</span>{{ end }}{{ end }}</span>
+      </div>
     {{ end }}{{ end }}
-    </ul>
+    </div>
