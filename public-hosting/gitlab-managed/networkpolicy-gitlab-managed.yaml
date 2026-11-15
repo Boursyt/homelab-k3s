@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gitlab-managed
+  namespace: gitlab-managed
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: kube-system }
+          podSelector:
+            matchLabels: { k8s-app: kube-dns }
+      ports:
+        - { port: 53, protocol: UDP }
+        - { port: 53, protocol: TCP }
+    # Kubernetes API (runner creates the job pods): the VIP and the three servers
+    - to:
+        - ipBlock: { cidr: 192.168.1.200/32 }
+        - ipBlock: { cidr: 192.168.1.201/32 }
+        - ipBlock: { cidr: 192.168.1.202/32 }
+        - ipBlock: { cidr: 192.168.1.203/32 }
+      ports:
+        - { port: 6443 }
+    # the internet, never the cluster, the LAN or the VPN
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16]

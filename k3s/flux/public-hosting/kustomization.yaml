@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - kustomization-collabora.yaml
   - kustomization-gatus-public.yaml
+  - kustomization-gitlab-managed.yaml
   - kustomization-glance-public.yaml
   - kustomization-nextcloud.yaml
