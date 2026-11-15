@@ -223,7 +223,7 @@ spec:
             - { name: code, mountPath: /code }
             - { name: nextcloud-main, mountPath: /persist, subPath: config }
         - name: redis-session-ini
-          image: busybox:1.37
+          image: busybox:1.38
           command: [touch, /php-session/redis-session.ini]
           securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] }, readOnlyRootFilesystem: true }
           volumeMounts: [{ name: php-session, mountPath: /php-session }]
