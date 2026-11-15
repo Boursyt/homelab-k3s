@@ -1,0 +1,15 @@
+- name: DB
+  width: wide
+  columns:
+    - size: small
+      widgets:
+        - $include: databases.yml
+        - $include: backups-detail.yml
+    - size: full
+      widgets:
+        - type: split-column
+          max-columns: 3
+          widgets:
+            - $include: db-private.yml
+            - $include: db-public.yml
+            - $include: db-gitlab.yml

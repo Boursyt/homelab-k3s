@@ -1,0 +1,15 @@
+- type: custom-api
+  title: Pipelines
+  title-url: https://git.lab.theoboursy.fr/boursyt/homelab-k3s/-/pipelines
+  cache: 1m
+  url: https://git.lab.theoboursy.fr/api/v4/projects/boursyt%2Fhomelab-k3s/pipelines?per_page=8
+  headers: { PRIVATE-TOKEN: "${GITLAB_TOKEN}" }
+  template: |
+    {{ $failed := 0 }}{{ $running := 0 }}
+    {{ range .JSON.Array "" }}{{ if eq (.String "status") "failed" }}{{ $failed = add $failed 1 }}{{ end }}{{ if or (eq (.String "status") "running") (eq (.String "status") "pending") }}{{ $running = add $running 1 }}{{ end }}{{ end }}
+    <div class="kv"><span class="size-h5 color-highlight">LAST 8</span><span class="pill {{ if gt $failed 0 }}bad">● {{ $failed }} failed{{ else if gt $running 0 }}warn">● {{ $running }} running{{ else }}ok">● all green{{ end }}</span></div>
+    <ul class="list list-gap-10 margin-top-15">
+    {{ range .JSON.Array "" }}{{ $s := .String "status" }}
+      <li class="kv size-h6"><span class="text-truncate"><span class="{{ if eq $s "success" }}color-positive{{ else if eq $s "failed" }}color-negative{{ else if eq $s "running" }}color-primary{{ else }}color-warn{{ end }}">●</span> <a class="color-highlight" href="{{ .String "web_url" }}" target="_blank" rel="noreferrer">#{{ .Int "id" }}</a> <span class="color-subdue">{{ .String "ref" | replaceAll "refs/merge-requests/" "MR !" | replaceAll "/head" "" }} · {{ .String "source" }}</span></span><span class="shrink-0 color-subdue" {{ .String "created_at" | parseTime "rfc3339" | toRelativeTime }}></span></li>
+    {{ end }}
+    </ul>
