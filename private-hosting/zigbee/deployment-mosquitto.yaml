@@ -17,7 +17,7 @@ spec:
       securityContext: { runAsUser: 1883, runAsGroup: 1883, runAsNonRoot: true, fsGroup: 1883 }
       initContainers:
         - name: passwd
-          image: eclipse-mosquitto:2.0.22
+          image: eclipse-mosquitto:2.0.23
           command:
             - sh
             - -c
@@ -34,7 +34,7 @@ spec:
           resources: { requests: { cpu: 5m, memory: 8Mi }, limits: { memory: 32Mi } }
       containers:
         - name: mosquitto
-          image: eclipse-mosquitto:2.0.22
+          image: eclipse-mosquitto:2.0.23
           ports:
             - { name: mqtt, containerPort: 1883 }
           volumeMounts:
