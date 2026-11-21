@@ -15,7 +15,7 @@ spec:
   values:
     image:
       repository: docker.io/collabora/code
-      tag: 26.04.6.1.1
+      tag: 26.04.6.2.1
 
     # one pod: several would need routing each document to the same pod
     replicaCount: 1
