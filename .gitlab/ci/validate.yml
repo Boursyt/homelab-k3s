@@ -9,7 +9,7 @@ gitleaks:
 
 render:
   stage: validate
-  image: { name: "ghcr.io/fluxcd/flux-cli:v2.10.0", entrypoint: [""] }
+  image: { name: "ghcr.io/fluxcd/flux-cli:v2.10.1", entrypoint: [""] }
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
