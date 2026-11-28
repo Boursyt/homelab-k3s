@@ -21,7 +21,7 @@ spec:
             seccompProfile: { type: RuntimeDefault }
           containers:
             - name: pg-dump
-              image: postgres:18.7-bookworm
+              image: postgres:19.0-bookworm
               env:
                 - { name: TZ, value: Europe/Paris }
                 - { name: PGHOST, value: postgres.databases.svc.cluster.local }
