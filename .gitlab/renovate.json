@@ -4,6 +4,8 @@
   "requireConfig": "optional",
   "extends": ["config:recommended"],
   "timezone": "Europe/Paris",
+  "prHourlyLimit": 25,
+  "prConcurrentLimit": 25,
   "gitAuthor": "Boursyt <86895272+Boursyt@users.noreply.github.com>",
   "flux": { "managerFilePatterns": ["/^(k3s|private-hosting|public-hosting)/.+\\.yaml$/"] },
   "kubernetes": { "managerFilePatterns": ["/^(k3s|private-hosting|public-hosting)/.+\\.yaml$/"] },
@@ -34,20 +36,21 @@
   ],
   "packageRules": [
     {
-      "description": "Files copied to machines by hand, not applied by Flux",
-      "matchFileNames": ["off-cluster/trident/**", "off-cluster/dns/**", "k3s/nodes/**"],
+      "description": "Files copied to machines by hand, not applied by Flux or doco-cd",
+      "matchFileNames": ["off-cluster/dns/**", "k3s/nodes/**"],
       "enabled": false
     },
     {
-      "description": "NAS stacks (deployed by doco-cd): pin and follow the image digests, so rebuilt tags (security fixes) arrive as updates too",
-      "matchFileNames": ["off-cluster/kibisis/**"],
+      "description": "NAS and trident stacks (deployed by doco-cd): pin and follow the image digests, so rebuilt tags (security fixes) arrive as updates too",
+      "matchFileNames": ["off-cluster/kibisis/**", "off-cluster/trident/**"],
       "pinDigests": true
     },
     {
       "description": "NAS PostgreSQL and PgBouncer: never merged automatically (a restart cuts every application connection), whatever the update type",
       "matchFileNames": ["off-cluster/kibisis/**"],
       "matchPackageNames": ["pgvector/pgvector", "edoburu/pgbouncer"],
-      "additionalBranchPrefix": "manual-"
+      "additionalBranchPrefix": "manual-",
+      "dependencyDashboardApproval": true
     },
     {
       "matchDepNames": ["fluxcd/flux2", "fluxcd/flux2/action", "ghcr.io/fluxcd/flux-cli"],
@@ -55,11 +58,13 @@
     },
     {
       "matchUpdateTypes": ["major"],
-      "additionalBranchPrefix": "manual-"
+      "additionalBranchPrefix": "manual-",
+      "dependencyDashboardApproval": true
     },
     {
       "matchFileNames": ["iac/**"],
-      "additionalBranchPrefix": "manual-"
+      "additionalBranchPrefix": "manual-",
+      "dependencyDashboardApproval": true
     }
   ]
 }
