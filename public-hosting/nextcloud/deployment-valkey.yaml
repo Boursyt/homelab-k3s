@@ -20,7 +20,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: valkey
-          image: valkey/valkey:9.1.3-alpine
+          image: valkey/valkey:9.2.1-alpine
           # cache, file locks and sessions: nothing to persist; evict only keys with a TTL
           args: [--save, "", --appendonly, "no", --maxmemory, 112mb, --maxmemory-policy, volatile-lru]
           ports:
