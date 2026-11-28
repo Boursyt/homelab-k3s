@@ -1,6 +1,6 @@
 # Gitea
 
-Git server (gitea.lab, kept as a backup of the repositories; SSH on the VIP port 2223) with Actions runners. The CI now runs on GitLab: no workflow uses these runners any more. Repositories and Valkey data on the NAS (NFS); runners and their caches on the OptiPlex local disks.
+Git server (gitea.lab), **scaled to zero** since 2026-11-28: kept only as a dormant backup of the repositories (set `replicaCount` and the runners' `replicas` back to 1 to wake it; SSH is now ClusterIP only). Actions runners included. The CI now runs on GitLab: no workflow uses these runners any more. Repositories and Valkey data on the NAS (NFS); runners and their caches on the OptiPlex local disks.
 
 | File | Content |
 |---|---|

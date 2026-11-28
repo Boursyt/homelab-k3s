@@ -35,13 +35,6 @@ endpoints:
     alerts: [{ type: ntfy }]
     conditions:
       - "[CONNECTED] == true"
-  - name: Gitea SSH
-    group: Services
-    url: "tcp://gitea.lab.theoboursy.fr:2223"
-    interval: 1m
-    alerts: [{ type: ntfy }]
-    conditions:
-      - "[CONNECTED] == true"
   - name: Traefik dashboard
     group: Services
     extra-labels: { section: "Infrastructure", icon: "traefik", href: "https://traefik.lab.theoboursy.fr/dashboard/", order: "31" }
