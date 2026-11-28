@@ -18,15 +18,6 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[CERTIFICATE_EXPIRATION] > 336h"
-  - name: Gitea
-    group: Apps
-    extra-labels: { desc: "git backup (mirror of GitLab)", section: "Apps", href: "https://gitea.lab.theoboursy.fr", order: "19" }
-    url: "https://gitea.lab.theoboursy.fr/api/healthz"
-    interval: 1m
-    alerts: [{ type: ntfy }]
-    conditions:
-      - "[STATUS] == 200"
-      - "[CERTIFICATE_EXPIRATION] > 336h"
   - name: Headlamp
     group: Apps
     extra-labels: { desc: "Kubernetes web UI", section: "Infrastructure", href: "https://headlamp.lab.theoboursy.fr", order: "32" }

@@ -46,7 +46,7 @@ spec:
         cron.git_gc_repos:
           ENABLED: true
           SCHEDULE: "@every 72h"
-      replicaCount: 1
+      replicaCount: 0
       additionalConfigFromEnvs:
         - name: GITEA__DATABASE__PASSWD
           valueFrom:
@@ -93,7 +93,7 @@ spec:
         clusterIP: ""
         port: 6969
       ssh:
-        type: LoadBalancer
+        type: ClusterIP
         clusterIP: ""
         port: 2223
 
