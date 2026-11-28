@@ -2,7 +2,7 @@ mirror-sync:
   stage: mirror
   image: curlimages/curl:8.23.0
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_SERVER_HOST == "git.lab.theoboursy.fr" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
     - |
       ids=$(curl -sS -H "PRIVATE-TOKEN: $MERGE_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/remote_mirrors" | grep -o '"id":[0-9]*' | cut -d: -f2)
