@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: smartctl-nas
+  namespace: monitoring
+spec:
+  jobName: smartctl-exporter-nas
+  scrapeTimeout: 20s
+  targetEndpoints:
+    - { targets: ["192.168.1.210:9633"], labels: { instance: kibisis } }

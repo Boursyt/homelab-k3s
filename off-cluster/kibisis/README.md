@@ -14,4 +14,5 @@ Docker Compose stacks of the NAS, deployed by doco-cd from `.doco-cd.nas.yml` (s
 | `victorialogs/` | VictoriaLogs, 30 days retention |
 | `node-exporter/` | host metrics |
 | `cadvisor/` | container metrics |
+| `smartctl-exporter/` | SMART health of the NAS disks |
 | `speedtest/` | internet speed test every 6 h (2.5 Gbit/s port) |

@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - configmap-vmauth-public.yaml
   - cronjob-speedtest.yaml
+  - daemonset-smartctl-exporter.yaml
   - deployment-vmauth-public.yaml
   - endpointslice-victoriametrics-nas.yaml
   - endpointslice-victorialogs-nas.yaml
@@ -20,6 +21,8 @@ resources:
   - service-vmauth-public.yaml
   - vmagent-vmagent.yaml
   - vmalert-vmalert.yaml
+  - vmpodscrape-smartctl-exporter.yaml
+  - vmstaticscrape-smartctl-nas.yaml
   - vmrule-homelab.yaml
   - vmnodescrape-kubelet-cadvisor.yaml
   - vmnodescrape-kubelet-probes.yaml

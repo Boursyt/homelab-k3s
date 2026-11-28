@@ -38,3 +38,6 @@ name: postgres
 working_dir: off-cluster/kibisis/postgres
 env_files:
   - secrets.env
+---
+name: smartctl-exporter
+working_dir: off-cluster/kibisis/smartctl-exporter

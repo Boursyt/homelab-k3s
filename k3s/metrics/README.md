@@ -15,7 +15,9 @@ Collection of every metric into VictoriaMetrics and every pod log into VictoriaL
 | `service-victorialogs.yaml`, `endpointslice-victorialogs-nas.yaml` | in-cluster name of VictoriaLogs, pointing to the NAS |
 | `vmagent-vmagent.yaml` | scraper, writes to VictoriaMetrics |
 | `secret-vmagent-scrape-token.yaml` | token used to scrape the Kubernetes components |
-| `vmrule-homelab.yaml` | alert rules (backups, nodes, Flux, crash loops, OOM, disks) with a `topic` label for the future Discord bot |
+| `daemonset-smartctl-exporter.yaml`, `vmpodscrape-smartctl-exporter.yaml` | SMART health of the OptiPlex disks (privileged, amd64 nodes only: SD cards have no SMART) |
+| `vmstaticscrape-smartctl-nas.yaml` | SMART exporter of the NAS (`:9633`) |
+| `vmrule-homelab.yaml` | alert rules (backups, nodes, Flux, crash loops, OOM, disks, hardware/SMART) with a `topic` label for the future Discord bot |
 | `vmalert-vmalert.yaml` | evaluates the recording rules the Kubernetes dashboards need; its alerts are discarded (alerting = Gatus → ntfy) |
 | `vmstaticscrape-*.yaml` | targets outside Kubernetes: node-exporters, NAS Postgres, PgBouncer, cAdvisor, doco-cd (NAS, `:9120`), Home Assistant |
 | `cronjob-speedtest.yaml` | internet speed from a node every 6 h |

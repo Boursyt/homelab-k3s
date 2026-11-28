@@ -1,0 +1,14 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: smartctl-exporter
+  namespace: monitoring
+spec:
+  jobLabel: smartctl-exporter
+  selector:
+    matchLabels: { app.kubernetes.io/name: smartctl-exporter }
+  podMetricsEndpoints:
+    - port: metrics
+      scrapeTimeout: 20s
+      relabelConfigs:
+        - { sourceLabels: [__meta_kubernetes_pod_node_name], targetLabel: instance }
