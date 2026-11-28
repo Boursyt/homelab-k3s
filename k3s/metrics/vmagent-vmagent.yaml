@@ -25,5 +25,5 @@ spec:
     loggerFormat: json
     remoteWrite.disableOnDiskQueue: "true"
   resources:
-    requests: { cpu: 50m, memory: 256Mi }
+    requests: { cpu: 50m, memory: 320Mi }
     limits:   { memory: 768Mi }

@@ -50,7 +50,7 @@ spec:
             periodSeconds: 30
             failureThreshold: 5
           resources:
-            requests: { cpu: 200m, memory: 512Mi }
+            requests: { cpu: 200m, memory: 896Mi }
             limits:   { memory: 2Gi }
       volumes:
         - name: config

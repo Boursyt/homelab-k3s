@@ -16,6 +16,8 @@ spec:
     crds: CreateReplace
     remediation: { retries: 3 }
   values:
+    replicaCount: 2
+    podDisruptionBudget: { enabled: true, minAvailable: 1 }
     crds:
       enabled: true
       keep: true
@@ -27,11 +29,15 @@ spec:
       requests: { cpu: 10m, memory: 48Mi }
       limits:   { memory: 192Mi }
     webhook:
+      replicaCount: 2
+      podDisruptionBudget: { enabled: true, minAvailable: 1 }
       extraArgs: [--logging-format=json]
       resources:
         requests: { cpu: 10m, memory: 24Mi }
         limits:   { memory: 96Mi }
     cainjector:
+      replicaCount: 2
+      podDisruptionBudget: { enabled: true, minAvailable: 1 }
       extraArgs: [--logging-format=json]
       resources:
         requests: { cpu: 10m, memory: 48Mi }
