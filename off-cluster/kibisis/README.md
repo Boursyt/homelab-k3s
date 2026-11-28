@@ -9,6 +9,7 @@ Docker Compose stacks of the NAS, deployed by doco-cd from `.doco-cd.nas.yml` (s
 | `garage/` | Garage S3 object storage for GitLab, data on `/volume1/garage` |
 | `postgres-gitlab/` | PostgreSQL 17 dedicated to GitLab: primary + PgBouncer on port 5435, TLS required, exporters |
 | `doco-cd/` | doco-cd: deploys the stacks listed in `.doco-cd.nas.yml` from git |
+| `docker-net-heal/` | boot service: recreates the containers Docker starts without a network (NIC link flap at boot) |
 | `victoriametrics/` | VictoriaMetrics, 12 months retention |
 | `victorialogs/` | VictoriaLogs, 30 days retention |
 | `node-exporter/` | host metrics |
