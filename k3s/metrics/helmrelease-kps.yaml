@@ -65,8 +65,8 @@ spec:
 
     kube-state-metrics:
       resources:
-        requests: { cpu: 10m, memory: 96Mi }
-        limits:   { memory: 192Mi }
+        requests: { cpu: 10m, memory: 160Mi }
+        limits:   { memory: 384Mi }
       # Flux objects as gotk_resource_info, for the Flux Cluster Stats dashboard (fluxcd/flux2-monitoring-example)
       rbac:
         extraRules:

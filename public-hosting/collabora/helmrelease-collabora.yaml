@@ -53,7 +53,7 @@ spec:
       capabilities: { drop: [ALL] }
 
     resources:
-      requests: { cpu: 200m, memory: 512Mi }
+      requests: { cpu: 200m, memory: 768Mi }
       limits: { memory: 2Gi }
     nodeSelector:
       kubernetes.io/arch: amd64

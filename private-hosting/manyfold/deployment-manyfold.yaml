@@ -60,7 +60,7 @@ spec:
             periodSeconds: 30
             failureThreshold: 5
           resources:
-            requests: { cpu: 100m, memory: 768Mi }
+            requests: { cpu: 100m, memory: 1536Mi }
             limits:   { memory: 3Gi }
       volumes:
         - name: models
