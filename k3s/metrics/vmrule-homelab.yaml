@@ -1,0 +1,48 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: homelab
+  namespace: monitoring
+spec:
+  groups:
+    - name: backups
+      rules:
+        - alert: BackupStale
+          expr: time() - kube_cronjob_status_last_successful_time{cronjob=~"pg-dump|restic|garage-backup|gitlab-toolbox-backup"} > 93600
+          for: 10m
+          labels: { topic: backups, severity: critical }
+          annotations:
+            summary: "Backup {{ $labels.cronjob }} has no success for more than 26 h"
+    - name: cluster
+      rules:
+        - alert: NodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status!="true"} == 1
+          for: 5m
+          labels: { topic: infra, severity: critical }
+          annotations:
+            summary: "Node {{ $labels.node }} is not Ready"
+        - alert: FluxNotReady
+          expr: gotk_resource_info{ready!="True"} == 1
+          for: 15m
+          labels: { topic: gitops, severity: warning }
+          annotations:
+            summary: "Flux {{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} is not ready"
+        - alert: PodCrashLoop
+          expr: kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"} == 1
+          for: 10m
+          labels: { topic: apps, severity: warning }
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is crash looping"
+        - alert: PodOOMKilled
+          expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1 and on (namespace, pod, container) increase(kube_pod_container_status_restarts_total[10m]) > 0
+          labels: { topic: apps, severity: warning }
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) was OOM killed"
+    - name: storage
+      rules:
+        - alert: DiskAlmostFull
+          expr: node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs|vfat",mountpoint!~"/var/lib/.*|/run.*"} / node_filesystem_size_bytes < 0.10
+          for: 15m
+          labels: { topic: storage, severity: warning }
+          annotations:
+            summary: "{{ $labels.instance }} {{ $labels.mountpoint }} has less than 10% free"

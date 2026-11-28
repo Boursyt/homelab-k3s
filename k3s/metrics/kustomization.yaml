@@ -20,6 +20,7 @@ resources:
   - service-vmauth-public.yaml
   - vmagent-vmagent.yaml
   - vmalert-vmalert.yaml
+  - vmrule-homelab.yaml
   - vmnodescrape-kubelet-cadvisor.yaml
   - vmnodescrape-kubelet-probes.yaml
   - vmnodescrape-kubelet.yaml
