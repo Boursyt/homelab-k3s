@@ -6,9 +6,14 @@ merge:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME !~ /^renovate\/manual-/
   script:
     - |
+      squash=true
+      case "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" in renovate/*) squash=false ;; esac
+      msg=$(printf "Merge branch '%s' into '%s'\n\n%s\n\nSee merge request %s!%s\n\nCo-authored-by: Boursyt <86895272+Boursyt@users.noreply.github.com>" \
+        "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" "$CI_MERGE_REQUEST_TITLE" "$CI_PROJECT_PATH" "$CI_MERGE_REQUEST_IID")
       code=$(curl -sS -o /tmp/out -w '%{http_code}' -X PUT \
         -H "PRIVATE-TOKEN: $MERGE_TOKEN" \
-        --data 'squash=true' --data 'should_remove_source_branch=true' --data 'auto_merge=true' \
+        --data "squash=$squash" --data 'should_remove_source_branch=true' --data 'auto_merge=true' \
+        --data-urlencode "merge_commit_message=$msg" \
         "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/merge")
       echo "HTTP $code"; cat /tmp/out; echo
       case "$code" in 200|202) exit 0 ;; esac
