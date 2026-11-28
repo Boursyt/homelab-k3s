@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: gitlab
-      version: 10.5.11
+      version: 10.6.3
       sourceRef: { kind: HelmRepository, name: gitlab, namespace: flux-system }
   install:
     crds: CreateReplace
