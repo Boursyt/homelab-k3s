@@ -42,7 +42,7 @@ spec:
                 limits: { memory: 512Mi }
           containers:
             - name: restic
-              image: restic/restic:0.19.1
+              image: restic/restic:0.20.0
               envFrom:
                 - secretRef: { name: restic }
               env:
