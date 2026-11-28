@@ -1,6 +1,6 @@
 renovate:
   stage: renovate
-  image: { name: "ghcr.io/renovatebot/renovate:44.264.1", entrypoint: [""] }
+  image: { name: "ghcr.io/renovatebot/renovate:45.3.2", entrypoint: [""] }
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   variables:
