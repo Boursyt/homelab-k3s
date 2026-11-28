@@ -16,6 +16,7 @@ spec:
     crds: CreateReplace
     remediation: { retries: 3 }
   values:
+    replicaCount: 2
     clusterRoleBinding:
       create: false
 

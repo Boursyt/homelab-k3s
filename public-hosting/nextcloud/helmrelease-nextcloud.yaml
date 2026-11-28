@@ -319,7 +319,7 @@ spec:
         existingClaim: nextcloud-data
 
     resources:
-      requests: { cpu: 100m, memory: 512Mi }
+      requests: { cpu: 100m, memory: 256Mi }
       limits: { memory: 2Gi }
     # first install and upgrades migrate the database
     startupProbe:

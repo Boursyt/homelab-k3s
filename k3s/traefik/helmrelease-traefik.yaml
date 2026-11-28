@@ -55,8 +55,8 @@ spec:
           # keep Traefik's own "service" label
           honorLabels: true
     resources:
-      requests: { cpu: 75m, memory: 128Mi }
-      limits:   { memory: 256Mi }
+      requests: { cpu: 50m, memory: 192Mi }
+      limits:   { memory: 384Mi }
     deployment:
       replicas: 2
       podAnnotations:
