@@ -4,6 +4,7 @@
   "requireConfig": "optional",
   "extends": ["config:recommended"],
   "timezone": "Europe/Paris",
+  "gitAuthor": "Boursyt <86895272+Boursyt@users.noreply.github.com>",
   "flux": { "managerFilePatterns": ["/^(k3s|private-hosting|public-hosting)/.+\\.yaml$/"] },
   "kubernetes": { "managerFilePatterns": ["/^(k3s|private-hosting|public-hosting)/.+\\.yaml$/"] },
   "customManagers": [
