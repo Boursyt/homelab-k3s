@@ -1,0 +1,16 @@
+push-gitlab-com:
+  stage: publish
+  image: alpine:3.24
+  resource_group: gitlab-com
+  rules:
+    - if: $CI_SERVER_HOST == "git.lab.theoboursy.fr" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - '[ -n "$GITLAB_COM_TOKEN" ] || { echo "GITLAB_COM_TOKEN is not set"; exit 1; }'
+    - apk add --no-cache git >/dev/null
+    - git fetch --quiet origin "$CI_DEFAULT_BRANCH"
+    - |
+      if ! out=$(git push "https://oauth2:${GITLAB_COM_TOKEN}@gitlab.com/Boursyt/homelab-k3s.git" "FETCH_HEAD:refs/heads/$CI_DEFAULT_BRANCH" 2>&1); then
+        echo "$out" | sed "s#${GITLAB_COM_TOKEN}#***#g"
+        exit 1
+      fi
+      echo "$out" | sed "s#${GITLAB_COM_TOKEN}#***#g" | tail -3

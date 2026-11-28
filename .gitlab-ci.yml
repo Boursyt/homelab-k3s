@@ -4,7 +4,7 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_SERVER_HOST == "git.lab.theoboursy.fr" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-stages: [validate, merge, renovate, mirror]
+stages: [validate, merge, renovate, publish]
 
 variables:
   GIT_DEPTH: "0"
@@ -13,4 +13,4 @@ include:
   - local: .gitlab/ci/validate.yml
   - local: .gitlab/ci/merge.yml
   - local: .gitlab/ci/renovate.yml
-  - local: .gitlab/ci/mirror.yml
+  - local: .gitlab/ci/publish.yml
